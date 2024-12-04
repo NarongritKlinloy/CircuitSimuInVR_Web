@@ -10,13 +10,12 @@
 3. ติดตั้ง Node js :
     ```bash
     https://nodejs.org/en
-    
-    เช็คเวอร์ชั่น :
+4. เช็คเวอร์ชั่น Node js :
     ```bash
     node -v
-4. ติดตั้ง Dependencies:
+5. ติดตั้ง Dependencies:
     ```bash
     npm install
-5. รันโปรเจค:
+6. รันโปรเจค:
     ```bash
     npm run dev
