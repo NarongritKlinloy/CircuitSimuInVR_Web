@@ -1,3 +1,4 @@
+/*Nav Bar ส่วนที่เป็นการแจ้งเตือน*/
 import { useLocation, Link } from "react-router-dom";
 import {
   Navbar,
@@ -109,7 +110,7 @@ export function DashboardNavbar() {
             <MenuList className="w-max border-0">
               <MenuItem className="flex items-center gap-3">
                 <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/team-2.jpg"
+                  src="https://verticalresponse.com/wp-content/uploads/2023/04/chat-gpt-logo-scaled.jpeg"
                   alt="item-1"
                   size="sm"
                   variant="circular"
@@ -120,20 +121,20 @@ export function DashboardNavbar() {
                     color="blue-gray"
                     className="mb-1 font-normal"
                   >
-                    <strong>New message</strong> from Laur
+                    <strong>Chat GPT</strong> from Laur
                   </Typography>
                   <Typography
                     variant="small"
                     color="blue-gray"
                     className="flex items-center gap-1 text-xs font-normal opacity-60"
                   >
-                    <ClockIcon className="h-3.5 w-3.5" /> 13 minutes ago
+                    <ClockIcon className="h-3.5 w-3.5" /> 55 minutes ago
                   </Typography>
                 </div>
               </MenuItem>
               <MenuItem className="flex items-center gap-4">
                 <Avatar
-                  src="https://demos.creative-tim.com/material-dashboard/assets/img/small-logos/logo-spotify.svg"
+                  src="https://curriculum.kmitl.ac.th/wp-content/uploads/2021/07/logo02-1.png"
                   alt="item-1"
                   size="sm"
                   variant="circular"
