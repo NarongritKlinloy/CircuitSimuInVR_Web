@@ -63,7 +63,7 @@ export function Configurator() {
       .then((data) => setStars(formatNumber(data.stargazers_count, 1)));
   }, []);
 
-  return (
+  return ( /* ตั้งค่ามุมขวา */
     <aside
       className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${
         openConfigurator ? "translate-x-0" : "translate-x-96"
@@ -174,7 +174,7 @@ export function Configurator() {
           </div>
           <a
             className="mx-auto flex items-center justify-center gap-2"
-            href="https://github.com/creativetimofficial/material-tailwind-dashboard-react"
+            /*href="https://github.com/creativetimofficial/material-tailwind-dashboard-react"*/
             target="_blank"
             rel="noreferrer"
           >

@@ -1,3 +1,5 @@
+/*Footer ส่วนที่อยู่ล่างสุด */
+
 import PropTypes from "prop-types";
 import { Typography } from "@material-tailwind/react";
 import { HeartIcon } from "@heroicons/react/24/solid";
