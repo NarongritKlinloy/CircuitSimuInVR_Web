@@ -46,6 +46,7 @@ export function DashboardNavbar() {
     >
       <div className="flex flex-col-reverse justify-between gap-6 md:flex-row md:items-center">
         <div className="capitalize">
+          
           <Breadcrumbs
             className={`bg-transparent p-0 transition-all ${
               fixedNavbar ? "mt-1" : ""
@@ -68,14 +69,20 @@ export function DashboardNavbar() {
               {page}
             </Typography>
           </Breadcrumbs>
+
+          /*Home */
           <Typography variant="h6" color="blue-gray">
             {page}
           </Typography>
+
+
         </div>
         <div className="flex items-center">
           <div className="mr-auto md:mr-4 md:w-56">
             <Input label="Search" />
           </div>
+
+          
           <IconButton
             variant="text"
             color="blue-gray"
@@ -84,6 +91,8 @@ export function DashboardNavbar() {
           >
             <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
           </IconButton>
+
+          
           <Link to="/auth/sign-in">
             <Button
               variant="text"
@@ -101,6 +110,8 @@ export function DashboardNavbar() {
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
           </Link>
+
+          
           <Menu>
             <MenuHandler>
               <IconButton variant="text" color="blue-gray">
