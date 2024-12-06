@@ -4,11 +4,28 @@ import {
   Checkbox,
   Button,
   Typography,
+  React,
 } from "@material-tailwind/react";
-import { Link } from "react-router-dom";
-
+import { useState } from "react";
+import { Link, useNavigate} from "react-router-dom";
 
 export function SignIn() {
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const navigate = useNavigate();
+
+  const EnterSignIn = (e) => {
+    e.preventDefault();
+    if(!username.endsWith('@kmitl.ac.th')){
+      alert('username must end with @kmitl.ac.th!');
+    }
+    else if(username === 'admin@kmitl.ac.th' && password === 'password'){
+      navigate('/dashboard/home');
+    }else{
+      alert('Invalid username or password');
+    }
+  };
+
   return (
     <section className="m-8 flex gap-4">
       <div className="w-full lg:w-3/5 mt-24">
@@ -16,24 +33,30 @@ export function SignIn() {
           <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
           <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to Sign In.</Typography>
         </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2">
+        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={EnterSignIn}>
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Your email
             </Typography>
             <Input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               size="lg"
-              placeholder="name@mail.com"
+              placeholder="student_id@kmitl.ac.th"
               className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
               labelProps={{
                 className: "before:content-none after:content-none",
               }}
             />
+
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
               Password
             </Typography>
             <Input
               type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               size="lg"
               placeholder="********"
               className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
@@ -42,6 +65,7 @@ export function SignIn() {
               }}
             />
           </div>
+
           <Checkbox
             label={
               <Typography
@@ -60,7 +84,7 @@ export function SignIn() {
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-          <Button className="mt-6" fullWidth>
+          <Button className="mt-6" fullWidth type="submit">
             Sign In
           </Button>
 
