@@ -53,10 +53,12 @@ export function Navbar({ brandName, routes, action }) {
             {brandName}
           </Typography>
         </Link>
+
         <div className="hidden lg:block">{navList}</div>
         {React.cloneElement(action, {
           className: "hidden lg:inline-block",
         })}
+        
         <IconButton
           variant="text"
           size="sm"

@@ -43,13 +43,13 @@ export function Footer({ brandName, brandLink, routes }) {
 }
 
 Footer.defaultProps = {
-  brandName: "Creative Tim",
-  brandLink: "https://www.creative-tim.com",
+  brandName: "Circuit Simulator in VR",
+  brandLink: "https://github.com/orgs/Bachelor-Degree-Hunter/repositories",
   routes: [
-    { name: "Creative Tim", path: "https://www.creative-tim.com" },
-    { name: "About Us", path: "https://www.creative-tim.com/presentation" },
-    { name: "Blog", path: "https://www.creative-tim.com/blog" },
-    { name: "License", path: "https://www.creative-tim.com/license" },
+    { name: "Circuit Simulator in VR", path: "https://github.com/orgs/Bachelor-Degree-Hunter/repositories" },
+    { name: "About Us", path: "https://github.com/orgs/Bachelor-Degree-Hunter/repositories" },
+    { name: "Blog", path: "https://github.com/orgs/Bachelor-Degree-Hunter/repositories" },
+    { name: "License", path: "https://github.com/orgs/Bachelor-Degree-Hunter/repositories" },
   ],
 };
 
