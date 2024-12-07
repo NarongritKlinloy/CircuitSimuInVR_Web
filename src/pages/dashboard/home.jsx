@@ -32,7 +32,7 @@ export function Home() {
     <div className="mt-12">
       
 
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
         {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (  
           <StatisticsCard
             key={title}
@@ -52,7 +52,7 @@ export function Home() {
       </div>
 
 
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-1">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
             key={props.title}
@@ -83,7 +83,8 @@ export function Home() {
 
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Projects
+              Exercise statistics
+
               </Typography>
               <Typography
                 variant="small"
@@ -137,7 +138,7 @@ export function Home() {
               </thead>
               <tbody>
 
-
+                
                 {projectsTableData.map(
                   ({ img, name, members, budget, completion }, key) => {
                     const className = `py-3 px-5 ${
@@ -146,7 +147,6 @@ export function Home() {
                         : "border-b border-blue-gray-50"
                     }`;
 
-                    
                     return (
                       <tr key={name}>
                         <td className={className}>
@@ -161,6 +161,8 @@ export function Home() {
                             </Typography>
                           </div>
                         </td>
+
+
                         <td className={className}>
                           {members.map(({ img, name }, key) => (
                             <Tooltip key={name} content={name}>
@@ -176,6 +178,8 @@ export function Home() {
                             </Tooltip>
                           ))}
                         </td>
+
+
                         <td className={className}>
                           <Typography
                             variant="small"
@@ -184,6 +188,8 @@ export function Home() {
                             {budget}
                           </Typography>
                         </td>
+
+
                         <td className={className}>
                           <div className="w-10/12">
                             <Typography
@@ -200,10 +206,13 @@ export function Home() {
                             />
                           </div>
                         </td>
+
+
                       </tr>
                     );
                   }
                 )}
+                
               </tbody>
             </table>
           </CardBody>
