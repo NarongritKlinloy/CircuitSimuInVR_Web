@@ -70,8 +70,7 @@ export function DashboardNavbar() {
             </Typography>
           </Breadcrumbs>
 
-          /*Home */
-          <Typography variant="h6" color="blue-gray">
+          <Typography variant="h3" color="blue-gray">
             {page}
           </Typography>
 
@@ -119,6 +118,7 @@ export function DashboardNavbar() {
               </IconButton>
             </MenuHandler>
             <MenuList className="w-max border-0">
+
               <MenuItem className="flex items-center gap-3">
                 <Avatar
                   src="https://verticalresponse.com/wp-content/uploads/2023/04/chat-gpt-logo-scaled.jpeg"
@@ -143,6 +143,7 @@ export function DashboardNavbar() {
                   </Typography>
                 </div>
               </MenuItem>
+
               <MenuItem className="flex items-center gap-4">
                 <Avatar
                   src="https://curriculum.kmitl.ac.th/wp-content/uploads/2021/07/logo02-1.png"
@@ -190,6 +191,8 @@ export function DashboardNavbar() {
               </MenuItem>
             </MenuList>
           </Menu>
+
+          
           <IconButton
             variant="text"
             color="blue-gray"

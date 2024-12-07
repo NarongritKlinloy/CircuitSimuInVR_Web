@@ -1,11 +1,9 @@
 import {
   HomeIcon,
   UserCircleIcon,
-  InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
   UsersIcon,
-  DocumentIcon,
   DocumentTextIcon
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
