@@ -4,7 +4,11 @@ import {
     ServerStackIcon,
     RectangleStackIcon,
     UsersIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    FolderIcon,
+    DocumentIcon,
+    UserGroupIcon,
+    NewspaperIcon
   } from "@heroicons/react/24/solid";
   import { HomeTeacher} from "@/pages/teacher";
   import { SignIn, SignUp } from "@/pages/auth";
@@ -24,28 +28,28 @@ import {
           element: <HomeTeacher />,
         },
         {
-          icon: <HomeIcon {...icon} />,
+          icon: <UsersIcon {...icon} />,
           name: "Student management",
           path: "/student_mgn",
           element: <HomeTeacher />,
         },
         {
-          icon: <HomeIcon {...icon} />,
+          icon: <FolderIcon {...icon} />,
           name: "Practice",
           path: "/practice_mgn",
           element: <HomeTeacher />,
         },
         {
-          icon: <HomeIcon {...icon} />,
+          icon: <UserGroupIcon {...icon} />,
           name: "Classroom",
           path: "/classroom_mgn",
           element: <HomeTeacher />,
         },
         {
-          icon: <HomeIcon {...icon} />,
+          icon: <DocumentTextIcon {...icon} />,
           name: "Report",
           path: "/reports",
-          element: <HomeTeacher />,
+          element: "WAITING FOR ELEMENT",
         },
       ]
     },
