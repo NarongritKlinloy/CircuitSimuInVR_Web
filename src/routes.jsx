@@ -6,6 +6,7 @@ import {
   UsersIcon,
   DocumentTextIcon
 } from "@heroicons/react/24/solid";
+import { HomeTeacher} from "@/pages/teacher";
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 
@@ -14,6 +15,18 @@ const icon = {
 };
 
 export const routes = [
+  {
+    layout: "teacher",
+    pages: [
+      {
+        icon: <HomeIcon {...icon} />,
+        name: "dashboard",
+        path: "/home",
+        element: <HomeTeacher />,
+      }
+    ]
+  },
+  
   {
     layout: "dashboard",
     pages: [
