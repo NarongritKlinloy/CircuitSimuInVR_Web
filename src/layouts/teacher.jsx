@@ -2,12 +2,12 @@ import { Routes, Route } from "react-router-dom";
 import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 import {
-  Sidenav,
-  DashboardNavbar,
+  T_Sidenav,
+  T_DashboardNavbar,
   Configurator,
   Footer,
 } from "@/widgets/layout";
-import routes from "@/routes";
+import routes from "@/t_routes";
 import { useMaterialTailwindController, setOpenConfigurator } from "@/context";
 
 export function Teacher() {
@@ -16,14 +16,16 @@ export function Teacher() {
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
-      <Sidenav
+
+      <T_Sidenav
         routes={routes}
         brandImg={
           sidenavType === "dark" ? "/img/logo-ct.png" : "/img/logo-ct-dark.png"
         }
       />
+
       <div className="p-4 xl:ml-80">
-        <DashboardNavbar />
+        <T_DashboardNavbar />
         <Configurator />
         <IconButton
           size="lg"
@@ -34,6 +36,7 @@ export function Teacher() {
         >
           <Cog6ToothIcon className="h-5 w-5" />
         </IconButton>
+
         <Routes>
           {routes.map(
             ({ layout, pages }) =>
@@ -43,6 +46,7 @@ export function Teacher() {
               ))
           )}
         </Routes>
+
         <div className="text-blue-gray-600">
           <Footer />
         </div>
