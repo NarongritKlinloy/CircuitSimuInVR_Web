@@ -19,3 +19,6 @@
 6. รันโปรเจค:
     ```bash
     npm run dev
+ึ7. ก่อนทำงานทุกครั้ง
+    ```bash
+    git pull origin Dev
