@@ -1,10 +1,10 @@
 import {
   HomeIcon,
   UserCircleIcon,
-  TableCellsIcon,
-  InformationCircleIcon,
   ServerStackIcon,
   RectangleStackIcon,
+  UsersIcon,
+  DocumentTextIcon
 } from "@heroicons/react/24/solid";
 import { Home, Profile, Tables, Notifications } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
@@ -23,21 +23,24 @@ export const routes = [
         path: "/home",
         element: <Home />,
       },
+
+      {
+        icon: <UsersIcon {...icon} />,
+        name: "Users",
+        path: "/Users",
+        element: <Tables />,
+      },
+      
       {
         icon: <UserCircleIcon {...icon} />,
-        name: "profile",
+        name: "Admin",
         path: "/profile",
         element: <Profile />,
       },
+      
       {
-        icon: <TableCellsIcon {...icon} />,
-        name: "tables",
-        path: "/tables",
-        element: <Tables />,
-      },
-      {
-        icon: <InformationCircleIcon {...icon} />,
-        name: "notifications",
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Report",
         path: "/notifications",
         element: <Notifications />,
       },

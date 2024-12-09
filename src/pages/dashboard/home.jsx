@@ -30,8 +30,10 @@ import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
 export function Home() {
   return (
     <div className="mt-12">
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
-        {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (
+      
+
+      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+        {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (  
           <StatisticsCard
             key={title}
             {...rest}
@@ -48,7 +50,9 @@ export function Home() {
           />
         ))}
       </div>
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
+
+
+      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-1">
         {statisticsChartsData.map((props) => (
           <StatisticsChart
             key={props.title}
@@ -65,17 +69,22 @@ export function Home() {
           />
         ))}
       </div>
+
+
       <div className="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Card className="overflow-hidden xl:col-span-2 border border-blue-gray-100 shadow-sm">
+         
           <CardHeader
             floated={false}
             shadow={false}
             color="transparent"
             className="m-0 flex items-center justify-between p-6"
           >
+
             <div>
               <Typography variant="h6" color="blue-gray" className="mb-1">
-                Projects
+              Exercise statistics
+
               </Typography>
               <Typography
                 variant="small"
@@ -85,6 +94,8 @@ export function Home() {
                 <strong>30 done</strong> this month
               </Typography>
             </div>
+
+
             <Menu placement="left-start">
               <MenuHandler>
                 <IconButton size="sm" variant="text" color="blue-gray">
@@ -102,6 +113,8 @@ export function Home() {
               </MenuList>
             </Menu>
           </CardHeader>
+
+
           <CardBody className="overflow-x-scroll px-0 pt-0 pb-2">
             <table className="w-full min-w-[640px] table-auto">
               <thead>
@@ -124,6 +137,8 @@ export function Home() {
                 </tr>
               </thead>
               <tbody>
+
+                
                 {projectsTableData.map(
                   ({ img, name, members, budget, completion }, key) => {
                     const className = `py-3 px-5 ${
@@ -146,6 +161,8 @@ export function Home() {
                             </Typography>
                           </div>
                         </td>
+
+
                         <td className={className}>
                           {members.map(({ img, name }, key) => (
                             <Tooltip key={name} content={name}>
@@ -161,6 +178,8 @@ export function Home() {
                             </Tooltip>
                           ))}
                         </td>
+
+
                         <td className={className}>
                           <Typography
                             variant="small"
@@ -169,6 +188,8 @@ export function Home() {
                             {budget}
                           </Typography>
                         </td>
+
+
                         <td className={className}>
                           <div className="w-10/12">
                             <Typography
@@ -185,10 +206,13 @@ export function Home() {
                             />
                           </div>
                         </td>
+
+
                       </tr>
                     );
                   }
                 )}
+                
               </tbody>
             </table>
           </CardBody>
