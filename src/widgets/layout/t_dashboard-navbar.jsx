@@ -1,4 +1,5 @@
 import { useLocation, Link } from "react-router-dom";
+import {useState , useEffect} from 'react';
 import {
   Navbar,
   Typography,
@@ -26,12 +27,22 @@ import {
   setOpenSidenav,
 } from "@/context";
 
-export function T_DashboardNavbar() {
+export function T_DashboardNavbar({routes}) {
+  const [header , setHeader] = useState(null);
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
 
+  useEffect(()=> {
+    routes.map(({pages},key)=> {
+      const result = pages.filter(({path}) => ( path == `/${page}`));
+      if(result){
+        setHeader(result[0].label);
+      }
+    })
+  }, [pathname])
+  
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -65,12 +76,13 @@ export function T_DashboardNavbar() {
               color="blue-gray"
               className="font-normal"
             >
-              {page}
+              { header }
             </Typography>
           </Breadcrumbs>
 
           <Typography variant="h3" color="blue-gray">
-            {page}
+            {/* {page} */}
+            { header }
           </Typography>
 
 

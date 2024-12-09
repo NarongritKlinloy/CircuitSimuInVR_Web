@@ -25,7 +25,7 @@ export function Teacher() {
       />
 
       <div className="p-4 xl:ml-80">
-        <T_DashboardNavbar />
+        <T_DashboardNavbar routes={routes} />
         <Configurator />
         <IconButton
           size="lg"
