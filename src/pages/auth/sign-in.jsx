@@ -21,6 +21,10 @@ export function SignIn() {
     }
     else if(username === 'admin@kmitl.ac.th' && password === 'password'){
       navigate('/dashboard/home');
+    }
+    // redirect to Teacher dashboard
+    else if(username === 'teacher@kmitl.ac.th' && password === 'password'){
+      navigate('/teacher/home');
     }else{
       alert('Invalid username or password');
     }
