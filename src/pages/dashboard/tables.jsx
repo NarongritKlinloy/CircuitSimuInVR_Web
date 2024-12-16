@@ -5,7 +5,7 @@ import AuthorModal from "./functionTables/authormodal";
 import TeacherTable from "./functionTables/teachertable";
 import TeacherModal from "./functionTables/teachermodal";
 import { authorsTableData } from "@/data/authors-table-data";
-import { teachersTableData } from "@/data/teachersTableData"
+import { teachersTableData } from "@/data/teachersTableData";
 
 export function Tables() {
   const [search, setSearch] = useState(""); // คำค้นหา
@@ -13,9 +13,9 @@ export function Tables() {
   const [teachers, setTeachers] = useState(teachersTableData); // เก็บรายชื่ออาจารย์
 
   // Authors Modal State
-  const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false); // สถานะ modal สำหรับเพิ่มข้อมูลผู้ใช้
-  const [isEditAuthorOpen, setIsEditAuthorOpen] = useState(false); // สถานะ modal สำหรับแก้ไขข้อมูลผู้ใช้
-  const [editingAuthor, setEditingAuthor] = useState(null); // ผู้ใช้ที่กำลังแก้ไข
+  const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
+  const [isEditAuthorOpen, setIsEditAuthorOpen] = useState(false);
+  const [editingAuthor, setEditingAuthor] = useState(null);
   const [newAuthor, setNewAuthor] = useState({
     name: "",
     email: "",
@@ -25,9 +25,9 @@ export function Tables() {
   });
 
   // Teachers Modal State
-  const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false); // สถานะ modal สำหรับเพิ่มข้อมูลอาจารย์
-  const [isEditTeacherOpen, setIsEditTeacherOpen] = useState(false); // สถานะ modal สำหรับแก้ไขข้อมูลอาจารย์
-  const [editingTeacher, setEditingTeacher] = useState(null); // อาจารย์ที่กำลังแก้ไข
+  const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
+  const [isEditTeacherOpen, setIsEditTeacherOpen] = useState(false);
+  const [editingTeacher, setEditingTeacher] = useState(null);
   const [newTeacher, setNewTeacher] = useState({
     name: "",
     email: "",
@@ -90,10 +90,11 @@ export function Tables() {
       <SearchAndAddSection
         search={search}
         setSearch={setSearch}
-        toggleAddModal={() => setIsAddAuthorOpen(true)} // ใช้สำหรับ Author เป็นค่าเริ่มต้น
+        toggleAddModal={() => setIsAddAuthorOpen(true)} // เริ่มต้นที่ Authors
       />
 
       {/* Section ตาราง Authors */}
+      <h2 className="text-xl font-bold mb-4">Authors Table</h2>
       <AuthorsTable
         authors={filteredAuthors}
         onEditClick={(author) => {
@@ -103,6 +104,7 @@ export function Tables() {
       />
 
       {/* Section ตาราง Teachers */}
+      <h2 className="text-xl font-bold mb-4 mt-8">Teachers Table</h2>
       <TeacherTable
         teachers={filteredTeachers}
         onEditClick={(teacher) => {

@@ -21,7 +21,7 @@ function TeacherTable({ teachers, onEditClick }) {
                                 {["Name", "Email", "Status", "Last Active"].map((el) => (
                                     <th
                                         key={el}
-                                        className="border-b border-blue-gray-50 py-3 px-5 text-left"
+                                        className="border-b border-blue-gray-50 px-5 text-left"
                                     >
                                         <Typography
                                             variant="small"
