@@ -21,6 +21,10 @@ export function SignIn() {
     }
     else if(username === 'admin@kmitl.ac.th' && password === 'password'){
       navigate('/dashboard/home');
+    }
+    // redirect to Teacher dashboard
+    else if(username === 'teacher@kmitl.ac.th' && password === 'password'){
+      navigate('/teacher/home');
     }else{
       alert('Invalid username or password');
     }
@@ -36,7 +40,7 @@ export function SignIn() {
         <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={EnterSignIn}>
           <div className="mb-1 flex flex-col gap-6">
             <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Your email
+              Email
             </Typography>
             <Input
               type="text"
@@ -65,7 +69,7 @@ export function SignIn() {
               }}
             />
           </div>
-
+        <div className="flex items-center justify-between gap-2 mt-6">
           <Checkbox
             label={
               <Typography
@@ -84,29 +88,17 @@ export function SignIn() {
             }
             containerProps={{ className: "-ml-2.5" }}
           />
-          <Button className="mt-6" fullWidth type="submit">
-            Sign In
-          </Button>
-
-          <div className="flex items-center justify-between gap-2 mt-6">
-            <Checkbox
-              label={
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="flex items-center justify-start font-medium"
-                >
-                  Subscribe me to newsletter
-                </Typography>
-              }
-              containerProps={{ className: "-ml-2.5" }}
-            />
-            <Typography variant="small" className="font-medium text-gray-900">
+          <Typography variant="small" className="font-medium text-gray-900">
               <a href="#">
                 Forgot Password
               </a>
             </Typography>
           </div>
+
+          <Button className="mt-3" fullWidth type="submit">
+            Sign In
+          </Button>            
+          
           <div className="space-y-4 mt-8">
             <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
               <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -124,10 +116,7 @@ export function SignIn() {
               </svg>
               <span>Sign in With Google</span>
             </Button>
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
-              <img src="/img/twitter-logo.svg" height={24} width={24} alt="" />
-              <span>Sign in With Twitter</span>
-            </Button>
+            
           </div>
           <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
             Not registered?
@@ -138,7 +127,7 @@ export function SignIn() {
       </div>
       <div className="w-2/5 h-full hidden lg:block">
         <img
-          src="/img/pattern.png"
+          src="https://img.freepik.com/premium-photo/futuristic-virtual-reality-concept-futuristic-man-vr-glasses-with-3d-illustration_780593-19006.jpg"
           className="h-full w-full object-cover rounded-3xl"
         />
       </div>
