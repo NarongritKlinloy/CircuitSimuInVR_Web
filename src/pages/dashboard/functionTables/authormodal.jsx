@@ -1,56 +1,135 @@
-import React from "react";
-import { Dialog, DialogHeader, DialogBody, DialogFooter, Input, Button } from "@material-tailwind/react";
+import React, { useState } from "react";
+import {
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+  Input,
+  Button,
+  Typography,
+} from "@material-tailwind/react";
 
 function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave }) {
+  const [errors, setErrors] = useState({}); // เก็บสถานะ Error
+
   if (!authorData) return null;
+
+  // ฟังก์ชันจัดการไฟล์รูปที่อัพโหลด
+  const handlePictureChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setAuthorData({ ...authorData, picture: reader.result });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  // ฟังก์ชันสำหรับ Validate ข้อมูลก่อนบันทึก
+  const validateFields = () => {
+    const newErrors = {};
+    if (!authorData.name) newErrors.name = "Name is required";
+    if (!authorData.email) newErrors.email = "Email is required";
+    if (!authorData.password) newErrors.password = "Password is required";
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
+  };
+
+  // ฟังก์ชันจัดการ Save พร้อม Validate
+  const handleSave = () => {
+    if (validateFields()) {
+      onSave(); // เรียกฟังก์ชัน onSave ถ้ากรอกข้อมูลครบ
+    }
+  };
 
   return (
     <Dialog open={isOpen} handler={toggleModal}>
       <DialogHeader>{authorData.name ? "Edit Author" : "Add New Author"}</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
-          <Input
-            label="Name"
-            value={authorData.name || ""}
-            onChange={(e) =>
-              setAuthorData({ ...authorData, name: e.target.value })
-            }
-          />
-          <Input
-            label="Email"
-            value={authorData.email || ""}
-            onChange={(e) =>
-              setAuthorData({ ...authorData, email: e.target.value })
-            }
-          />
-          <Input
-            label="Job Title"
-            value={authorData.job[0] || ""}
-            onChange={(e) =>
-              setAuthorData({ ...authorData, job: [e.target.value, authorData.job[1]] })
-            }
-          />
-          <Input
-            label="Department"
-            value={authorData.job[1] || ""}
-            onChange={(e) =>
-              setAuthorData({ ...authorData, job: [authorData.job[0], e.target.value] })
-            }
-          />
-          <Input
-            label="Employed Date"
-            value={authorData.date || ""}
-            onChange={(e) =>
-              setAuthorData({ ...authorData, date: e.target.value })
-            }
-          />
+          {/* ช่องเพิ่มรูปภาพ */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Picture</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handlePictureChange}
+              className="mt-1 block w-full text-sm text-gray-500
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded-lg file:border-0
+                         file:text-sm file:font-semibold
+                         file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100"
+            />
+            {authorData.picture && (
+              <img
+                src={authorData.picture}
+                alt="Uploaded Preview"
+                className="mt-2 h-20 w-20 rounded-lg object-cover"
+              />
+            )}
+          </div>
+
+          {/* ช่อง Name */}
+          <div>
+            <Input
+              label="Name"
+              value={authorData.name || ""}
+              onChange={(e) =>
+                setAuthorData({ ...authorData, name: e.target.value })
+              }
+              error={!!errors.name} // แสดง Error ใน Input
+            />
+            {errors.name && (
+              <Typography variant="small" color="red" className="mt-1">
+                {errors.name}
+              </Typography>
+            )}
+          </div>
+
+          {/* ช่อง Email */}
+          <div>
+            <Input
+              label="Email"
+              value={authorData.email || ""}
+              onChange={(e) =>
+                setAuthorData({ ...authorData, email: e.target.value })
+              }
+              error={!!errors.email}
+            />
+            {errors.email && (
+              <Typography variant="small" color="red" className="mt-1">
+                {errors.email}
+              </Typography>
+            )}
+          </div>
+
+          {/* ช่อง Password */}
+          <div>
+            <Input
+              label="Password"
+              value={authorData.password || ""}
+              onChange={(e) =>
+                setAuthorData({ ...authorData, password: e.target.value })
+              }
+              error={!!errors.password}
+              
+            />
+            {errors.password && (
+              <Typography variant="small" color="red" className="mt-1">
+                {errors.password}
+              </Typography>
+            )}
+          </div>
         </div>
       </DialogBody>
       <DialogFooter>
         <Button variant="text" color="red" onClick={toggleModal}>
           Cancel
         </Button>
-        <Button variant="gradient" color="green" onClick={onSave}>
+        <Button variant="gradient" color="green" onClick={handleSave}>
           {authorData.name ? "Save" : "Add"}
         </Button>
       </DialogFooter>
