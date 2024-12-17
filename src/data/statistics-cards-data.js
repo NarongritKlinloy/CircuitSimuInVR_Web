@@ -22,7 +22,7 @@ export const statisticsCardsData = [
     color: "gray",
     icon: DocumentTextIcon,
     title: "Total report",
-    value: "2",
+    value: "3",
     footer: {
       color: "text-green-500",
       value: "+55%",
