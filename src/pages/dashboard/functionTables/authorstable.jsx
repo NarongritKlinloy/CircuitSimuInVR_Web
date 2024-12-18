@@ -29,6 +29,9 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
             text: `${selectedUser.name}'s role has been updated to ${selectedRole}.`,
             icon: "success",
             confirmButtonText: "OK",
+            customClass: {
+                confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+            },
         });
         closeEditModal();
     };
@@ -47,7 +50,14 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 console.log(`Deleted user: ${name}`);
-                Swal.fire("Deleted!", `${name} has been deleted.`, "success");
+                Swal.fire({
+                    title: "Deleted!",
+                    text: `${name} has been deleted.`,
+                    icon: "success", confirmButtonText: "OK",
+                    customClass: {
+                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+                    }
+                });
             }
         });
     };
