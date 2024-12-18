@@ -27,21 +27,27 @@ app.get('/', (req, res) => {
   res.send('Backend Server is running...');
 });
 
-// API สำหรับ Sign Up
-app.post('/api/signup', (req, res) => {
-  const { email, password } = req.body;
+// API สำหรับ Google Login - บันทึกผู้ใช้และตรวจสอบ Role
+app.post('/api/google-login', (req, res) => {
+  const { email, name, picture } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: 'Email and Password are required' });
-  }
+  // ตรวจสอบ Role โดยเช็คว่าหน้า @ เป็นตัวเลข 8 หลัก (Student) หรือไม่
+  const isStudent = /^\d{8}@kmitl.ac.th$/.test(email);
+  const role = isStudent ? 'Student' : 'Teacher';
 
-  const sql = 'INSERT INTO user (name, role_id) VALUES (?, 3)';
-  db.query(sql, [email, password], (err, result) => {
+  // Query: บันทึกหรืออัปเดตข้อมูลผู้ใช้
+  const sql = `
+    INSERT INTO user (name, role_id, picture)
+    VALUES (?, ?, ?)
+    ON DUPLICATE KEY UPDATE role_id = VALUES(role_id), picture = VALUES(picture)
+  `;
+
+  db.query(sql, [email, role, picture], (err, result) => {
     if (err) {
-      console.error('Error inserting data:', err);
-      return res.status(500).json({ message: 'Failed to save user' });
+      console.error('Error inserting/updating user:', err);
+      return res.status(500).json({ message: 'Database error' });
     }
-    res.status(200).json({ message: 'User registered successfully' });
+    res.status(200).json({ role });
   });
 });
 
@@ -49,3 +55,5 @@ app.post('/api/signup', (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+//บันทึกข้อมูลล็อกอินล่าสุด เข้า database

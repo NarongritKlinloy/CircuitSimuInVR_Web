@@ -3,7 +3,6 @@ import SearchAndAddSection from "./functionTables/searchandaddsection";
 import AuthorsTable from "./functionTables/authorstable";
 import AuthorModal from "./functionTables/authormodal";
 import TeacherTable from "./functionTables/teachertable";
-import TeacherModal from "./functionTables/teachermodal";
 import { authorsTableData } from "@/data/authors-table-data";
 import { teachersTableData } from "@/data/teachersTableData";
 
@@ -25,16 +24,10 @@ export function Tables() {
   });
 
   // Teachers Modal State
-  const [isAddTeacherOpen, setIsAddTeacherOpen] = useState(false);
+  
   const [isEditTeacherOpen, setIsEditTeacherOpen] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState(null);
-  const [newTeacher, setNewTeacher] = useState({
-    name: "",
-    email: "",
-    department: "",
-    online: false,
-    date: "",
-  });
+ 
 
   // ฟังก์ชันกรองข้อมูล Authors Table
   const filteredAuthors = authors.filter(({ name, email }) =>
@@ -57,12 +50,7 @@ export function Tables() {
     setIsAddAuthorOpen(false);
   };
 
-  // ฟังก์ชันเพิ่มอาจารย์ใหม่
-  const handleAddTeacher = () => {
-    setTeachers([...teachers, newTeacher]);
-    setNewTeacher({ name: "", email: "", department: "", online: false, date: "" });
-    setIsAddTeacherOpen(false);
-  };
+ 
 
   // ฟังก์ชันแก้ไขข้อมูลผู้ใช้
   const handleEditAuthor = () => {
@@ -94,7 +82,6 @@ export function Tables() {
       />
 
       {/* Section ตาราง Authors */}
-      <h2 className="text-xl font-bold mb-4">Authors Table</h2>
       <AuthorsTable
         authors={filteredAuthors}
         onEditClick={(author) => {
@@ -104,7 +91,7 @@ export function Tables() {
       />
 
       {/* Section ตาราง Teachers */}
-      <h2 className="text-xl font-bold mb-4 mt-8">Teachers Table</h2>
+      
       <TeacherTable
         teachers={filteredTeachers}
         onEditClick={(teacher) => {
@@ -131,23 +118,9 @@ export function Tables() {
         onSave={handleEditAuthor}
       />
 
-      {/* Modal สำหรับเพิ่มข้อมูลอาจารย์ */}
-      <TeacherModal
-        isOpen={isAddTeacherOpen}
-        toggleModal={() => setIsAddTeacherOpen(false)}
-        teacherData={newTeacher}
-        setTeacherData={setNewTeacher}
-        onSave={handleAddTeacher}
-      />
+      
 
-      {/* Modal สำหรับแก้ไขข้อมูลอาจารย์ */}
-      <TeacherModal
-        isOpen={isEditTeacherOpen}
-        toggleModal={() => setIsEditTeacherOpen(false)}
-        teacherData={editingTeacher}
-        setTeacherData={setEditingTeacher}
-        onSave={handleEditTeacher}
-      />
+     
     </div>
   );
 }

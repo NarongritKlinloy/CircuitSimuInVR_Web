@@ -22,3 +22,9 @@
 7. ก่อนทำงานทุกครั้ง
     ```bash
     git pull origin Dev
+
+## เพิ่มเติมเพื่อใช้ Login Google
+
+1. ติดตั้งแพ็คเกจ google ก่อน :
+    ```bash
+    npm install @react-oauth/google
