@@ -54,7 +54,7 @@ export function SignIn() {
       });
     } else if (username === 'admin@kmitl.ac.th' && password === 'password') {
       navigate('/dashboard/home');
-    } else if (username === 'teacher@kmitl.ac.th' && password === 'password') {
+    } else if (username === 'teacher@kmitl.ac.th' && password === 'password' || username === 'teacher@kmitl.ac.th' && password === '1234') {
       navigate('/teacher/home');
     } else {
       Swal.fire({
