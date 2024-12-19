@@ -14,9 +14,8 @@ export function PracticeMgn() {
   const [editingPractice, setEditingPractice] = useState(null);
   const [newPractice, setNewPractice] = useState({
     name: "",
-    email: "",
-    job: ["", ""],
-    online: false,
+    detail: "",
+    status: true,
     date: "",
   });
 
@@ -31,7 +30,7 @@ export function PracticeMgn() {
   // ฟังก์ชันเพิ่มผู้ใช้ใหม่
   const handleAddPractice = () => {
     setPractice([...practice, newPractice]);
-    setNewPractice({ name: "", email: "", job: ["", ""], online: false, date: "" });
+    setNewPractice({ name: "", detail: "", status: true, date: "" });
     setIsAddPracticeOpen(false);
   };
 
