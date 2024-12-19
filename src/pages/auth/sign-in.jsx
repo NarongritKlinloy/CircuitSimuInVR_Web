@@ -51,6 +51,10 @@ export function SignIn() {
         icon: 'error',
         title: 'Invalid Username',
         text: 'Username must end with @kmitl.ac.th!',
+        confirmButtonText: 'OK',
+        customClass: {
+          confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        },
       });
     } else if (username === 'admin@kmitl.ac.th' && password === 'password') {
       navigate('/dashboard/home');
@@ -61,6 +65,10 @@ export function SignIn() {
         icon: 'error',
         title: 'Login Failed',
         text: 'Invalid username or password.',
+        confirmButtonText: 'OK',
+        customClass: {
+          confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        },
       });
     }
   };
@@ -75,6 +83,10 @@ export function SignIn() {
         icon: 'error',
         title: 'Access Denied',
         text: 'Only @kmitl.ac.th accounts are allowed!',
+        confirmButtonText: 'OK',
+        customClass: {
+          confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        },
       });
       return;
     }
@@ -87,16 +99,24 @@ export function SignIn() {
         icon: 'error',
         title: 'Access Denied',
         text: 'You are not authorized to access the admin system.',
+        confirmButtonText: 'OK',
+        customClass: {
+          confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        },
       }).then(() => {
         navigate('/dashboard/home');
-      });;
+      });;{/* ต้องแก้ตรงนี้ถ้าเปลี่ยนเป็น studentแล้ว */}
     } else {
       Swal.fire({
         icon: 'success',
         title: 'Login Successful',
         text: `Welcome, Teacher: ${email}`,
+        confirmButtonText: 'OK',
+        customClass: {
+          confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        },
       }).then(() => {
-        navigate('/teacher/home');
+        navigate('/teacher/home');  
       });
     }
   };
@@ -106,6 +126,10 @@ export function SignIn() {
       icon: 'error',
       title: 'Google Login Failed',
       text: 'Please try again!',
+      confirmButtonText: 'OK',
+      customClass: {
+        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+      },
     });
   };
 
