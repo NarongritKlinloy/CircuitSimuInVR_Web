@@ -222,7 +222,7 @@ export function SignIn() {
 
         <div className="w-2/5 h-full hidden lg:block">
           <img
-            src="https://img.freepik.com/premium-photo/futuristic-virtual-reality-concept-futuristic-man-vr-glasses-with-3d-illustration_780593-19006.jpg"
+            src="https://img2.pic.in.th/pic/DALLE-2024-12-23-12.47.png"
             className="h-full w-full object-cover rounded-3xl"
           />
         </div>
