@@ -1,7 +1,6 @@
 import React, { useState } from "react";
-import SearchAndAddSection from "./functionTables/searchandaddsection";
+import SearchAndAddSection from "./functionTables/searchpractice";
 import PracticeTable from "./functionTables/PracticeTable";
-import PracticeModal from "./functionTables/PracticeModal";
 import { practiceTableData } from "@/data/practice-table-data";
 
 export function PracticeMgn() {

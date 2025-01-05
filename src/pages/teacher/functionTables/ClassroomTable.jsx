@@ -1,24 +1,12 @@
 import React, { useState } from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
-import {
-    Card,
-    CardHeader,
-    CardBody,
-    Typography,
-    Avatar,
-    Chip,
-    Dialog,
-    DialogHeader,
-    DialogBody,
-    DialogFooter,
-    Button,
-} from "@material-tailwind/react";
+import { Card, CardHeader, CardBody, Typography, Avatar, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
-function TeacherTable({ teachers, onEditClick, onDelete }) {
-    const [isEditOpen, setIsEditOpen] = useState(false); // State สำหรับเปิด/ปิด Modal
-    const [selectedUser, setSelectedUser] = useState(null); // เก็บข้อมูล User ที่จะแก้ไข
-    const [selectedRole, setSelectedRole] = useState(""); // เก็บ Role ที่เลือกจาก Dropdown
+function ClassroomTable({ classrooms, onEditClick, onDelete }) {
+    const [isEditOpen, setIsEditOpen] = useState(false);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [selectedRole, setSelectedRole] = useState("");
 
     // เปิด Modal และโหลดข้อมูล User ที่เลือก
     const openEditModal = (user) => {
@@ -41,6 +29,9 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
             text: `${selectedUser.name}'s role has been updated to ${selectedRole}.`,
             icon: "success",
             confirmButtonText: "OK",
+            customClass: {
+                confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+            },
         });
         closeEditModal();
     };
@@ -59,7 +50,14 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
         }).then((result) => {
             if (result.isConfirmed) {
                 console.log(`Deleted user: ${name}`);
-                Swal.fire("Deleted!", `${name} has been deleted.`, "success");
+                Swal.fire({
+                    title: "Deleted!",
+                    text: `${name} has been deleted.`,
+                    icon: "success", confirmButtonText: "OK",
+                    customClass: {
+                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+                    }
+                });
             }
         });
     };
@@ -69,7 +67,7 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
             <Card>
                 <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
                     <Typography variant="h6" color="white">
-                        Teacher Table
+                        Classroom Table
                     </Typography>
                 </CardHeader>
 
@@ -81,9 +79,7 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                 {["Name", "Email", "Status", "Last Active", "", ""].map((header) => (
                                     <th
                                         key={header}
-                                        className={`border-b border-blue-gray-50 px-5 py-2 ${
-                                            header === "Name" ? "text-left" : "text-center"
-                                        }`}
+                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "Name" ? "text-left" : "text-center"}`}
                                     >
                                         <Typography
                                             variant="small"
@@ -95,18 +91,15 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                 ))}
                             </tr>
                         </thead>
-
-                        {/* Table Body */}
                         <tbody>
-                            {teachers.map(({ img, name, email, online, date, role }, key) => {
-                                const isLast = key === teachers.length - 1;
-                                const rowClassName = `py-3 px-5 align-middle ${
-                                    isLast ? "" : "border-b border-blue-gray-50"
-                                }`;
+                            {/* {classrooms.map(({ img, name, email, online, date, role }, key) => { */}
+                            {classrooms.map(({ img, name, email, online, date, role }, key) => {
+                                const isLast = key === classrooms.length - 1;
+                                const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                                 return (
                                     <tr key={name}>
-                                        {/* Name - ชิดซ้าย */}
+                                        {/* Name */}
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
                                                 <Avatar src={img} alt={name} size="sm" variant="rounded" />
@@ -116,14 +109,14 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                             </div>
                                         </td>
 
-                                        {/* Email - กึ่งกลาง */}
+                                        {/* Email */}
                                         <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-normal text-blue-gray-500 truncate">
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {email}
                                             </Typography>
                                         </td>
 
-                                        {/* Status - กึ่งกลาง */}
+                                        {/* Status */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Chip
                                                 variant="gradient"
@@ -133,7 +126,7 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                             />
                                         </td>
 
-                                        {/* Last Active - กึ่งกลาง */}
+                                        {/* Last Active */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
                                                 {date}
@@ -197,4 +190,4 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
     );
 }
 
-export default TeacherTable;
+export default ClassroomTable;

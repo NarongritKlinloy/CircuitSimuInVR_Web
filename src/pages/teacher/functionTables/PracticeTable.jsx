@@ -78,40 +78,39 @@ function PracticeTable({ practice, onStatusChange }) {
   
               <tbody>
                 {practice.map(({ id, name, detail, date, status }, key) => {
-                  const className = `py-3 px-5 ${
-                    key === practice.length - 1 ? "" : "border-b border-blue-gray-50"
-                  }`;
+                  // const className = `py-3 px-5 ${
+                  //   key === practice.length - 1 ? "" : "border-b border-blue-gray-50"
+                  // }`;
+                  const isLast = key === practice.length - 1;
+                  const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
   
                   return (
                     <tr key={id}>
-                      <td className={className}>
+                      {/* <td className={className}> */}
+                      <td className={`${rowClassName}`}>
                         <div className="flex items-center gap-4">
                           {id}
                           <div>
-                            <Typography
-                              variant="small"
-                              color="blue-gray"
-                              className="font-semibold"
-                            >
+                            <Typography variant="small" color="blue-gray" className="font-semibold" >
                               {name}
                             </Typography>
                           </div>
                         </div>
                       </td>
   
-                      <td className={className}>
+                      <td className={`${rowClassName}`}>
                         <Typography className="text-xs font-normal text-blue-gray-500">
                           {detail}
                         </Typography>
                       </td>
-                      <td className={className}>
+                      <td className={`${rowClassName}`}>
                         <Typography className="text-xs font-normal text-blue-gray-500">
                           {date}
                         </Typography>
                       </td>
   
-                      <td className={className}>
-                        <Switch
+                      <td className={`${rowClassName}`}>
+                        <Switch 
                           checked={status}
                           onClick={(e) => switchCheck(e, { id, name, detail, date, status })}
                         />
