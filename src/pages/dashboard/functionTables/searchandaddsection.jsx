@@ -12,9 +12,13 @@ function searchandaddsection({ search, setSearch, toggleAddModal }) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        
+        {/*
         <Button variant="gradient" color="green" onClick={toggleAddModal}>
           Add
         </Button>
+        */}
+
       </div>
     </Card>
   );
