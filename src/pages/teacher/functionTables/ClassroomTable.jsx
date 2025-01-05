@@ -1,32 +1,38 @@
 import React, { useState } from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { Card, CardHeader, CardBody, Typography, Avatar, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
+import { Card, Input, CardHeader, CardBody, Typography, Avatar, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
 function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedRole, setSelectedRole] = useState("");
+    const [selectedClassroom, setSelectedClassroom] = useState(null);
+    
 
-    // เปิด Modal และโหลดข้อมูล User ที่เลือก
-    const openEditModal = (user) => {
-        setSelectedUser(user);
-        setSelectedRole(user.role || "Student"); // Set role เริ่มต้น
+    // handle data change
+    const inputHandle = (event) => { 
+        setSelectedClassroom((prev) => ({
+            ...prev , [event.target.name] : event.target.value
+        }))
+    }
+
+    // เปิด Modal และโหลดข้อมูล
+    const openEditModal = (classroom) => {
+        setSelectedClassroom(classroom);
         setIsEditOpen(true);
     };
 
     // ปิด Modal
     const closeEditModal = () => {
         setIsEditOpen(false);
-        setSelectedUser(null);
+        setSelectedClassroom(null);
     };
 
-    // ฟังก์ชันยืนยันการแก้ไข Role
+    // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = () => {
-        console.log(`Updated role for ${selectedUser.name} to ${selectedRole}`);
+        console.log(`Updated ${selectedClassroom.classname} to ${selectedClassroom.classname}`);
         Swal.fire({
             title: "Updated!",
-            text: `${selectedUser.name}'s role has been updated to ${selectedRole}.`,
+            text: `${selectedClassroom.classname} has been updated to ${selectedClassroom.classname}.`,
             icon: "success",
             confirmButtonText: "OK",
             customClass: {
@@ -37,10 +43,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     };
 
     // ฟังก์ชันยืนยันการลบ
-    const confirmDelete = (name) => {
+    const confirmDelete = (classname) => {
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you really want to delete ${name}?`,
+            text: `Do you really want to delete ${classname}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -49,10 +55,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             cancelButtonText: "Cancel",
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(`Deleted user: ${name}`);
+                console.log(`Deleted : ${classname}`);
                 Swal.fire({
                     title: "Deleted!",
-                    text: `${name} has been deleted.`,
+                    text: `${classname} has been deleted.`,
                     icon: "success", confirmButtonText: "OK",
                     customClass: {
                         confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
@@ -76,10 +82,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["Name", "Email", "Status", "Last Active", "", ""].map((header) => (
+                                {["classname", "sec", "year", "edit", "delete"].map((header) => (
                                     <th
                                         key={header}
-                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "Name" ? "text-left" : "text-center"}`}
+                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "classname" ? "text-left" : "text-center"}`}
                                     >
                                         <Typography
                                             variant="small"
@@ -93,50 +99,35 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </thead>
                         <tbody>
                             {/* {classrooms.map(({ img, name, email, online, date, role }, key) => { */}
-                            {classrooms.map(({ img, name, email, online, date, role }, key) => {
+                            {classrooms.map(({ id, classname, sec, year}, key) => {
                                 const isLast = key === classrooms.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                                 return (
-                                    <tr key={name}>
-                                        {/* Name */}
+                                    <tr key={id}>
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
-                                                <Avatar src={img} alt={name} size="sm" variant="rounded" />
                                                 <Typography variant="small" color="blue-gray" className="font-semibold">
-                                                    {name}
+                                                    {id}
                                                 </Typography>
+                                                {classname}
                                             </div>
                                         </td>
-
-                                        {/* Email */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {email}
+                                                {sec}
                                             </Typography>
                                         </td>
-
-                                        {/* Status */}
                                         <td className={`${rowClassName} text-center`}>
-                                            <Chip
-                                                variant="gradient"
-                                                color={online ? "green" : "blue-gray"}
-                                                value={online ? "ONLINE" : "OFFLINE"}
-                                                className="py-0.5 px-2 text-[11px] font-medium w-fit mx-auto"
-                                            />
-                                        </td>
-
-                                        {/* Last Active */}
-                                        <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                {date}
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                                {year}
                                             </Typography>
                                         </td>
 
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ name, role })}
+                                                onClick={() => openEditModal({id, classname , sec , year})}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
@@ -146,7 +137,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                         {/* Delete Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => confirmDelete(name)}
+                                                onClick={() => confirmDelete(classname)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <TrashIcon className="h-5 w-5" />
@@ -162,20 +153,42 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
 
             {/* Edit Modal */}
             <Dialog open={isEditOpen} handler={closeEditModal}>
-                <DialogHeader>Edit User Role</DialogHeader>
+                <DialogHeader>Edit Classroom</DialogHeader>
                 <DialogBody>
                     <Typography className="mb-4">
-                        Update role for <strong>{selectedUser?.name}</strong>
+                        {/* Update <strong>{selectedClassroom?.classname}</strong> Information */}
+                        Update classroom information
                     </Typography>
-                    <select
-                        value={selectedRole}
-                        onChange={(e) => setSelectedRole(e.target.value)}
-                        className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                        <option value="Student">Student</option>
-                        <option value="Teacher">Teacher</option>
-                        <option value="Admin">Admin</option>
-                    </select>
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <Input
+                                label="Name"
+                                name = "classname"
+                                value={selectedClassroom?.classname}
+                                onChange={inputHandle}
+                            />
+                        </div>
+
+                        <div className="flex gap-4">
+                            <div className="w-1/2">
+                                <Input
+                                    label="sec"
+                                    name = "sec"
+                                    value={selectedClassroom?.sec}
+                                    onChange={inputHandle}
+                                />
+                            </div>
+
+                            <div className="w-1/2">
+                                <Input
+                                    label="year"
+                                    name="year"
+                                    value={selectedClassroom?.year}
+                                    onChange={inputHandle}
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </DialogBody>
                 <DialogFooter>
                     <Button variant="text" color="red" onClick={closeEditModal}>

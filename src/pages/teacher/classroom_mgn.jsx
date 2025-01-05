@@ -8,33 +8,31 @@ export function ClassroomMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState(classroomTableData);
 
-  // Authors Modal State
+  // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
   const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
   const [editingClassroom, setEditingClassroom] = useState(null);
   const [newClassroom, setNewClassroom] = useState({
-    name: "",
-    email: "",
-    job: ["", ""],
-    online: false,
-    date: "",
+    classname: "",
+    sec: "",
+    year: "",
   });
 
-  // ฟังก์ชันกรองข้อมูล Authors Table
-  const filteredClassroom = classrooms.filter(({ name, email }) =>
-    [name, email].some((field) =>
+  // ฟังก์ชันค้นหา
+  const filteredClassroom = classrooms.filter(({ classname, sec }) =>
+    [classname, sec].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
 
-  // ฟังก์ชันเพิ่มผู้ใช้ใหม่
+  // ฟังก์ชันเพิ่ม
   const handleAddClassroom = () => {
     setClassroom([...classrooms, newClassroom]);
-    setNewClassroom({ name: "", email: "", job: ["", ""], online: false, date: "" });
+    setNewClassroom({ classname: "", sec: "", year: "" });
     setIsAddClassroomOpen(false);
   };
 
-  // ฟังก์ชันแก้ไขข้อมูลผู้ใช้
+  // ฟังก์ชันแก้ไข
   const handleEditAuthor = () => {
     setClassroom((prevAuthors) =>
       prevAuthors.map((classroom) =>
