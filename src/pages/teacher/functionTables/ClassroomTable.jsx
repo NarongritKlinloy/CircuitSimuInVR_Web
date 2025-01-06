@@ -82,7 +82,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["classname", "sec", "year", "edit", "delete"].map((header) => (
+                                {["classname", "sec","semester", "year", "edit", "delete"].map((header) => (
                                     <th
                                         key={header}
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${header === "classname" ? "text-left" : "text-center"}`}
@@ -99,7 +99,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </thead>
                         <tbody>
                             {/* {classrooms.map(({ img, name, email, online, date, role }, key) => { */}
-                            {classrooms.map(({ id, classname, sec, year}, key) => {
+                            {classrooms.map(({ id, classname, sec , semester, year}, key) => {
                                 const isLast = key === classrooms.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -120,6 +120,12 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
+                                                {semester}
+                                            </Typography>
+                                        </td>
+
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {year}
                                             </Typography>
                                         </td>
@@ -127,7 +133,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({id, classname , sec , year})}
+                                                onClick={() => openEditModal({id, classname , sec ,semester, year})}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
