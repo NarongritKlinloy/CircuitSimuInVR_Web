@@ -24,7 +24,7 @@ export function SignIn() {
     }
     
      // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
-    if (email === "65015123@kmitl.ac.th") {
+    if (email === "65015041@kmitl.ac.th" ) {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -38,6 +38,8 @@ export function SignIn() {
       });
       return;
     }
+
+    
 
     const usernamePart = email.split("@")[0];
     const isNumber = /^\d{8}$/;

@@ -27,7 +27,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
         {/* ส่วนบน */}
         <div>
           <div className="relative">
-            <Link to="/" className="flex items-center py-3 px-1">
+            <Link to="/dashboard/home" className="flex items-center py-3 px-1">
               <img
                 src="https://img5.pic.in.th/file/secure-sv1/DALLE-2025-01-05-14.14.45---A-bright-and-futuristic-circular-logo-design-for-a-virtual-reality-VR-application-focused-on-circuit-building.-The-logo-features-a-sleek-VR-headset.png"
                 alt="Logo Circuit simulator in VR"
