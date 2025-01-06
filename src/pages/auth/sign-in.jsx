@@ -22,6 +22,22 @@ export function SignIn() {
       });
       return;
     }
+    
+     // เงื่อนไขพิเศษสำหรับ email 65015123@kmitl.ac.th
+    if (email === "65015123@kmitl.ac.th") {
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: `Welcome, Student: ${email}`,
+        confirmButtonText: "OK",
+        customClass: {
+          confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+        },
+      }).then(() => {
+        navigate('/teacher/home'); // Redirect ไปหน้า student/home
+      });
+      return;
+    }
 
     const usernamePart = email.split("@")[0];
     const isNumber = /^\d{8}$/;
