@@ -15,6 +15,7 @@ export function ClassroomMgn() {
   const [newClassroom, setNewClassroom] = useState({
     classname: "",
     sec: "",
+    semester: "",
     year: "",
   });
 
@@ -28,7 +29,7 @@ export function ClassroomMgn() {
   // ฟังก์ชันเพิ่ม
   const handleAddClassroom = () => {
     setClassroom([...classrooms, newClassroom]);
-    setNewClassroom({ classname: "", sec: "", year: "" });
+    setNewClassroom({ classname: "", sec: "", semester: "", year: "" });
     setIsAddClassroomOpen(false);
   };
 

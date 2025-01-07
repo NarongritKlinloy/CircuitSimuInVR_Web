@@ -176,7 +176,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </div>
 
                         <div className="flex gap-4">
-                            <div className="w-1/2">
+                            <div className="w-1/3">
                                 <Input
                                     label="sec"
                                     name = "sec"
@@ -184,8 +184,15 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                     onChange={inputHandle}
                                 />
                             </div>
-
-                            <div className="w-1/2">
+                            <div className="w-1/3">
+                                <Input
+                                    label="semester"
+                                    name = "semester"
+                                    value={selectedClassroom?.semester}
+                                    onChange={inputHandle}
+                                />
+                            </div>
+                            <div className="w-1/3">
                                 <Input
                                     label="year"
                                     name="year"

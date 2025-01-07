@@ -35,9 +35,10 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-    if (!classroomData.classname) newErrors.classname = "Name is required";
-    if (!classroomData.sec) newErrors.sec = "Email is required";
-    if (!classroomData.year) newErrors.year = "Password is required";
+    if (!classroomData.classname) newErrors.classname = "Classname is required";
+    if (!classroomData.sec) newErrors.sec = "Sec is required";
+    if (!classroomData.semester) newErrors.semester = "Semester is required";
+    if (!classroomData.year) newErrors.year = "Year is required";
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
@@ -73,7 +74,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
           </div>
         
           <div className="flex gap-4">
-            <div className="w-1/2">
+            <div className="w-1/3">
               <Input
                 label="sec"
                 value={classroomData.sec || ""}
@@ -89,7 +90,23 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
               )}
             </div>
 
-            <div className="w-1/2">
+            <div className="w-1/3">
+              <Input
+                label="semester"
+                value={classroomData.semester || ""}
+                onChange={(e) =>
+                  setClassroomData({ ...classroomData, semester: e.target.value })
+                }
+                error={!!errors.semester}
+              />
+              {errors.semester && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {errors.semester}
+                </Typography>
+              )}
+            </div>
+
+            <div className="w-1/3">
               <Input
                 label="year"
                 value={classroomData.year || ""}
