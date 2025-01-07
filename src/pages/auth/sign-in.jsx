@@ -24,20 +24,33 @@ export function SignIn() {
     }
     
      // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
-    if (email === "65015041@kmitl.ac.th" ) {
+     if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th") {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
-        text: `Welcome, Student: ${email}`,
-        confirmButtonText: "OK",
+        text: `Welcome, ${email} Developer team`,
+        input: "select",
+        inputOptions: {
+          admin: "Admin",
+          teacher: "Teacher",
+        },
+        inputPlaceholder: "Select your role",
+        confirmButtonText: "Proceed",
         customClass: {
           confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
         },
-      }).then(() => {
-        navigate('/teacher/home'); // Redirect ไปหน้า student/home
+      }).then((result) => {
+        if (result.isConfirmed) {
+          if (result.value === "admin") {
+            navigate("/dashboard/home"); // Redirect ไปหน้า Admin
+          } else if (result.value === "teacher") {
+            navigate("/teacher/home"); // Redirect ไปหน้า Teacher
+          }
+        }
       });
       return;
     }
+    
 
     
 
