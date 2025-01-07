@@ -76,10 +76,12 @@ export function DashboardNavbar() {
 
 
         </div>
+        
         <div className="flex items-center">
+          {/* 
           <div className="mr-auto md:mr-4 md:w-56">
             <Input label="Search" />
-          </div>
+          </div>*/}
 
           
           <IconButton
@@ -92,7 +94,7 @@ export function DashboardNavbar() {
           </IconButton>
 
           
-          <Link to="/auth/sign-in">
+          {/*ทำส่วนนี้ให้เป็น ข้อมูลของผู้ใช้งาน ตัวอย่างใน link นี้ >> https://img2.pic.in.th/pic/Screenshot-2025-01-05-152144.png */}
             <Button
               variant="text"
               color="blue-gray"
@@ -108,7 +110,7 @@ export function DashboardNavbar() {
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
-          </Link>
+          {/* ------------------------------------------------------------------------------------------------------- */}
 
           
           <Menu>
