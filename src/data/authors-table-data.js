@@ -1,4 +1,17 @@
-export const authorsTableData = [
+import axios from 'axios';
+export const authorsTableData = async () => {
+  try{
+    const response = await axios.get('http://localhost:5000/dashboard/Users');
+    return response.data;
+  }
+  catch(error){
+    console.error('Error fetching user', error);
+    return [];
+  }
+};
+
+/*
+[
   { id :"1",
     img: "https://scontent.fbkk5-5.fna.fbcdn.net/v/t1.6435-9/75264827_2515988055347046_1934387376730144768_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=833d8c&_nc_eui2=AeG-Jq_N1HTdvDHa-yeYEWZO73aeDbRE7Cbvdp4NtETsJqxtQVlqx4cP__lgWUvw292Pyt-4D8M4JHjv5FFAClFz&_nc_ohc=oeqc6kFNEs0Q7kNvgE5Ti13&_nc_zt=23&_nc_ht=scontent.fbkk5-5.fna&_nc_gid=AlLZwTnI3JRcnmZAvvwkGjk&oh=00_AYAfu8SM5x3VWDigKexg1jKcU6Oe7P-cdfQVstsZJl6KSQ&oe=677E6761",
     name: "Fluke ",
@@ -52,7 +65,7 @@ export const authorsTableData = [
     online: false,
     date: "14/09/20",
   }
-  
 ];
+*/
 
 export default authorsTableData;

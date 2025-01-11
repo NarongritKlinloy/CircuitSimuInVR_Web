@@ -93,7 +93,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                         </thead>
 
                         <tbody>
-                            {authors.map(({ img, name, email, online, date, role }, key) => {
+                            {authors.map(({ uid, name, role_id, last_active, online}, key) => {
                                 const isLast = key === authors.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -109,10 +109,10 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                                             </div>
                                         </td>
 
-                                        {/* Email */}
+                                        {/* Uid */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {email}
+                                                {uid}
                                             </Typography>
                                         </td>
 
@@ -129,14 +129,14 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                                         {/* Last Active */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                {date}
+                                                {last_active}
                                             </Typography>
                                         </td>
 
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ name, role })}
+                                                onClick={() => openEditModal({ name, role_id })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SearchAndAddSection from "./functionTables/searchandaddsection";
 import AuthorsTable from "./functionTables/authorstable";
 import AuthorModal from "./functionTables/authormodal";
@@ -8,7 +8,16 @@ import { teachersTableData } from "@/data/teachersTableData";
 
 export function Tables() {
   const [search, setSearch] = useState(""); // คำค้นหา
-  const [authors, setAuthors] = useState(authorsTableData); // เก็บรายชื่อผู้ใช้
+
+  const [authors, setAuthors] = useState([]); // เก็บรายชื่อผู้ใช้
+  useEffect(() => {
+    const getAuthors = async () => {
+      const data = await authorsTableData();
+      setAuthors(data);
+    };
+    getAuthors();
+  }, []);
+
   const [teachers, setTeachers] = useState(teachersTableData); // เก็บรายชื่ออาจารย์
 
   // Authors Modal State
@@ -17,7 +26,7 @@ export function Tables() {
   const [editingAuthor, setEditingAuthor] = useState(null);
   const [newAuthor, setNewAuthor] = useState({
     name: "",
-    email: "",
+    uid: "",
     job: ["", ""],
     online: false,
     date: "",
@@ -30,15 +39,15 @@ export function Tables() {
  
 
   // ฟังก์ชันกรองข้อมูล Authors Table
-  const filteredAuthors = authors.filter(({ name, email }) =>
-    [name, email].some((field) =>
+  const filteredAuthors = authors.filter(({ name, uid }) =>
+    [name, uid].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
 
   // ฟังก์ชันกรองข้อมูล Teachers Table
-  const filteredTeachers = teachers.filter(({ name, email }) =>
-    [name, email].some((field) =>
+  const filteredTeachers = teachers.filter(({ name, uid }) =>
+    [name, uid].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
@@ -46,7 +55,7 @@ export function Tables() {
   // ฟังก์ชันเพิ่มผู้ใช้ใหม่
   const handleAddAuthor = () => {
     setAuthors([...authors, newAuthor]);
-    setNewAuthor({ name: "", email: "", job: ["", ""], online: false, date: "" });
+    setNewAuthor({ name: "", uid: "", job: ["", ""], online: false, date: "" });
     setIsAddAuthorOpen(false);
   };
 
@@ -74,6 +83,38 @@ export function Tables() {
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
+
+
+
+      <div>
+      <h1>📚 Authors List</h1>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Join Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {authors.map((author) => (
+            <tr>
+              <td>
+                <img src={author.name} alt={author.name} width="50" />
+              </td>
+              <td>{author.name}</td>
+              <td>{author.uid}</td>
+              <td>{author.online ? '🟢 Online' : '🔴 Offline'}</td>
+              <td>{new Date(author.last_active).toLocaleDateString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+
+
+
       {/* Section การค้นหาและปุ่ม Add */}
       <SearchAndAddSection
         search={search}
