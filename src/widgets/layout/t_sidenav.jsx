@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import {useEffect} from "react";
 import { Link, NavLink } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
@@ -18,6 +19,8 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
     transparent: "bg-transparent",
   };
 
+  routes[0].pages = routes[0].pages.filter(({name}) => (name != "Student"));
+  
   return (
     <aside
       className={`${sidenavTypes[sidenavType]} ${openSidenav ? "translate-x-0" : "-translate-x-80"
@@ -55,7 +58,7 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
 
 
       <div className="m-4">
-        {routes.map(({ layout, title, pages }, key) => (
+         { routes.map(({ layout, title, pages }, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
             {title && (
               <li className="mx-3.5 mt-4 mb-2">
@@ -68,33 +71,36 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
                 </Typography>
               </li>
             )}
-            {pages.map(({ icon, label, name, path }) => (
+
+            { pages.map(({ icon, label, name, path }) => (
               <li key={name}>
-                <NavLink to={`/${layout}${path}`}>
-                  {({ isActive }) => (
-                    <Button
-                      variant={isActive ? "gradient" : "text"}
-                      color={
-                        isActive
-                          ? sidenavColor
-                          : sidenavType === "dark"
-                            ? "white"
-                            : "blue-gray"
-                      }
-                      className="flex items-center gap-4 px-4 capitalize"
-                      fullWidth
+              <NavLink to={`/${layout}${path}`}>
+                {({ isActive }) => (
+                  <Button
+                    variant={isActive ? "gradient" : "text"}
+                    color={
+                      isActive
+                        ? sidenavColor
+                        : sidenavType === "dark"
+                          ? "white"
+                          : "blue-gray"
+                    }
+                    
+                    className="flex items-center gap-4 px-4 capitalize"
+                    fullWidth
+                  >
+                    {icon}
+                    <Typography
+                      color="inherit"
+                      className="font-medium capitalize"
                     >
-                      {icon}
-                      <Typography
-                        color="inherit"
-                        className="font-medium capitalize"
-                      >
-                        {name}
-                      </Typography>
-                    </Button>
-                  )}
-                </NavLink>
-              </li>
+                      {name}
+                    </Typography>
+                  </Button>
+                )}
+
+              </NavLink>
+            </li>
             ))}
           </ul>
         ))}

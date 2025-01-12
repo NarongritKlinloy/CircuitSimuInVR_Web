@@ -1,84 +1,76 @@
 import React, { useState } from "react";
-import SearchAndAddSection from "./functionTables/SearchAndAdd";
-import ClassroomTable from "./functionTables/ClassroomTable";
-import ClassroomModal from "./functionTables/classroommodal";
-import { classroomTableData } from "@/data/classroom-table-data";
+import { useParams } from "react-router-dom";
+import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
+import StudentTable from "./functionTables/StudentTable";
+import StudentModal from "./functionTables/StudentModal";
+import { studentTableData } from "@/data/student-table-data";
 
 export function StudentMgn() {
-  const [search, setSearch] = useState(""); // คำค้นหา
-  const [classrooms, setClassroom] = useState(classroomTableData);
-
-  // Modal State
-  const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
-  const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
-  const [editingClassroom, setEditingClassroom] = useState(null);
-  const [newClassroom, setNewClassroom] = useState({
-    classname: "",
+  const { classname } = useParams();
+  const [search, setSearch] = useState("");
+  const [students, setStudent] = useState(studentTableData);
+  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
+  const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [newStudent, setNewStudent] = useState({
+    name: "",
     sec: "",
+    semester: "",
     year: "",
   });
 
-  // ฟังก์ชันค้นหา
-  const filteredClassroom = classrooms.filter(({ classname, sec }) =>
-    [classname, sec].some((field) =>
+  const filteredStudent = students.filter(({ name, id }) =>
+    [name, id].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
 
-  // ฟังก์ชันเพิ่ม
-  const handleAddClassroom = () => {
-    setClassroom([...classrooms, newClassroom]);
-    setNewClassroom({ classname: "", sec: "", year: "" });
-    setIsAddClassroomOpen(false);
+  const handleAddStudent = () => {
+    setStudent([...students, newStudent]);
+    setNewStudent({ name: "", sec: "", semester: "", year: "" });
+    setIsAddStudentOpen(false);
   };
 
-  // ฟังก์ชันแก้ไข
   const handleEditAuthor = () => {
-    setClassroom((prevAuthors) =>
-      prevAuthors.map((classroom) =>
-        classroom.name === editingClassroom.name ? editingClassroom : classroom
+    setStudent((prevAuthors) =>
+      prevAuthors.map((student) =>
+        student.name === editingStudent.name ? editingStudent : student
       )
     );
-    setIsEditClassroomOpen(false);
+    setIsEditStudentOpen(false);
   };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-      {/* Section การค้นหาและปุ่ม Add */}
-      <SearchAndAddSection
+      <SearchAndAddStudent
         search={search}
         setSearch={setSearch}
-        toggleAddModal={() => setIsAddClassroomOpen(true)}
+        toggleAddModal={() => setIsAddStudentOpen(true)}
       />
 
-      {/* Section ตาราง Authors */}
-      <ClassroomTable
-        classrooms={filteredClassroom}
-        onEditClick={(classroom) => {
-          setEditingClassroom(classroom);
-          setIsEditClassroomOpen(true);
+      <StudentTable
+        students={filteredStudent}
+        onEditClick={(student) => {
+          setEditingStudent(student);
+          setIsEditStudentOpen(true);
         }}
       />
       
-    
-      {/* Modal สำหรับเพิ่มข้อมูลผู้ใช้ */}
-      <ClassroomModal
-        isOpen={isAddClassroomOpen}
-        toggleModal={() => setIsAddClassroomOpen(false)}
-        classroomData={newClassroom}
-        setClassroomData={setNewClassroom}
-        onSave={handleAddClassroom}
+      <StudentModal
+        isOpen={isAddStudentOpen}
+        toggleModal={() => setIsAddStudentOpen(false)}
+        studentData={newStudent}
+        setStudentData={setNewStudent}
+        onSave={handleAddStudent}
       />
 
-      {/* Modal สำหรับแก้ไขข้อมูลผู้ใช้ */}
-      <ClassroomModal
-        isOpen={isEditClassroomOpen}
-        toggleModal={() => setIsEditClassroomOpen(false)}
-        classroomData={editingClassroom}
-        setClassroomData={setEditingClassroom}
+      <StudentModal
+        isOpen={isEditStudentOpen}
+        toggleModal={() => setIsEditStudentOpen(false)}
+        studentData={editingStudent}
+        setStudentData={setEditingStudent}
         onSave={handleEditAuthor}
       />
-
     </div>
   );
 }

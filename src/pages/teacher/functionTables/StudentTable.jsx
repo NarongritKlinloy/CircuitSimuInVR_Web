@@ -1,40 +1,40 @@
 import React, { useState } from "react";
-import { Link , useNavigate } from "react-router-dom";
-import { PencilSquareIcon, TrashIcon, UserPlusIcon} from "@heroicons/react/24/solid";
-import { Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
+import { useParams } from "react-router-dom";
+import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 
-function ClassroomTable({ classrooms, onEditClick, onDelete }) {
-    const navigate = useNavigate();
+function StudentTable({ students, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
-    const [selectedClassroom, setSelectedClassroom] = useState(null);
+    const { classname } = useParams();
+    const [selectedStudent, setSelectedStudent] = useState(null);
 
 
     // handle data change
     const inputHandle = (event) => {
-        setSelectedClassroom((prev) => ({
+        setSelectedStudent((prev) => ({
             ...prev, [event.target.name]: event.target.value
         }))
     }
 
     // เปิด Modal และโหลดข้อมูล
-    const openEditModal = (classroom) => {
-        setSelectedClassroom(classroom);
+    const openEditModal = (student) => {
+        setSelectedStudent(student);
         setIsEditOpen(true);
     };
 
     // ปิด Modal
     const closeEditModal = () => {
         setIsEditOpen(false);
-        setSelectedClassroom(null);
+        setSelectedStudent(null);
     };
 
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = () => {
-        console.log(`Updated ${selectedClassroom.classname} to ${selectedClassroom.classname}`);
+        console.log(`Updated ${selectedStudent.name} to ${selectedStudent.name}`);
         Swal.fire({
             title: "Updated!",
-            text: `${selectedClassroom.classname} has been updated to ${selectedClassroom.classname}.`,
+            text: `${selectedStudent.name} has been updated to ${selectedStudent.name}.`,
             icon: "success",
             confirmButtonText: "OK",
             customClass: {
@@ -45,10 +45,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     };
 
     // ฟังก์ชันยืนยันการลบ
-    const confirmDelete = (classname) => {
+    const confirmDelete = (name) => {
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you really want to delete ${classname}?`,
+            text: `Do you really want to delete ${name}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -57,10 +57,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             cancelButtonText: "Cancel",
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(`Deleted : ${classname}`);
+                console.log(`Deleted : ${name}`);
                 Swal.fire({
                     title: "Deleted!",
-                    text: `${classname} has been deleted.`,
+                    text: `${name} has been deleted.`,
                     icon: "success", confirmButtonText: "OK",
                     customClass: {
                         confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
@@ -75,7 +75,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             <Card>
                 <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
                     <Typography variant="h6" color="white">
-                        Classroom Table
+                        Student Table : { classname }
                     </Typography>
                 </CardHeader>
 
@@ -83,11 +83,11 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                 <CardBody className="overflow-x-auto pt-0 pb-2">
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
-                            <tr> 
-                                {["classname", "sec", "semester", "year", "student", "add student", "edit","delete"].map((header) => (
+                            <tr>
+                                {["no.", "id", "name", "sec", "semester", "year", "edit", "delete"].map((header) => (
                                     <th
                                         key={header}
-                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "classname" ? "text-left" : "text-center"}`}
+                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "name" ? "text-left" : "text-center"}`}
                                     >
                                         <Typography
                                             variant="small"
@@ -100,65 +100,58 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {classrooms.map(({ id, classname, sec, semester, year, total }, key) => {
-                                const isLast = key === classrooms.length - 1;
+                            {students.map(({ id, name, sec, semester, year}, key) => {
+                                const isLast = key === students.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                                 return (
-                                    <tr key={id}>
-                                        <td className={`${rowClassName} text-left`}>
-                                            <div className="flex items-center gap-4">
-                                                <Typography variant="small" color="blue-gray" className="font-semibold">
-                                                    {id}
-                                                </Typography>
-                                                {classname}
-                                            </div>
+                                    <tr key={name}>
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal font-semibold">
+                                                {key+1}
+                                            </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                        <Typography className="text-s font-normal text-blue-gray-500">
+                                                {id}
+                                            </Typography>
+                                        </td>
+                                        <td className={`${rowClassName} text-left`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
+                                                {name}
+                                            </Typography>
+                                        </td>
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
                                                 {sec}
                                             </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                            <Typography className="text-s font-normal text-blue-gray-500">
                                                 {semester}
                                             </Typography>
                                         </td>
 
                                         <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                            <Typography className="text-s font-normal text-blue-gray-500">
                                                 {year}
                                             </Typography>
-                                        </td>
-                                        <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {total}
-                                            </Typography>
-                                        </td>
-
-                                         {/* Add Button */}
-                                         <td className={`${rowClassName} text-center`}>
-                                            <Link to={`/teacher/student_mgn/${classname}`}
-                                                className="text-green-500 hover:text-green-700"
-                                            >
-                                                <UserPlusIcon className="h-5 w-5 mx-auto" />
-                                            </Link>
                                         </td>
 
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ id, classname, sec, semester, year })}
+                                                onClick={() => openEditModal({ id, name, sec, semester, year })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
-                                                <PencilSquareIcon  className="h-5 w-5" />
+                                                <PencilSquareIcon className="h-5 w-5" />
                                             </button>
                                         </td>
 
                                         {/* Delete Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => confirmDelete(classname)}
+                                                onClick={() => confirmDelete(name)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <TrashIcon className="h-5 w-5" />
@@ -177,43 +170,57 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                 <DialogHeader>Edit Classroom</DialogHeader>
                 <DialogBody>
                     <Typography className="mb-4">
-                        Update classroom information
+                        Update student information
                     </Typography>
                     <div className="flex flex-col gap-4">
-                        <div>
-                            <Input
-                                label="Name"
-                                name="classname"
-                                value={selectedClassroom?.classname}
-                                onChange={inputHandle}
-                            />
-                        </div>
-
                         <div className="flex gap-4">
-                            <div className="w-1/3">
-                                <Input
-                                    label="sec"
-                                    name="sec"
-                                    value={selectedClassroom?.sec}
+                            <div className="w-1/2">
+                                <Input readOnly
+                                    label="student id"
+                                    name="stdid"
+                                    value={selectedStudent?.id}
                                     onChange={inputHandle}
                                 />
                             </div>
-                            <div className="w-1/3">
-                                <Input
+                            <div className="w-1/2">
+                                <Input  readOnly
+                                    label="name"
+                                    name="name"
+                                    value={selectedStudent?.name}
+                                    onChange={inputHandle}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-4">
+                            <div className="w-1/2">
+                                <Input readOnly
                                     label="semester"
                                     name="semester"
-                                    value={selectedClassroom?.semester}
+                                    value={selectedStudent?.semester}
                                     onChange={inputHandle}
                                 />
                             </div>
-                            <div className="w-1/3">
-                                <Input
+                            <div className="w-1/2">
+                                <Input  readOnly
                                     label="year"
                                     name="year"
-                                    value={selectedClassroom?.year}
+                                    value={selectedStudent?.year}
                                     onChange={inputHandle}
                                 />
                             </div>
+                        </div>
+                        
+                        <div>
+                            <Select 
+                                label="Select Sec"
+                                name="sec"
+                                value={selectedStudent?.sec} 
+                                onChange={(val) => setValue(val)}
+                            >
+                                <Option value="101">101</Option>
+                                <Option value="102">102</Option>
+                                <Option value="103">103</Option>
+                            </Select>
                         </div>
                     </div>
                 </DialogBody>
@@ -230,4 +237,4 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     );
 }
 
-export default ClassroomTable;
+export default StudentTable;

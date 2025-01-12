@@ -47,12 +47,12 @@ export function ClassroomMgn() {
     <div className="mt-12 mb-8 flex flex-col gap-12">
       {/* Section การค้นหาและปุ่ม Add */}
       <SearchAndAddSection
-        search={search}
-        setSearch={setSearch}
+        search={ search }
+        setSearch={ setSearch }
         toggleAddModal={() => setIsAddClassroomOpen(true)}
       />
-
-      {/* Section ตาราง Authors */}
+      
+      {/* Section ตาราง Classroom */}
       <ClassroomTable
         classrooms={filteredClassroom}
         onEditClick={(classroom) => {
@@ -62,7 +62,7 @@ export function ClassroomMgn() {
       />
       
     
-      {/* Modal สำหรับเพิ่มข้อมูลผู้ใช้ */}
+      {/* Modal add classroom */}
       <ClassroomModal
         isOpen={isAddClassroomOpen}
         toggleModal={() => setIsAddClassroomOpen(false)}
@@ -71,7 +71,7 @@ export function ClassroomMgn() {
         onSave={handleAddClassroom}
       />
 
-      {/* Modal สำหรับแก้ไขข้อมูลผู้ใช้ */}
+      {/* Modal edit classroom */}
       <ClassroomModal
         isOpen={isEditClassroomOpen}
         toggleModal={() => setIsEditClassroomOpen(false)}

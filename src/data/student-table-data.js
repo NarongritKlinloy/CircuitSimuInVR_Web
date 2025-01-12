@@ -22,7 +22,7 @@ export const studentTableData = [
     },
     {
         id: "65015168",
-        name: "Apidetch Detchmak",
+        name: "Apidetch Thepsanit",
         sec: "101",
         semester: "1",
         year: "2564"
