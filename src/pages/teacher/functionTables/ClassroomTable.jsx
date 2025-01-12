@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Card, Input, CardHeader, CardBody, Typography, Avatar, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
+import { deleteClassroomAPI } from "@/data/delete-classroom";
 
 function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -43,10 +44,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     };
 
     // ฟังก์ชันยืนยันการลบ
-    const confirmDelete = (classname) => {
+    const confirmDelete = (classroom) => {
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you really want to delete ${classname}?`,
+            text: `Do you really want to delete ${classroom.class_name}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -55,13 +56,18 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             cancelButtonText: "Cancel",
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(`Deleted : ${classname}`);
+                deleteClassroomAPI(classroom.class_id);
+                console.log(`Deleted : ${classroom.class_name}`);
                 Swal.fire({
                     title: "Deleted!",
-                    text: `${classname} has been deleted.`,
+                    text: `${classroom.class_name} has been deleted.`,
                     icon: "success", confirmButtonText: "OK",
                     customClass: {
                         confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
                     }
                 });
             }
@@ -99,41 +105,41 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </thead>
                         <tbody>
                             {/* {classrooms.map(({ img, name, email, online, date, role }, key) => { */}
-                            {classrooms.map(({ id, classname, sec , semester, year}, key) => {
+                            {classrooms.map((data, key) => {
                                 const isLast = key === classrooms.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                                 return (
-                                    <tr key={id}>
+                                    <tr key={data.class_id}>
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
                                                 <Typography variant="small" color="blue-gray" className="font-semibold">
-                                                    {id}
+                                                    {data.class_id}
                                                 </Typography>
-                                                {classname}
+                                                {data.class_name}
                                             </div>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {sec}
+                                                {data.sec}
                                             </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {semester}
+                                                {data.semester}
                                             </Typography>
                                         </td>
 
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {year}
+                                                {data.year}
                                             </Typography>
                                         </td>
 
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({id, classname , sec ,semester, year})}
+                                                onClick={() => openEditModal(data)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
@@ -143,7 +149,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                         {/* Delete Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => confirmDelete(classname)}
+                                                onClick={() => confirmDelete(data)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <TrashIcon className="h-5 w-5" />

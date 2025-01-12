@@ -18,7 +18,14 @@ export function Tables() {
     getAuthors();
   }, []);
 
-  const [teachers, setTeachers] = useState(teachersTableData); // เก็บรายชื่ออาจารย์
+  const [teachers, setTeachers] = useState([]); // เก็บรายชื่ออาจารย์
+  useEffect(() => {
+    const getTeachers = async () => {
+      const data = await teachersTableData();
+      setTeachers(data);
+    };
+    getTeachers();
+  }, []);
 
   // Authors Modal State
   const [isAddAuthorOpen, setIsAddAuthorOpen] = useState(false);
@@ -83,37 +90,6 @@ export function Tables() {
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-
-
-
-      <div>
-      <h1>📚 Authors List</h1>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Status</th>
-            <th>Join Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {authors.map((author) => (
-            <tr>
-              <td>
-                <img src={author.name} alt={author.name} width="50" />
-              </td>
-              <td>{author.name}</td>
-              <td>{author.uid}</td>
-              <td>{author.online ? '🟢 Online' : '🔴 Offline'}</td>
-              <td>{new Date(author.last_active).toLocaleDateString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-
-
 
       {/* Section การค้นหาและปุ่ม Add */}
       <SearchAndAddSection

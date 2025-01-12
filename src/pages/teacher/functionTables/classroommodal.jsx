@@ -9,6 +9,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { classroomTableData } from "@/data/classroom-table-data";
+import addClassroom from "@/data/add-classroom";
 
 function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
@@ -35,7 +36,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-    if (!classroomData.classname) newErrors.classname = "Name is required";
+    if (!classroomData.class_name) newErrors.class_name = "Name is required";
     if (!classroomData.sec) newErrors.sec = "Email is required";
     if (!classroomData.year) newErrors.year = "Password is required";
 
@@ -46,6 +47,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   // ฟังก์ชันบันทึกข้อมูล
   const handleSave = () => {
     if (validateFields()) {
+      addClassroom(classroomData.class_name, classroomData.sec, 1, classroomData.year);
       onSave();
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
     }
@@ -53,21 +55,21 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
 
   return (
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{classroomData.classname ? "Edit Classroom" : "Add New Classroom"}</DialogHeader>
+      <DialogHeader>{classroomData.class_name ? "Edit Classroom" : "Add New Classroom"}</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>
             <Input
               label="Name"
-              value={classroomData.classname || ""}
+              value={classroomData.class_name || ""}
               onChange={(e) =>
-                setClassroomData({ ...classroomData, classname: e.target.value })
+                setClassroomData({ ...classroomData, class_name: e.target.value })
               }
-              error={!!errors.classname}
+              error={!!errors.class_name}
             />
             {errors.classname && (
               <Typography variant="small" color="red" className="mt-1">
-                {errors.classname}
+                {errors.class_name}
               </Typography>
             )}
           </div>
@@ -112,7 +114,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
           Cancel
         </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
-          {classroomData.classname ? "Save" : "Add"}
+          {classroomData.class_name ? "Save" : "Add"}
         </Button>
       </DialogFooter>
     </Dialog>
