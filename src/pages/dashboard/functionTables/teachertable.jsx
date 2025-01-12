@@ -14,16 +14,17 @@ import {
     Button,
 } from "@material-tailwind/react";
 import Swal from "sweetalert2";
+import { updateRoleAPI } from "@/data/update-role";
+import { deleteUserAPI } from "@/data/delete-user";
 
 function TeacherTable({ teachers, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false); // State สำหรับเปิด/ปิด Modal
     const [selectedUser, setSelectedUser] = useState(null); // เก็บข้อมูล User ที่จะแก้ไข
-    const [selectedRole, setSelectedRole] = useState(""); // เก็บ Role ที่เลือกจาก Dropdown
+    const [selectedRole, setSelectedRole] = useState(3); // เก็บ Role ที่เลือกจาก Dropdown
 
     // เปิด Modal และโหลดข้อมูล User ที่เลือก
     const openEditModal = (user) => {
         setSelectedUser(user);
-        setSelectedRole(user.role || "Student"); // Set role เริ่มต้น
         setIsEditOpen(true);
     };
 
@@ -35,21 +36,29 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
 
     // ฟังก์ชันยืนยันการแก้ไข Role
     const handleSaveEdit = () => {
+        updateRoleAPI(selectedUser.uid, selectedRole);
         console.log(`Updated role for ${selectedUser.name} to ${selectedRole}`);
         Swal.fire({
             title: "Updated!",
             text: `${selectedUser.name}'s role has been updated to ${selectedRole}.`,
             icon: "success",
             confirmButtonText: "OK",
+            customClass: {
+                confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.reload();
+            }
         });
         closeEditModal();
     };
 
     // ฟังก์ชันยืนยันการลบ
-    const confirmDelete = (name) => {
+    const confirmDelete = (teachers) => {
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you really want to delete ${name}?`,
+            text: `Do you really want to delete ${teachers.name}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -58,8 +67,21 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
             cancelButtonText: "Cancel",
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(`Deleted user: ${name}`);
-                Swal.fire("Deleted!", `${name} has been deleted.`, "success");
+                deleteUserAPI(teachers.uid);
+                console.log(`Deleted user: ${teachers.name}`);
+                Swal.fire({
+                    title: "Deleted!",
+                    text: `${teachers.name} has been deleted.`,
+                    icon: "success",
+                    confirmButtonText: "OK",
+                    customClass: {
+                        confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
+                });
             }
         });
     };
@@ -98,62 +120,65 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
 
                         {/* Table Body */}
                         <tbody>
-                            {teachers.map(({ img, name, email, online, date, role }, key) => {
+                            {teachers.map((teachers, key) => {
                                 const isLast = key === teachers.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${
                                     isLast ? "" : "border-b border-blue-gray-50"
                                 }`;
 
                                 return (
-                                    <tr key={name}>
-                                        {/* Name - ชิดซ้าย */}
+                                    <tr key={teachers.uid}> {/* ใช้ uid เป็น key */}
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
-                                                <Avatar src={img} alt={name} size="sm" variant="rounded" />
-                                                <Typography variant="small" color="blue-gray" className="font-semibold">
-                                                    {name}
+                                                <Avatar
+                                                    src={teachers.img || "https://via.placeholder.com/150"} // ใช้รูปเริ่มต้นหากไม่มีรูป
+                                                    alt={teachers.name}
+                                                    size="sm"
+                                                    variant="rounded"
+                                                />
+                                                <Typography
+                                                    variant="small"
+                                                    color="blue-gray"
+                                                    className="font-semibold"
+                                                >
+                                                    {teachers.name}
                                                 </Typography>
                                             </div>
                                         </td>
 
-                                        {/* Email - กึ่งกลาง */}
                                         <td className={`${rowClassName} text-center`}>
-                                            <Typography className="text-xs font-normal text-blue-gray-500 truncate">
-                                                {email}
+                                            <Typography className="text-xs font-normal text-blue-gray-500">
+                                                {teachers.uid}
                                             </Typography>
                                         </td>
 
-                                        {/* Status - กึ่งกลาง */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Chip
                                                 variant="gradient"
-                                                color={online ? "green" : "blue-gray"}
-                                                value={online ? "ONLINE" : "OFFLINE"}
+                                                color={teachers.online ? "green" : "blue-gray"}
+                                                value={teachers.online ? "ONLINE" : "OFFLINE"}
                                                 className="py-0.5 px-2 text-[11px] font-medium w-fit mx-auto"
                                             />
                                         </td>
 
-                                        {/* Last Active - กึ่งกลาง */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                {date}
+                                                {teachers.last_active}
                                             </Typography>
                                         </td>
 
-                                        {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ name, role })}
+                                                onClick={() => openEditModal(teachers)}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
                                             </button>
                                         </td>
 
-                                        {/* Delete Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => confirmDelete(name)}
+                                                onClick={() => confirmDelete(teachers)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <TrashIcon className="h-5 w-5" />
@@ -179,9 +204,8 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                         onChange={(e) => setSelectedRole(e.target.value)}
                         className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="Student">Student</option>
-                        <option value="Teacher">Teacher</option>
-                        <option value="Admin">Admin</option>
+                        <option value="3">Student</option>
+                        <option value="2">Admin</option>
                     </select>
                 </DialogBody>
                 <DialogFooter>

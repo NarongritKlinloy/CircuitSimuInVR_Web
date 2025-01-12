@@ -2,15 +2,16 @@ import React, { useState } from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Card, CardHeader, CardBody, Typography, Avatar, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
+import { updateRoleAPI } from "@/data/update-role";
+import { deleteUserAPI } from "@/data/delete-user";
 
 function AuthorsTable({ authors, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedRole, setSelectedRole] = useState("");
+    const [selectedRole, setSelectedRole] = useState(1);
 
     const openEditModal = (user) => {
         setSelectedUser(user);
-        setSelectedRole(user.role_id || "Student"); // กำหนดค่าเริ่มต้นจาก role_id
         setIsEditOpen(true);
     };
 
@@ -20,6 +21,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
     };
 
     const handleSaveEdit = () => {
+        updateRoleAPI(selectedUser.uid, selectedRole);
         console.log(`Updated role for ${selectedUser.name} to ${selectedRole}`);
         Swal.fire({
             title: "Updated!",
@@ -29,14 +31,18 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
             customClass: {
                 confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
             },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.reload();
+            }
         });
         closeEditModal();
     };
 
-    const confirmDelete = (name) => {
+    const confirmDelete = (user) => {
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you really want to delete ${name}?`,
+            text: `Do you really want to delete ${user.name}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -45,15 +51,20 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
             cancelButtonText: "Cancel",
         }).then((result) => {
             if (result.isConfirmed) {
-                console.log(`Deleted user: ${name}`);
+                deleteUserAPI(user.uid);
+                console.log(`Deleted user: ${user.name}`);
                 Swal.fire({
                     title: "Deleted!",
-                    text: `${name} has been deleted.`,
+                    text: `${user.name} has been deleted.`,
                     icon: "success",
                     confirmButtonText: "OK",
                     customClass: {
                         confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
                     },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.reload();
+                    }
                 });
             }
         });
@@ -149,7 +160,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
 
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => confirmDelete(user.name)}
+                                                onClick={() => confirmDelete(user)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <TrashIcon className="h-5 w-5" />
@@ -174,9 +185,8 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                         onChange={(e) => setSelectedRole(e.target.value)}
                         className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="Student">Student</option>
-                        <option value="Teacher">Teacher</option>
-                        <option value="Admin">Admin</option>
+                        <option value="1">Teacher</option>
+                        <option value="2">Admin</option>
                     </select>
                 </DialogBody>
                 <DialogFooter>
