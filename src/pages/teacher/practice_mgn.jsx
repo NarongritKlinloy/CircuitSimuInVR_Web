@@ -31,7 +31,6 @@ export function PracticeMgn() {
         toggleAddModal={() => setIsAddPracticeOpen(true)}
       />
 
-      <h2 className="text-xl font-bold mb-4">Practice Table</h2>
       <PracticeTable
         practice={filteredPractice}
         onEditClick={(practice) => {
