@@ -63,7 +63,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
     };
 
     return (
-        <div className="flex flex-col gap-8">
+        <div className="flex flex-col gap-8 ">
             <Card>
                 <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
                     <Typography variant="h6" color="white">
@@ -72,7 +72,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                 </CardHeader>
 
                 {/* Table Section */}
-                <CardBody className="overflow-x-auto pt-0 pb-2">
+                <CardBody className="overflow-x-scroll pt-0 pb-2">
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
