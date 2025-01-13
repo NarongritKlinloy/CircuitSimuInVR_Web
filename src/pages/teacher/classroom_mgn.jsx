@@ -17,6 +17,7 @@ export function ClassroomMgn() {
     sec: "",
     semester: "",
     year: "",
+    total: "",
   });
 
   // ฟังก์ชันค้นหา
@@ -29,7 +30,7 @@ export function ClassroomMgn() {
   // ฟังก์ชันเพิ่ม
   const handleAddClassroom = () => {
     setClassroom([...classrooms, newClassroom]);
-    setNewClassroom({ classname: "", sec: "", semester: "", year: "" });
+    setNewClassroom({ classname: "", sec: "", semester: "", year: "", total:""});
     setIsAddClassroomOpen(false);
   };
 

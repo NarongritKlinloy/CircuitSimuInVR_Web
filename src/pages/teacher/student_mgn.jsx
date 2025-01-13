@@ -42,6 +42,7 @@ export function StudentMgn() {
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
+      
       <SearchAndAddStudent
         search={search}
         setSearch={setSearch}
