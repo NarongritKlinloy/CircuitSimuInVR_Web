@@ -28,9 +28,12 @@ export function Notifications() {
 
 
   return (
-    <div className="mx-auto my-20 flex max-w-screen-lg flex-col gap-8">
+    <div className="flex flex-col gap-8 ">
+      <div>
+        
+      </div>
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 ">
           <Typography variant="h6" color="white">
             Report
           </Typography>

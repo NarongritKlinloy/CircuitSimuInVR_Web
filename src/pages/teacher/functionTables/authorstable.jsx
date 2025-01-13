@@ -2,26 +2,27 @@ import React, { useState } from "react";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Card, CardHeader, CardBody, Typography, Avatar, Chip, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
 import Swal from "sweetalert2";
-import { updateRoleAPI } from "@/data/update-role";
-import { deleteUserAPI } from "@/data/delete-user";
 
 function AuthorsTable({ authors, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [selectedUser, setSelectedUser] = useState(null);
-    const [selectedRole, setSelectedRole] = useState(1);
+    const [selectedRole, setSelectedRole] = useState("");
 
+    // เปิด Modal และโหลดข้อมูล User ที่เลือก
     const openEditModal = (user) => {
         setSelectedUser(user);
+        setSelectedRole(user.role || "Student"); // Set role เริ่มต้น
         setIsEditOpen(true);
     };
 
+    // ปิด Modal
     const closeEditModal = () => {
         setIsEditOpen(false);
         setSelectedUser(null);
     };
 
+    // ฟังก์ชันยืนยันการแก้ไข Role
     const handleSaveEdit = () => {
-        updateRoleAPI(selectedUser.uid, selectedRole);
         console.log(`Updated role for ${selectedUser.name} to ${selectedRole}`);
         Swal.fire({
             title: "Updated!",
@@ -29,20 +30,17 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
             icon: "success",
             confirmButtonText: "OK",
             customClass: {
-                confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+                confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
             },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                window.location.reload();
-            }
         });
         closeEditModal();
     };
 
-    const confirmDelete = (user) => {
+    // ฟังก์ชันยืนยันการลบ
+    const confirmDelete = (name) => {
         Swal.fire({
             title: "Are you sure?",
-            text: `Do you really want to delete ${user.name}?`,
+            text: `Do you really want to delete ${name}?`,
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#d33",
@@ -51,19 +49,13 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
             cancelButtonText: "Cancel",
         }).then((result) => {
             if (result.isConfirmed) {
-                deleteUserAPI(user.uid);
-                console.log(`Deleted user: ${user.name}`);
+                console.log(`Deleted user: ${name}`);
                 Swal.fire({
                     title: "Deleted!",
-                    text: `${user.name} has been deleted.`,
-                    icon: "success",
-                    confirmButtonText: "OK",
+                    text: `${name} has been deleted.`,
+                    icon: "success", confirmButtonText: "OK",
                     customClass: {
-                        confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-                    },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.reload();
+                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
                     }
                 });
             }
@@ -71,7 +63,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
     };
 
     return (
-        <div className="flex flex-col gap-8 ">
+        <div className="flex flex-col gap-8">
             <Card>
                 <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
                     <Typography variant="h6" color="white">
@@ -79,19 +71,15 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                     </Typography>
                 </CardHeader>
 
-
                 {/* Table Section */}
-                <CardBody className="overflow-x-scroll pt-0 pb-2">
-
+                <CardBody className="overflow-x-auto pt-0 pb-2">
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["Name", "Email", "Status", "Last Active", "", ""].map((header, index) => (
+                                {["Name", "Email", "Status", "Last Active", "", ""].map((header) => (
                                     <th
-                                        key={index} // ใช้ index เป็น key
-                                        className={`border-b border-blue-gray-50 px-5 py-2 ${
-                                            header === "Name" ? "text-left" : "text-center"
-                                        }`}
+                                        key={header}
+                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "Name" ? "text-left" : "text-center"}`}
                                     >
                                         <Typography
                                             variant="small"
@@ -105,65 +93,60 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                         </thead>
 
                         <tbody>
-                            {authors.map((user, key) => {
+                            {authors.map(({ img, name, email, online, date, role }, key) => {
                                 const isLast = key === authors.length - 1;
-                                const rowClassName = `py-3 px-5 align-middle ${
-                                    isLast ? "" : "border-b border-blue-gray-50"
-                                }`;
+                                const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                                 return (
-                                    <tr key={user.uid}> {/* ใช้ uid เป็น key */}
+                                    <tr key={name}>
+                                        {/* Name */}
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
-                                                <Avatar
-                                                    src={user.img || "https://via.placeholder.com/150"} // ใช้รูปเริ่มต้นหากไม่มีรูป
-                                                    alt={user.name}
-                                                    size="sm"
-                                                    variant="rounded"
-                                                />
-                                                <Typography
-                                                    variant="small"
-                                                    color="blue-gray"
-                                                    className="font-semibold"
-                                                >
-                                                    {user.name}
+                                                <Avatar src={img} alt={name} size="sm" variant="rounded" />
+                                                <Typography variant="small" color="blue-gray" className="font-semibold">
+                                                    {name}
                                                 </Typography>
                                             </div>
                                         </td>
 
+                                        {/* Email */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
-                                                {user.uid}
+                                                {email}
                                             </Typography>
                                         </td>
 
+                                        {/* Status */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Chip
                                                 variant="gradient"
-                                                color={user.online ? "green" : "blue-gray"}
-                                                value={user.online ? "ONLINE" : "OFFLINE"}
+                                                color={online ? "green" : "blue-gray"}
+                                                value={online ? "ONLINE" : "OFFLINE"}
                                                 className="py-0.5 px-2 text-[11px] font-medium w-fit mx-auto"
                                             />
                                         </td>
 
+                                        {/* Last Active */}
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                {user.last_active}
+                                                {date}
                                             </Typography>
                                         </td>
 
+                                        {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal(user)}
+                                                onClick={() => openEditModal({ name, role })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
                                             </button>
                                         </td>
 
+                                        {/* Delete Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => confirmDelete(user)}
+                                                onClick={() => confirmDelete(name)}
                                                 className="text-red-500 hover:text-red-700"
                                             >
                                                 <TrashIcon className="h-5 w-5" />
@@ -177,6 +160,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                 </CardBody>
             </Card>
 
+            {/* Edit Modal */}
             <Dialog open={isEditOpen} handler={closeEditModal}>
                 <DialogHeader>Edit User Role</DialogHeader>
                 <DialogBody>
@@ -188,8 +172,9 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                         onChange={(e) => setSelectedRole(e.target.value)}
                         className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                        <option value="1">Teacher</option>
-                        <option value="2">Admin</option>
+                        <option value="Student">Student</option>
+                        <option value="Teacher">Teacher</option>
+                        <option value="Admin">Admin</option>
                     </select>
                 </DialogBody>
                 <DialogFooter>

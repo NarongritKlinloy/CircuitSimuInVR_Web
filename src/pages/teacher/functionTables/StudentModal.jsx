@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
+  Select, Option,
   Dialog,
   DialogHeader,
   DialogBody,
@@ -8,11 +9,19 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
+import { studentTableData } from "@/data/student-table-data";
 
-function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave }) {
+function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
-  if (!authorData) return null;
+  // declare user id
+  const userId = studentTableData.length + 1;
+  
+  useEffect(() => {
+    setStudentData({ ...studentData, id: userId  })
+  }, [])
+
+  if (!studentData) return null;
 
   // ฟังก์ชันรีเซ็ต Error และข้อมูล
   const resetState = () => {
@@ -25,15 +34,18 @@ function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave })
     toggleModal(); // ปิด Modal
   };
 
+  
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-    if (!authorData.name) newErrors.name = "Name is required";
-    if (!authorData.email) newErrors.email = "Email is required";
-    if (!authorData.password) newErrors.password = "Password is required";
-    if (!authorData.role) newErrors.role = "Role is required";
 
+    if (!studentData.name) newErrors.name = "Name is required";
+    if (!studentData.sec) newErrors.sec = "Sec is required";
+    if (!studentData.semester) newErrors.semester = "Semester is required";
+    if (!studentData.year) newErrors.year = "Year is required";
+    
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
   };
 
@@ -45,23 +57,23 @@ function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave })
     }
   };
 
+
   return (
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{authorData.name ? "Edit User" : "Add New User"}</DialogHeader>
+      <DialogHeader>{studentData.name ? "Edit Student" : "Add New Student"}</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
-          {/* ช่องเพิ่มรูปภาพ */}
           <div>
-            <label className="block text-sm font-medium text-gray-700">Picture</label>
+            <label className="block text-sm font-medium text-gray-700">Add File</label>
             <input
               type="file"
-              accept="image/*"
+              accept="csv/*"
               onChange={(e) => {
                 const file = e.target.files[0];
                 if (file) {
                   const reader = new FileReader();
                   reader.onloadend = () => {
-                    setAuthorData({ ...authorData, picture: reader.result });
+                    setStudentData({ ...studentData, picture: reader.result });
                   };
                   reader.readAsDataURL(file);
                 }
@@ -74,14 +86,12 @@ function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave })
                          hover:file:bg-blue-100"
             />
           </div>
-
-          {/* ช่อง Name */}
           <div>
             <Input
               label="Name"
-              value={authorData.name || ""}
+              value={studentData.name || ""}
               onChange={(e) =>
-                setAuthorData({ ...authorData, name: e.target.value })
+                setStudentData({ ...studentData, name: e.target.value })
               }
               error={!!errors.name}
             />
@@ -92,78 +102,56 @@ function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave })
             )}
           </div>
 
-          {/* ช่อง Email */}
-          <div>
-            <Input
-              label="Email"
-              value={authorData.email || ""}
-              onChange={(e) =>
-                setAuthorData({ ...authorData, email: e.target.value })
-              }
-              error={!!errors.email}
-            />
-            {errors.email && (
-              <Typography variant="small" color="red" className="mt-1">
-                {errors.email}
-              </Typography>
-            )}
-          </div>
-
-          {/* ช่อง Password และ Confirm Password */}
           <div className="flex gap-4">
-            <div className="w-1/2">
-              <Input
-                label="Password"
-                value={authorData.password || ""}
-                onChange={(e) =>
-                  setAuthorData({ ...authorData, password: e.target.value })
-                }
-                error={!!errors.password}
-              />
-              {errors.password && (
+            <div className="w-1/3">
+              <Select
+                label="Select Sec"
+                value={studentData.sec}
+                onChange={(e) => setStudentData({ ...studentData, sec: e })}
+              >
+                <Option value="101">101</Option>
+                <Option value="102">102</Option>
+                <Option value="103">103</Option>
+              </Select>
+
+              {errors.sec && (
                 <Typography variant="small" color="red" className="mt-1">
-                  {errors.password}
+                  {errors.sec}
+                </Typography>
+              )}
+            </div>
+            <div className="w-1/3">
+              <Input
+                label="semester"
+                value={studentData.semester || ""}
+                onChange={(e) =>
+                  setStudentData({ ...studentData, semester: e.target.value })
+                }
+                error={!!errors.semester}
+              />
+              {errors.semester && (
+                <Typography variant="small" color="red" className="mt-1">
+                  {errors.semester}
                 </Typography>
               )}
             </div>
 
-            <div className="w-1/2">
+            <div className="w-1/3">
               <Input
-                label="Confirm Password"
-                value={authorData.confirmPassword || ""}
+                label="year"
+                value={studentData.year || ""}
                 onChange={(e) =>
-                  setAuthorData({ ...authorData, confirmPassword: e.target.value })
+                  setStudentData({ ...studentData, year: e.target.value })
                 }
-                error={!!errors.confirmPassword}
+
+                error={!!errors.year}
               />
-              {errors.confirmPassword && (
+              {errors.year && (
                 <Typography variant="small" color="red" className="mt-1">
-                  {errors.confirmPassword}
+                  {errors.year}
                 </Typography>
               )}
             </div>
-          </div>
-
-          {/* Dropdown Role */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-            <select
-              value={authorData.role || ""}
-              onChange={(e) =>
-                setAuthorData({ ...authorData, role: e.target.value })
-              }
-              className="w-full border border-gray-300 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="" disabled>Select Role</option>
-              <option value="Student">Student</option>
-              <option value="Teacher">Teacher</option>
-              <option value="Admin">Admin</option>
-            </select>
-            {errors.role && (
-              <Typography variant="small" color="red" className="mt-1">
-                {errors.role}
-              </Typography>
-            )}
           </div>
         </div>
       </DialogBody>
@@ -172,11 +160,11 @@ function authormodal({ isOpen, toggleModal, authorData, setAuthorData, onSave })
           Cancel
         </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
-          {authorData.name ? "Save" : "Add"}
+          {studentData.name ? "Save" : "Add"}
         </Button>
       </DialogFooter>
     </Dialog>
   );
 }
 
-export default authormodal;
+export default StudentModal;

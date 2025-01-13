@@ -1,7 +1,7 @@
 import React from "react";
 import { Card, Input, Button } from "@material-tailwind/react";
 
-function searchandaddsection({ search, setSearch, toggleAddModal }) {
+function SearchAndAddStudent({ search, setSearch, toggleAddModal }) {
   return (
     <Card>
       <div className="flex items-center justify-between p-4">
@@ -13,15 +13,14 @@ function searchandaddsection({ search, setSearch, toggleAddModal }) {
           />
         </div>
         
-        {/*
-        <Button variant="gradient" color="green" onClick={toggleAddModal}>
-          Add
-        </Button>
-        */}
-
+        <div className="flex gap-2">
+          <Button variant="gradient" color="green" onClick={toggleAddModal}>
+            Add
+          </Button>
+        </div>
       </div>
     </Card>
   );
 }
 
-export default searchandaddsection;
+export default SearchAndAddStudent;
