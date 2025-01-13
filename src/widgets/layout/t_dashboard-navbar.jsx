@@ -36,8 +36,10 @@ export function T_DashboardNavbar({routes}) {
 
   useEffect(()=> {
     routes.map(({pages},key)=> {
-      const result = pages.filter(({path}) => ( path == `/${page}`));
-      if(result){
+      const result = pages.filter(({path , name }) => ((path == `/${page}`)));
+      const filterPath = pathname.split("/");
+      
+      if(result.length > 0){
         setHeader(result[0].label);
       }
     })

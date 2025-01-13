@@ -7,7 +7,6 @@ import Swal from "sweetalert2";
 
 export function SignIn() {
   const navigate = useNavigate();
-
   const handleGoogleLoginSuccess = (credentialResponse) => {
     const jwt = credentialResponse.credential;
     const payload = JSON.parse(atob(jwt.split(".")[1]));
@@ -22,9 +21,9 @@ export function SignIn() {
       });
       return;
     }
-    
+ 
      // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
-     if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th") {
+    if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th") {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
