@@ -5,13 +5,39 @@ import {
   ChartBarIcon,
   DocumentTextIcon
 } from "@heroicons/react/24/solid";
+import { collapse } from "@material-tailwind/react";
+import axios from 'axios';
+
+export const countUserAPI = async () => {
+    try {
+        const response = await axios.get('http://localhost:5000/api/user/count');
+        //console.log(response.data);
+        return response.data.count;
+    } catch (error) {
+        console.error("Error counting user:", error);
+        return 0;
+    }
+};
+const user_count = await countUserAPI();
+
+export const countAdminAPI = async () => {
+  try {
+      const response = await axios.get('http://localhost:5000/api/admin/count');
+      //console.log(response.data);
+      return response.data.count;
+  } catch (error) {
+      console.error("Error counting admin:", error);
+      return 0;
+  }
+};
+const admin_count = await countAdminAPI();
 
 export const statisticsCardsData = [
   {
     color: "gray",
     icon: UsersIcon,
     title: "Total Users",
-    value: "300",
+    value: user_count,
     footer: {
       color: "text-green-500",
       value: "+3%",
@@ -33,7 +59,7 @@ export const statisticsCardsData = [
     color: "gray",
     icon: UserIcon,
     title: "Admin",
-    value: "1",
+    value: admin_count,
     footer: {
       color: "text-red-500",
       value: "-2%",

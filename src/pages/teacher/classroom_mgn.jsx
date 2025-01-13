@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchAndAddSection from "./functionTables/SearchAndAdd";
 import ClassroomTable from "./functionTables/ClassroomTable";
 import ClassroomModal from "./functionTables/classroommodal";
@@ -6,29 +6,38 @@ import { classroomTableData } from "@/data/classroom-table-data";
 
 export function ClassroomMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
-  const [classrooms, setClassroom] = useState(classroomTableData);
-
+  const [classrooms, setClassroom] = useState([]);
+  useEffect(() => {
+    const getClassroom = async () => {
+      const data = await classroomTableData();
+      //console.log("data: ", data);
+      setClassroom(data);
+    };
+    getClassroom();
+  }, []);
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
   const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
   const [editingClassroom, setEditingClassroom] = useState(null);
   const [newClassroom, setNewClassroom] = useState({
-    classname: "",
+    class_name: "",
     sec: "",
+    semester: "",
     year: "",
   });
 
   // ฟังก์ชันค้นหา
-  const filteredClassroom = classrooms.filter(({ classname, sec }) =>
-    [classname, sec].some((field) =>
+  const filteredClassroom = classrooms.filter(({ class_name, sec }) =>
+    [class_name, sec].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
 
   // ฟังก์ชันเพิ่ม
   const handleAddClassroom = () => {
+    //console.log("Hello!");
     setClassroom([...classrooms, newClassroom]);
-    setNewClassroom({ classname: "", sec: "", year: "" });
+    setNewClassroom({ class_name: "", sec: "", year: "" , semester: ""});
     setIsAddClassroomOpen(false);
   };
 

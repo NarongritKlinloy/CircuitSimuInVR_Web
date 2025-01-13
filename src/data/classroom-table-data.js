@@ -1,25 +1,12 @@
-export const classroomTableData = [
-    {
-      id: "1",
-      classname: "Electronic Circuit",
-      sec: "101",
-      semester:"1",
-      year: "2565"
-    },
-    {
-      id: "2",
-      classname: "Basic Digital",
-      sec: "102",
-      semester:"1",
-      year: "2565"
-    },
-    {
-      id: "3",
-      classname: "Embedded",
-      sec: "103",
-      semester:"1",
-      year: "2565"
-    }
-  ];
+import axios from "axios";
+export const classroomTableData = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/classroom');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching practice', error);
+    return [];
+  }
+};
   export default classroomTableData;
   
