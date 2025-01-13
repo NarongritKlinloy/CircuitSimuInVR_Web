@@ -9,12 +9,12 @@ const PORT = 5000;
 app.use(express.json());
 app.use(cors());
 
-// MySQL Database Connection
+// เชื่อมต่อกับ MySQL
 const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: 'boomza532', // รหัสผ่านของคุณ
-  database: 'circuit_simulator_db'
+  host: "localhost",
+  user: "root",
+  password: "boomza532",
+  database: "project_circuit",
 });
 
 db.connect(err => {
