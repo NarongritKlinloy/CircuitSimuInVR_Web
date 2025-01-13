@@ -14,9 +14,9 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
   // declare user id
-  const userId = classroomTableData.length + 1;
+  const classId = classroomTableData.length + 1;
   useEffect(() => {
-    setClassroomData({ id: userId });
+    setClassroomData({ id: classId, total: "40" })
   },[])
 
   if (!classroomData) return null;

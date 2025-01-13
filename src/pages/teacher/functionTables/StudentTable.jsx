@@ -8,8 +8,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedStudent, setSelectedStudent] = useState(null);
-
-
+    
     // handle data change
     const inputHandle = (event) => {
         setSelectedStudent((prev) => ({
@@ -31,10 +30,10 @@ function StudentTable({ students, onEditClick, onDelete }) {
 
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = () => {
-        console.log(`Updated ${selectedStudent.name} to ${selectedStudent.name}`);
+        console.log(`Updated ${selectedStudent.name}`);
         Swal.fire({
             title: "Updated!",
-            text: `${selectedStudent.name} has been updated to ${selectedStudent.name}.`,
+            text: `${selectedStudent.name} has been updated`,
             icon: "success",
             confirmButtonText: "OK",
             customClass: {
@@ -215,7 +214,11 @@ function StudentTable({ students, onEditClick, onDelete }) {
                                 label="Select Sec"
                                 name="sec"
                                 value={selectedStudent?.sec} 
-                                onChange={(val) => setValue(val)}
+                                onChange={(e) =>
+                                    setSelectedStudent((prev) => ({
+                                        ...prev, sec: e
+                                    }))
+                                }
                             >
                                 <Option value="101">101</Option>
                                 <Option value="102">102</Option>

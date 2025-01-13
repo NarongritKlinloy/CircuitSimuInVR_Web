@@ -16,8 +16,9 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
 
   // declare user id
   const userId = studentTableData.length + 1;
+  
   useEffect(() => {
-    setStudentData({ id: userId });
+    setStudentData({ ...studentData, id: userId  })
   }, [])
 
   if (!studentData) return null;
@@ -37,12 +38,14 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
+
     if (!studentData.name) newErrors.name = "Name is required";
     if (!studentData.sec) newErrors.sec = "Sec is required";
     if (!studentData.semester) newErrors.semester = "Semester is required";
     if (!studentData.year) newErrors.year = "Year is required";
-
+    
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
   };
 
@@ -53,6 +56,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
     }
   };
+
 
   return (
     <Dialog open={isOpen} handler={handleClose}>
@@ -69,7 +73,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
                 if (file) {
                   const reader = new FileReader();
                   reader.onloadend = () => {
-                    setStudentData({ ...studentDataData, picture: reader.result });
+                    setStudentData({ ...studentData, picture: reader.result });
                   };
                   reader.readAsDataURL(file);
                 }
@@ -102,16 +106,14 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
             <div className="w-1/3">
               <Select
                 label="Select Sec"
-                value={studentData.sec || ""}
-                onChange={(e) =>
-                  setStudentData({ ...studentData, sec: e.target.value })
-                }
-                error={!!errors.sec}
+                value={studentData.sec}
+                onChange={(e) => setStudentData({ ...studentData, sec: e })}
               >
                 <Option value="101">101</Option>
                 <Option value="102">102</Option>
                 <Option value="103">103</Option>
               </Select>
+
               {errors.sec && (
                 <Typography variant="small" color="red" className="mt-1">
                   {errors.sec}
@@ -141,6 +143,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
                 onChange={(e) =>
                   setStudentData({ ...studentData, year: e.target.value })
                 }
+
                 error={!!errors.year}
               />
               {errors.year && (
