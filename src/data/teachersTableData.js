@@ -1,17 +1,15 @@
 export const teachersTableData = [
     {
-      img: "https://via.placeholder.com/40", // รูปภาพตัวแทน
-      name: "Dr. John Smith",
-      email: "john.smith@university.edu",
-      department: "Computer Science",
+      img: "https://www.ce.kmitl.ac.th/api/faculty/download/Kiatnarong", // รูปภาพตัวแทน
+      name: "Dr.Kiatnarong Tongprasert",
+      email: "kiatnarong.to@kmitl.ac.th",
       online: true,
       date: "14/09/20",
     },
     {
-      img: "https://via.placeholder.com/40",
-      name: "Dr. Jane Doe",
-      email: "jane.doe@university.edu",
-      department: "Mathematics",
+      img: "https://www.ce.kmitl.ac.th/api/faculty/download/Thana",
+      name: "Dr.Thana Hongsuwan",
+      email: "khthana@kmitl.ac.th",
       online: false,
       date: "14/09/20",
     },

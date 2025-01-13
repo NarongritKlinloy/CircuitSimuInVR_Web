@@ -41,13 +41,12 @@ export const routes = [
       {
         icon: <DocumentTextIcon {...icon} />,
         name: "Report",
-        path: "/notifications",
+        path: "/report",
         element: <Notifications />,
       },
     ],
   },
   {
-    title: "auth pages",
     layout: "auth",
     pages: [
       {

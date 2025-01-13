@@ -1,149 +1,154 @@
 import {
-  Card,
-  Input,
-  Checkbox,
-  Button,
   Typography,
-  React,
 } from "@material-tailwind/react";
-import { useState } from "react";
-import { Link, useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
+import Swal from "sweetalert2";
 
 export function SignIn() {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const handleGoogleLoginSuccess = (credentialResponse) => {
+    const jwt = credentialResponse.credential;
+    const payload = JSON.parse(atob(jwt.split(".")[1]));
+    const email = payload.email;
 
-  const EnterSignIn = (e) => {
-    e.preventDefault();
-    if(!username.endsWith('@kmitl.ac.th')){
-      alert('username must end with @kmitl.ac.th!');
+    if (!email.endsWith("@kmitl.ac.th")) {
+      Swal.fire({
+        icon: "error",
+        title: "Access Denied",
+        text: "Only @kmitl.ac.th accounts are allowed!",
+        confirmButtonText: "OK",
+      });
+      return;
     }
-    else if(username === 'admin@kmitl.ac.th' && password === 'password'){
-      navigate('/dashboard/home');
-    }else{
-      alert('Invalid username or password');
+ 
+     // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
+    if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th") {
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: `Welcome, ${email} Developer team`,
+        input: "select",
+        inputOptions: {
+          admin: "Admin",
+          teacher: "Teacher",
+        },
+        inputPlaceholder: "Select your role",
+        confirmButtonText: "Proceed",
+        customClass: {
+          confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+        },
+      }).then((result) => {
+        if (result.isConfirmed) {
+          if (result.value === "admin") {
+            navigate("/dashboard/home"); // Redirect ไปหน้า Admin
+          } else if (result.value === "teacher") {
+            navigate("/teacher/home"); // Redirect ไปหน้า Teacher
+          }
+        }
+      });
+      return;
+    }
+    
+
+    
+
+    const usernamePart = email.split("@")[0];
+    const isNumber = /^\d{8}$/;
+
+    if (isNumber.test(usernamePart)) {
+      Swal.fire({
+        icon: "error",
+        title: "Access Denied",
+        text: "You are not authorized to access the admin system.",
+        confirmButtonText: "OK",
+      }).then(() => {
+        navigate("/dashboard/home");
+      });
+    } else {
+      Swal.fire({
+        icon: "success",
+        title: "Login Successful",
+        text: `Welcome, Teacher: ${email}`,
+        confirmButtonText: "OK",
+      }).then(() => {
+        navigate("/teacher/home");
+      });
     }
   };
 
+  const handleGoogleLoginError = () => {
+    Swal.fire({
+      icon: "error",
+      title: "Google Login Failed",
+      text: "Please try again!",
+      confirmButtonText: "OK",
+    });
+  };
+
   return (
-    <section className="m-8 flex gap-4">
-      <div className="w-full lg:w-3/5 mt-24">
-        <div className="text-center">
-          <Typography variant="h2" className="font-bold mb-4">Sign In</Typography>
-          <Typography variant="paragraph" color="blue-gray" className="text-lg font-normal">Enter your email and password to Sign In.</Typography>
-        </div>
-        <form className="mt-8 mb-2 mx-auto w-80 max-w-screen-lg lg:w-1/2" onSubmit={EnterSignIn}>
-          <div className="mb-1 flex flex-col gap-6">
-            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Your email
-            </Typography>
-            <Input
-              type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              size="lg"
-              placeholder="student_id@kmitl.ac.th"
-              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
-            />
+    <GoogleOAuthProvider clientId="289166698407-3sivu8jo52aveuuh78kg8n17agseta42.apps.googleusercontent.com">
+       
+       <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300"> {/* เปลี่ยนสีพื้นหลัง */}
+        <div className="w-full lg:w-1/2 p-8">
+          {/* กล่องหลัก */}
 
-            <Typography variant="small" color="blue-gray" className="-mb-3 font-medium">
-              Password
-            </Typography>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              size="lg"
-              placeholder="********"
-              className=" !border-t-blue-gray-200 focus:!border-t-gray-900"
-              labelProps={{
-                className: "before:content-none after:content-none",
-              }}
+          {/* เพิ่มรูปโลโก้ */}
+          <div className="flex justify-center mt-4 py-5 px-6">
+            <img
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/KMITL_Sublogo.svg/768px-KMITL_Sublogo.svg.png" // ลิงก์ของโลโก้
+              alt="Logo"
+              className="w-64 h-auto" // ปรับขนาดโลโก้
+            />
+            <img
+              src="https://img5.pic.in.th/file/secure-sv1/DALLE-2025-01-05-14.14.45---A-bright-and-futuristic-circular-logo-design-for-a-virtual-reality-VR-application-focused-on-circuit-building.-The-logo-features-a-sleek-VR-headset.png" // ลิงก์ของโลโก้
+              alt="Logo"
+              className="w-32 h-auto" // ปรับขนาดโลโก้
             />
           </div>
 
-          <Checkbox
-            label={
-              <Typography
-                variant="small"
-                color="gray"
-                className="flex items-center justify-start font-medium"
-              >
-                I agree the&nbsp;
-                <a
-                  href="#"
-                  className="font-normal text-black transition-colors hover:text-gray-900 underline"
-                >
-                  Terms and Conditions
-                </a>
+
+          <div className="bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden">
+            {/* ส่วนหัวสีส้ม */}
+            <div className="bg-orange-500 text-white py-4 px-6">
+              <h1 className="text-lg font-bold text-center">KMITL Registration System</h1>
+            </div>
+
+
+            {/* เนื้อหาด้านใน */}
+            <div className="p-6 text-center">
+              <Typography variant="h3" className="font-bold text-gray-800">
+                ยืนยันตัวตนด้วยบริการของ Google
               </Typography>
-            }
-            containerProps={{ className: "-ml-2.5" }}
+              <Typography
+                variant="paragraph"
+                color="blue-gray"
+                className="text-lg font-normal mt-2"
+              >
+                โดยใช้ Email Account ของสถาบันฯ
+              </Typography>
+              <div className="max-w-md mx-auto mt-6">
+                <GoogleLogin
+                  onSuccess={handleGoogleLoginSuccess}
+                  onError={handleGoogleLoginError}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <div className="hidden lg:block w-full lg:w-1/2">
+          <img
+            //src="https://img2.pic.in.th/pic/DALLE-2024-12-23-12.47.png"
+            src="https://img2.pic.in.th/pic/DALLE-2025-01-05-14.21.58---A-person-wearing-a-sleek-and-modern-VR-headset-with-a-distinctively-Thai-cultural-twist.-The-individual-is-dressed-in-a-contemporary-Thai-inspired-out.jpg"
+            alt="Login Illustration"
+            className="w-full h-full object-cover rounded-lg"
           />
-          <Button className="mt-6" fullWidth type="submit">
-            Sign In
-          </Button>
+        </div>
+      </section>
+    </GoogleOAuthProvider>
 
-          <div className="flex items-center justify-between gap-2 mt-6">
-            <Checkbox
-              label={
-                <Typography
-                  variant="small"
-                  color="gray"
-                  className="flex items-center justify-start font-medium"
-                >
-                  Subscribe me to newsletter
-                </Typography>
-              }
-              containerProps={{ className: "-ml-2.5" }}
-            />
-            <Typography variant="small" className="font-medium text-gray-900">
-              <a href="#">
-                Forgot Password
-              </a>
-            </Typography>
-          </div>
-          <div className="space-y-4 mt-8">
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
-              <svg width="17" height="16" viewBox="0 0 17 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <g clipPath="url(#clip0_1156_824)">
-                  <path d="M16.3442 8.18429C16.3442 7.64047 16.3001 7.09371 16.206 6.55872H8.66016V9.63937H12.9813C12.802 10.6329 12.2258 11.5119 11.3822 12.0704V14.0693H13.9602C15.4741 12.6759 16.3442 10.6182 16.3442 8.18429Z" fill="#4285F4" />
-                  <path d="M8.65974 16.0006C10.8174 16.0006 12.637 15.2922 13.9627 14.0693L11.3847 12.0704C10.6675 12.5584 9.7415 12.8347 8.66268 12.8347C6.5756 12.8347 4.80598 11.4266 4.17104 9.53357H1.51074V11.5942C2.86882 14.2956 5.63494 16.0006 8.65974 16.0006Z" fill="#34A853" />
-                  <path d="M4.16852 9.53356C3.83341 8.53999 3.83341 7.46411 4.16852 6.47054V4.40991H1.51116C0.376489 6.67043 0.376489 9.33367 1.51116 11.5942L4.16852 9.53356Z" fill="#FBBC04" />
-                  <path d="M8.65974 3.16644C9.80029 3.1488 10.9026 3.57798 11.7286 4.36578L14.0127 2.08174C12.5664 0.72367 10.6469 -0.0229773 8.65974 0.000539111C5.63494 0.000539111 2.86882 1.70548 1.51074 4.40987L4.1681 6.4705C4.8001 4.57449 6.57266 3.16644 8.65974 3.16644Z" fill="#EA4335" />
-                </g>
-                <defs>
-                  <clipPath id="clip0_1156_824">
-                    <rect width="16" height="16" fill="white" transform="translate(0.5)" />
-                  </clipPath>
-                </defs>
-              </svg>
-              <span>Sign in With Google</span>
-            </Button>
-            <Button size="lg" color="white" className="flex items-center gap-2 justify-center shadow-md" fullWidth>
-              <img src="/img/twitter-logo.svg" height={24} width={24} alt="" />
-              <span>Sign in With Twitter</span>
-            </Button>
-          </div>
-          <Typography variant="paragraph" className="text-center text-blue-gray-500 font-medium mt-4">
-            Not registered?
-            <Link to="/auth/sign-up" className="text-gray-900 ml-1">Create account</Link>
-          </Typography>
-        </form>
-
-      </div>
-      <div className="w-2/5 h-full hidden lg:block">
-        <img
-          src="/img/pattern.png"
-          className="h-full w-full object-cover rounded-3xl"
-        />
-      </div>
-
-    </section>
   );
 }
 

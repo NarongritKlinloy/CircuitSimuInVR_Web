@@ -1,5 +1,5 @@
-/*Nav Bar ส่วนที่เป็นการแจ้งเตือน*/
 import { useLocation, Link } from "react-router-dom";
+import {useState , useEffect} from 'react';
 import {
   Navbar,
   Typography,
@@ -27,12 +27,24 @@ import {
   setOpenSidenav,
 } from "@/context";
 
-export function DashboardNavbar() {
+export function T_DashboardNavbar({routes}) {
+  const [header , setHeader] = useState(null);
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
 
+  useEffect(()=> {
+    routes.map(({pages},key)=> {
+      const result = pages.filter(({path , name }) => ((path == `/${page}`)));
+      const filterPath = pathname.split("/");
+      
+      if(result.length > 0){
+        setHeader(result[0].label);
+      }
+    })
+  }, [pathname])
+  
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -66,22 +78,21 @@ export function DashboardNavbar() {
               color="blue-gray"
               className="font-normal"
             >
-              {page}
+              { header }
             </Typography>
           </Breadcrumbs>
 
           <Typography variant="h3" color="blue-gray">
-            {page}
+            {/* {page} */}
+            { header }
           </Typography>
 
 
         </div>
-        
         <div className="flex items-center">
-          {/* 
           <div className="mr-auto md:mr-4 md:w-56">
             <Input label="Search" />
-          </div>*/}
+          </div>
 
           
           <IconButton
@@ -94,7 +105,7 @@ export function DashboardNavbar() {
           </IconButton>
 
           
-          {/*ทำส่วนนี้ให้เป็น ข้อมูลของผู้ใช้งาน ตัวอย่างใน link นี้ >> https://img2.pic.in.th/pic/Screenshot-2025-01-05-152144.png */}
+          <Link to="/auth/sign-in">
             <Button
               variant="text"
               color="blue-gray"
@@ -110,7 +121,7 @@ export function DashboardNavbar() {
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
-          {/* ------------------------------------------------------------------------------------------------------- */}
+          </Link>
 
           
           <Menu>
@@ -208,6 +219,6 @@ export function DashboardNavbar() {
   );
 }
 
-DashboardNavbar.displayName = "/src/widgets/layout/dashboard-navbar.jsx";
+T_DashboardNavbar.displayName = "/src/widgets/layout/t_dashboard-navbar.jsx";
 
-export default DashboardNavbar;
+export default T_DashboardNavbar;
