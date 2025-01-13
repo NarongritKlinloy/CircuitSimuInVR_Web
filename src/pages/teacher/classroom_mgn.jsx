@@ -24,6 +24,7 @@ export function ClassroomMgn() {
     sec: "",
     semester: "",
     year: "",
+    total: "",
   });
 
   // ฟังก์ชันค้นหา
@@ -38,7 +39,9 @@ export function ClassroomMgn() {
     //console.log("Hello!");
     setClassroom([...classrooms, newClassroom]);
 
+
     setNewClassroom({ class_name: "", sec: "", year: "" , semester: ""});
+
 
     setIsAddClassroomOpen(false);
   };
