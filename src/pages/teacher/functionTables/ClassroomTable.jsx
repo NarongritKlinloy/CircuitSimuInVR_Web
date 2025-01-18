@@ -1,10 +1,3 @@
-import React, { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import {
-    PencilSquareIcon,
-    TrashIcon,
-    UserPlusIcon,
-} from "@heroicons/react/24/solid";
 import {
     Card,
     Input,
@@ -17,8 +10,18 @@ import {
     DialogFooter,
     Button,
 } from "@material-tailwind/react";
+
+import {
+    PencilSquareIcon,
+    TrashIcon,
+    UserPlusIcon,
+} from "@heroicons/react/24/solid";
+
+import React, { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { deleteClassroomAPI } from "@/data/delete-classroom";
+import { editClassroomAPI } from "@/data/edit-classroom";
 
 function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     const navigate = useNavigate();
@@ -46,17 +49,9 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     };
 
     // ฟังก์ชันยืนยันการแก้ไข
-    const handleSaveEdit = () => {
-        console.log(`Updated ${selectedClassroom.classname} to ${selectedClassroom.classname}`);
-        Swal.fire({
-            title: "Updated!",
-            text: `${selectedClassroom.classname} has been updated.`,
-            icon: "success",
-            confirmButtonText: "OK",
-            customClass: {
-                confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-            },
-        });
+    const handleSaveEdit = async () => {
+        editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
+
         closeEditModal();
     };
 
@@ -107,6 +102,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         <thead>
                             <tr>
                                 {[
+                                    "id",
                                     "classname",
                                     "sec",
                                     "semester",
@@ -118,11 +114,10 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                 ].map((header) => (
                                     <th
                                         key={header}
-                                        className={`border-b border-blue-gray-50 px-5 py-2 ${
-                                            header === "classname"
+                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "classname"
                                                 ? "text-left"
                                                 : "text-center"
-                                        }`}
+                                            }`}
                                     >
                                         <Typography
                                             variant="small"
@@ -138,14 +133,13 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                             {classrooms.map(
                                 ({ class_id, class_name, sec, semester, year, total }, key) => {
                                     const isLast = key === classrooms.length - 1;
-                                    const rowClassName = `py-3 px-5 align-middle ${
-                                        isLast ? "" : "border-b border-blue-gray-50"
-                                    }`;
+                                    const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"
+                                        }`;
 
                                     return (
                                         <tr key={class_id}>
-                                            <td className={`${rowClassName} text-left`}>
-                                                <div className="flex items-center gap-4">
+                                            <td className={`${rowClassName} text-center`}>
+                                                <div className="flex justify-center items-center gap-4">
                                                     <Typography
                                                         variant="small"
                                                         color="blue-gray"
@@ -153,6 +147,11 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                     >
                                                         {class_id}
                                                     </Typography>
+                                                </div>
+                                            </td>
+
+                                            <td className={`${rowClassName} text-left`}>
+                                                <div className="flex items-center gap-4">
                                                     {class_name}
                                                 </div>
                                             </td>
