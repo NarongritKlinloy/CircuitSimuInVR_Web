@@ -151,33 +151,33 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             </td>
 
                                             <td className={`${rowClassName} text-left`}>
-                                                <div className="flex items-center gap-4">
+                                                <div className="text-s font-normal text-blue-gray-500">
                                                     {class_name}
                                                 </div>
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
-                                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                                <Typography className="text-s font-normal text-blue-gray-500">
                                                     {sec}
                                                 </Typography>
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
-                                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                                <Typography className="text-s font-normal text-blue-gray-500">
                                                     {semester}
                                                 </Typography>
                                             </td>
 
                                             <td className={`${rowClassName} text-center`}>
-                                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                                <Typography className="text-s font-normal text-blue-gray-500">
                                                     {year}
                                                 </Typography>
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
-                                                <Typography className="text-xs font-normal text-blue-gray-500">
+                                                <Typography className="text-s font-normal text-blue-gray-500">
                                                     {total}
                                                 </Typography>
                                             </td>
 
-                                            {/* Add Button */}
+                                            {/* Add Student Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
                                                     to={`/teacher/student_mgn/${class_name}`}
@@ -187,7 +187,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                 </Link>
                                             </td>
 
-                                            {/* Edit Button */}
+                                            {/* Edit Classroom Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
                                                     onClick={() =>
@@ -205,7 +205,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                 </button>
                                             </td>
 
-                                            {/* Delete Button */}
+                                            {/* Delete Classroom Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
                                                     onClick={() =>

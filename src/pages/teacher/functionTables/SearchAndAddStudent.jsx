@@ -22,5 +22,5 @@ function SearchAndAddStudent({ search, setSearch, toggleAddModal }) {
     </Card>
   );
 }
-
+ 
 export default SearchAndAddStudent;

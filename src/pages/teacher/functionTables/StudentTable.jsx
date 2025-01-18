@@ -22,7 +22,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
         setIsEditOpen(true);
     };
 
-    // ปิด Modal
+    // ปิด Modal 
     const closeEditModal = () => {
         setIsEditOpen(false);
         setSelectedStudent(null);
@@ -166,7 +166,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
 
             {/* Edit Modal */}
             <Dialog open={isEditOpen} handler={closeEditModal}>
-                <DialogHeader>Edit Classroom</DialogHeader>
+                <DialogHeader>Edit Student</DialogHeader>
                 <DialogBody>
                     <Typography className="mb-4">
                         Update student information

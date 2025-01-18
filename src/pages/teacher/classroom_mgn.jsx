@@ -12,7 +12,6 @@ export function ClassroomMgn() {
   useEffect(() => {
     const getClassroom = async () => {
       const data = await classroomTableData();
-      //console.log("data: ", data);
       setClassroom(data);
     };
     getClassroom();
