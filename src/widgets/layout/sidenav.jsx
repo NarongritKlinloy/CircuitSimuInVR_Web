@@ -33,6 +33,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                 alt="Logo Circuit simulator in VR"
                 width={60}
               />
+
               <Typography
                 variant="h5"
                 color={sidenavType === "dark" ? "white" : "blue-gray"}

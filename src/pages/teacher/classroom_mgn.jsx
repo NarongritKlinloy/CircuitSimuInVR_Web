@@ -3,18 +3,20 @@ import SearchAndAddSection from "./functionTables/SearchAndAdd";
 import ClassroomTable from "./functionTables/ClassroomTable";
 import ClassroomModal from "./functionTables/classroommodal";
 import { classroomTableData } from "@/data/classroom-table-data";
+import { addClassroomAPI } from "@/data/add-classroom";
 
 export function ClassroomMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState([]);
+  
   useEffect(() => {
     const getClassroom = async () => {
       const data = await classroomTableData();
-      //console.log("data: ", data);
       setClassroom(data);
     };
     getClassroom();
-  }, []);
+  }, [classrooms]);
+  
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
   const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
@@ -34,17 +36,17 @@ export function ClassroomMgn() {
   );
 
   // ฟังก์ชันเพิ่ม
-  const handleAddClassroom = () => {
-    //console.log("Hello!");
+  const handleAddClassroom = async() => {
     setClassroom([...classrooms, newClassroom]);
+    addClassroomAPI(newClassroom);
     setNewClassroom({ class_name: "", sec: "", year: "" , semester: ""});
     setIsAddClassroomOpen(false);
   };
 
   // ฟังก์ชันแก้ไข
-  const handleEditAuthor = () => {
-    setClassroom((prevAuthors) =>
-      prevAuthors.map((classroom) =>
+  const handleEditClassroom = () => {
+    setClassroom((prev) =>
+      prev.map((classroom) =>
         classroom.name === editingClassroom.name ? editingClassroom : classroom
       )
     );
@@ -55,12 +57,13 @@ export function ClassroomMgn() {
     <div className="mt-12 mb-8 flex flex-col gap-12">
       {/* Section การค้นหาและปุ่ม Add */}
       <SearchAndAddSection
-        search={search}
-        setSearch={setSearch}
+        search={ search }
+        setSearch={ setSearch }
         toggleAddModal={() => setIsAddClassroomOpen(true)}
+        
       />
-
-      {/* Section ตาราง Authors */}
+      
+      {/* Section ตาราง Classroom */}
       <ClassroomTable
         classrooms={filteredClassroom}
         onEditClick={(classroom) => {
@@ -70,22 +73,24 @@ export function ClassroomMgn() {
       />
       
     
-      {/* Modal สำหรับเพิ่มข้อมูลผู้ใช้ */}
+      {/* Modal add classroom */}
       <ClassroomModal
         isOpen={isAddClassroomOpen}
         toggleModal={() => setIsAddClassroomOpen(false)}
         classroomData={newClassroom}
         setClassroomData={setNewClassroom}
         onSave={handleAddClassroom}
+        btnStatus={"Add"}
       />
 
-      {/* Modal สำหรับแก้ไขข้อมูลผู้ใช้ */}
+      {/* Modal edit classroom */}
       <ClassroomModal
         isOpen={isEditClassroomOpen}
         toggleModal={() => setIsEditClassroomOpen(false)}
         classroomData={editingClassroom}
         setClassroomData={setEditingClassroom}
-        onSave={handleEditAuthor}
+        onSave={handleEditClassroom}
+        btnStatus={"Edit"}
       />
 
     </div>

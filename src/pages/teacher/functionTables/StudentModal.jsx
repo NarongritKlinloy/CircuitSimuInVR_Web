@@ -1,5 +1,6 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
+  Select, Option,
   Dialog,
   DialogHeader,
   DialogBody,
@@ -8,12 +9,19 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { classroomTableData } from "@/data/classroom-table-data";
-
-function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave , btnStatus }) {
+import { studentTableData } from "@/data/student-table-data";
+ 
+function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
-  if (!classroomData) return null;
+  // declare user id
+  const userId = studentTableData.length + 1;
+  
+  useEffect(() => {
+    setStudentData({ ...studentData, id: userId  })
+  }, [])
+
+  if (!studentData) return null;
 
   // ฟังก์ชันรีเซ็ต Error และข้อมูล
   const resetState = () => {
@@ -26,74 +34,98 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
     toggleModal(); // ปิด Modal
   };
 
+  
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
 
-    if (!classroomData.class_name) newErrors.classname = "Classname is required";
-    if (!classroomData.sec) newErrors.sec = "Sec is required";
-    if (!classroomData.semester) newErrors.semester = "Semester is required";
-    if (!classroomData.year) newErrors.year = "Year is required";
-
+    if (!studentData.name) newErrors.name = "Name is required";
+    if (!studentData.sec) newErrors.sec = "Sec is required";
+    if (!studentData.semester) newErrors.semester = "Semester is required";
+    if (!studentData.year) newErrors.year = "Year is required";
+    
     setErrors(newErrors);
-    const result = Object.keys(newErrors).length === 0 ? true : false
-    return result;
+    
+    return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
   };
 
   // ฟังก์ชันบันทึกข้อมูล
   const handleSave = () => {
-    const result = validateFields();
     if (validateFields()) {
       onSave();
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
     }
   };
 
+
   return (
-  <>
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{btnStatus} Classroom</DialogHeader>
+      <DialogHeader>{btnStatus} Student</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>
-            <Input
-              label="Name"
-              value={classroomData.class_name || ""}
-              onChange={(e) =>
-                setClassroomData({ ...classroomData, class_name: e.target.value })
-              }
-              error={!!errors.class_name}
+            <label className="block text-sm font-medium text-gray-700">Add File</label>
+            <input
+              type="file"
+              accept="csv/*"
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onloadend = () => {
+                    setStudentData({ ...studentData, picture: reader.result });
+                  };
+                  reader.readAsDataURL(file);
+                }
+              }}
+              className="mt-1 block w-full text-sm text-gray-500
+                         file:mr-4 file:py-2 file:px-4
+                         file:rounded-lg file:border-0
+                         file:text-sm file:font-semibold
+                         file:bg-blue-50 file:text-blue-700
+                         hover:file:bg-blue-100"
             />
-            {errors.classname && (
+          </div>
+          <div>
+            <Input
+              label="Student ID"
+              value={studentData.name || ""}
+              onChange={(e) =>
+                setStudentData({ ...studentData, name: e.target.value })
+              }
+              error={!!errors.name}
+            />
+            {errors.name && (
               <Typography variant="small" color="red" className="mt-1">
-                {errors.class_name}
+                {errors.name}
               </Typography>
             )}
           </div>
-        
-          <div className="flex gap-4">
+
+          {/* <div className="flex gap-4">
             <div className="w-1/3">
-              <Input
-                label="sec"
-                value={classroomData.sec || ""}
-                onChange={(e) =>
-                  setClassroomData({ ...classroomData, sec: e.target.value })
-                }
-                error={!!errors.sec}
-              />
+              <Select
+                label="Select Sec"
+                value={studentData.sec}
+                onChange={(e) => setStudentData({ ...studentData, sec: e })}
+              >
+                <Option value="101">101</Option>
+                <Option value="102">102</Option>
+                <Option value="103">103</Option>
+              </Select>
+
               {errors.sec && (
                 <Typography variant="small" color="red" className="mt-1">
                   {errors.sec}
                 </Typography>
               )}
             </div>
-
             <div className="w-1/3">
               <Input
                 label="semester"
-                value={classroomData.semester || ""}
+                value={studentData.semester || ""}
                 onChange={(e) =>
-                  setClassroomData({ ...classroomData, semester: e.target.value })
+                  setStudentData({ ...studentData, semester: e.target.value })
                 }
                 error={!!errors.semester}
               />
@@ -107,10 +139,11 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
             <div className="w-1/3">
               <Input
                 label="year"
-                value={classroomData.year || ""}
+                value={studentData.year || ""}
                 onChange={(e) =>
-                  setClassroomData({ ...classroomData, year: e.target.value })
+                  setStudentData({ ...studentData, year: e.target.value })
                 }
+
                 error={!!errors.year}
               />
               {errors.year && (
@@ -119,7 +152,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
                 </Typography>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogBody>
       <DialogFooter>
@@ -131,8 +164,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
         </Button>
       </DialogFooter>
     </Dialog>
-  </>
   );
 }
 
-export default ClassroomModal;
+export default StudentModal;
