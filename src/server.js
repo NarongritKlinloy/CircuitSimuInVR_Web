@@ -1,7 +1,9 @@
 import express from 'express';
 import mysql from 'mysql2';
 import cors from 'cors';
+import e from 'express';
 
+const router = express.Router();
 const app = express();
 const PORT = 5000;
 
@@ -13,7 +15,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "boomza532",
+  password: "xxx",
   database: "project_circuit",
 });
 
@@ -55,11 +57,13 @@ app.put('/api/user/:uid', (req, res) => {
  const { newrole } = req.body;
 
  const sql = "UPDATE user SET role_id = ? WHERE uid = ?";
+
  db.query(sql, [newrole, uid], (err, result) => {
   if(err){
     console.error("Error updating role:", err);
     return res.status(500).json({error: "Update failed"});
   }
+  
   res.status(200).json({message: "Updated successfully"});
  });
 });
@@ -153,7 +157,7 @@ app.get('/api/classroom', (req, res) => {
 });
 
 //เพิ่มข้อมูล classroom
-app.post('/api/classroom/add', (req, res) => {
+app.post('/api/classroom', (req, res) => {
   const { class_name, sec, semester, year } = req.body;
   const sql = "INSERT INTO classroom (class_name, sec, semester, year) VALUES (?, ?, ?, ?)";
 
@@ -181,6 +185,41 @@ app.delete('/api/classroom/:class_id', (req, res) => {
     }
     res.status(200).json({ message: "Classroom deleted successfully" });
   });
+});
+
+app.put('/api/classroom/:id', async(req, res) => {
+  try{
+    const { id } = req.params;
+    const { class_name , semester , sec , year } = req.body;
+
+    // check user input
+    if(!class_name || !semester || !sec || !year){
+      throw { status : 400 , message : "Please enter data all fields"};
+    }
+
+    // check class id in database
+    const [checkClass] = await db.promise().query("SELECT * FROM classroom WHERE class_id = ?",id);
+    if(checkClass.length <= 0){
+      throw {status : 404 , message : "Classroom not found!"};
+    }
+
+    // declare classroom data schema
+    const class_data = { class_name, semester, sec, year }
+
+    // update data -> db
+    const updateResult = await db.promise().query("UPDATE classroom SET ? WHERE class_id = ?",[class_data,id]);
+    if(!updateResult){
+      throw {status : 400 , message : "Classroom failed to update!"};
+    }
+
+    return res.status(200).json({message : "Classroom updated successfully"});
+
+    }catch(err){
+      const message = err.message || "Internal server error";
+      const status = err.status || 500;
+      
+      return res.status(status).json({message});
+    }
 });
 
 // ประกาศ port ที่ทำงานอยู่

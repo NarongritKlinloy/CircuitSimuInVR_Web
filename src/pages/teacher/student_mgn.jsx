@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
 import StudentTable from "./functionTables/StudentTable";
@@ -9,6 +9,16 @@ export function StudentMgn() {
   const { classname } = useParams();
   const [search, setSearch] = useState("");
   const [students, setStudent] = useState(studentTableData);
+
+  useEffect(() => {
+    const getStudent = async () => {
+      const data = await studentTableData();
+      setStudent(data);
+    };
+    getStudent();
+  }, [students]);
+
+  // Modal State
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
   const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
@@ -19,21 +29,24 @@ export function StudentMgn() {
     year: "",
   });
 
+  // seach 
   const filteredStudent = students.filter(({ name, id }) =>
     [name, id].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
 
+  // add
   const handleAddStudent = () => {
     setStudent([...students, newStudent]);
     setNewStudent({ name: "", sec: "", semester: "", year: "" });
     setIsAddStudentOpen(false);
   };
 
-  const handleEditAuthor = () => {
-    setStudent((prevAuthors) =>
-      prevAuthors.map((student) =>
+
+  const handleEditStudent = () => {
+    setStudent((prevStudent) =>
+      prevStudent.map((student) =>
         student.name === editingStudent.name ? editingStudent : student
       )
     );
@@ -63,6 +76,7 @@ export function StudentMgn() {
         studentData={newStudent}
         setStudentData={setNewStudent}
         onSave={handleAddStudent}
+        btnStatus={"Add"}
       />
 
       <StudentModal
@@ -70,7 +84,8 @@ export function StudentMgn() {
         toggleModal={() => setIsEditStudentOpen(false)}
         studentData={editingStudent}
         setStudentData={setEditingStudent}
-        onSave={handleEditAuthor}
+        onSave={handleEditStudent}
+        btnStatus={"Edit"}
       />
     </div>
   );
