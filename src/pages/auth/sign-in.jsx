@@ -11,6 +11,7 @@ export function SignIn() {
     const jwt = credentialResponse.credential;
     const payload = JSON.parse(atob(jwt.split(".")[1]));
     const email = payload.email;
+    const name = payload.name;
 
     if (!email.endsWith("@kmitl.ac.th")) {
       Swal.fire({
@@ -40,9 +41,13 @@ export function SignIn() {
         },
       }).then((result) => {
         if (result.isConfirmed) {
-          if (result.value === "admin") {
+          const role = result.value;
+          sessionStorage.setItem("role", role);
+          sessionStorage.setItem("email", email);
+          sessionStorage.setItem("name", name);
+          if (role === "admin") {
             navigate("/dashboard/home"); // Redirect ไปหน้า Admin
-          } else if (result.value === "teacher") {
+          } else if (role === "teacher") {
             navigate("/teacher/home"); // Redirect ไปหน้า Teacher
           }
         }
@@ -63,6 +68,9 @@ export function SignIn() {
         text: "You are not authorized to access the admin system.",
         confirmButtonText: "OK",
       }).then(() => {
+        sessionStorage.setItem("email", email);
+        sessionStorage.setItem("name", name);
+        sessionStorage.setItem("role", "admin");
         navigate("/dashboard/home");
       });
     } else {
@@ -72,6 +80,9 @@ export function SignIn() {
         text: `Welcome, Teacher: ${email}`,
         confirmButtonText: "OK",
       }).then(() => {
+        sessionStorage.setItem("email", email);
+        sessionStorage.setItem("name", name);
+        sessionStorage.setItem("role", "teacher");
         navigate("/teacher/home");
       });
     }

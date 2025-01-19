@@ -21,18 +21,26 @@ import {
   CreditCardIcon,
   Bars3Icon,
 } from "@heroicons/react/24/solid";
+import { useState, useEffect } from "react";
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
   setOpenSidenav,
 } from "@/context";
-
+  
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
 
+  // เก็บชื่อผู้ใช้จาก sessionStorage
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const name = sessionStorage.getItem("name");
+    setUserName(name || ""); // ถ้าไม่มี name ให้ตั้งค่าเป็นค่าว่าง
+  }, []);
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -99,9 +107,10 @@ export function DashboardNavbar() {
               variant="text"
               color="blue-gray"
               className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              disabled
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Sign In
+              {userName}
             </Button>
             <IconButton
               variant="text"
