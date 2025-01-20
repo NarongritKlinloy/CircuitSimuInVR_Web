@@ -3,18 +3,20 @@ import SearchAndAddSection from "./functionTables/SearchAndAdd";
 import ClassroomTable from "./functionTables/ClassroomTable";
 import ClassroomModal from "./functionTables/classroommodal";
 import { classroomTableData } from "@/data/classroom-table-data";
+import { addClassroomAPI } from "@/data/add-classroom";
 
 export function ClassroomMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState([]);
+  
   useEffect(() => {
     const getClassroom = async () => {
       const data = await classroomTableData();
-      //console.log("data: ", data);
       setClassroom(data);
     };
     getClassroom();
-  }, []);
+  }, [classrooms]);
+  
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
   const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
@@ -24,7 +26,6 @@ export function ClassroomMgn() {
     sec: "",
     semester: "",
     year: "",
-    total: "",
   });
 
   // ฟังก์ชันค้นหา
@@ -35,21 +36,17 @@ export function ClassroomMgn() {
   );
 
   // ฟังก์ชันเพิ่ม
-  const handleAddClassroom = () => {
-    //console.log("Hello!");
+  const handleAddClassroom = async() => {
     setClassroom([...classrooms, newClassroom]);
-
-
+    addClassroomAPI(newClassroom);
     setNewClassroom({ class_name: "", sec: "", year: "" , semester: ""});
-
-
     setIsAddClassroomOpen(false);
   };
 
   // ฟังก์ชันแก้ไข
-  const handleEditAuthor = () => {
-    setClassroom((prevAuthors) =>
-      prevAuthors.map((classroom) =>
+  const handleEditClassroom = () => {
+    setClassroom((prev) =>
+      prev.map((classroom) =>
         classroom.name === editingClassroom.name ? editingClassroom : classroom
       )
     );
@@ -63,6 +60,7 @@ export function ClassroomMgn() {
         search={ search }
         setSearch={ setSearch }
         toggleAddModal={() => setIsAddClassroomOpen(true)}
+        
       />
       
       {/* Section ตาราง Classroom */}
@@ -82,6 +80,7 @@ export function ClassroomMgn() {
         classroomData={newClassroom}
         setClassroomData={setNewClassroom}
         onSave={handleAddClassroom}
+        btnStatus={"Add"}
       />
 
       {/* Modal edit classroom */}
@@ -90,7 +89,8 @@ export function ClassroomMgn() {
         toggleModal={() => setIsEditClassroomOpen(false)}
         classroomData={editingClassroom}
         setClassroomData={setEditingClassroom}
-        onSave={handleEditAuthor}
+        onSave={handleEditClassroom}
+        btnStatus={"Edit"}
       />
 
     </div>

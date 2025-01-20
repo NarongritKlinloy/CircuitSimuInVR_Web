@@ -10,8 +10,8 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { studentTableData } from "@/data/student-table-data";
-
-function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave }) {
+ 
+function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
   // declare user id
@@ -60,7 +60,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
 
   return (
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{studentData.name ? "Edit Student" : "Add New Student"}</DialogHeader>
+      <DialogHeader>{btnStatus} Student</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>
@@ -88,7 +88,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
           </div>
           <div>
             <Input
-              label="Name"
+              label="Student ID"
               value={studentData.name || ""}
               onChange={(e) =>
                 setStudentData({ ...studentData, name: e.target.value })
@@ -102,7 +102,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
             )}
           </div>
 
-          <div className="flex gap-4">
+          {/* <div className="flex gap-4">
             <div className="w-1/3">
               <Select
                 label="Select Sec"
@@ -152,7 +152,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
                 </Typography>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogBody>
       <DialogFooter>
@@ -160,7 +160,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
           Cancel
         </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
-          {studentData.name ? "Save" : "Add"}
+          {btnStatus}
         </Button>
       </DialogFooter>
     </Dialog>

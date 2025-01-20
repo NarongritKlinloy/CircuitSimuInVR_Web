@@ -9,16 +9,9 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { classroomTableData } from "@/data/classroom-table-data";
-import addClassroom from "@/data/add-classroom";
 
-function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave }) {
+function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave , btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
-
-  // declare user id
-  const classId = classroomTableData.length + 1;
-  useEffect(() => {
-    setClassroomData({ id: classId, total: "40" })
-  },[])
 
   if (!classroomData) return null;
 
@@ -37,27 +30,29 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   const validateFields = () => {
     const newErrors = {};
 
-    if (!classroomData.classname) newErrors.classname = "Classname is required";
+    if (!classroomData.class_name) newErrors.classname = "Classname is required";
     if (!classroomData.sec) newErrors.sec = "Sec is required";
     if (!classroomData.semester) newErrors.semester = "Semester is required";
     if (!classroomData.year) newErrors.year = "Year is required";
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
+    const result = Object.keys(newErrors).length === 0 ? true : false
+    return result;
   };
 
   // ฟังก์ชันบันทึกข้อมูล
   const handleSave = () => {
+    const result = validateFields();
     if (validateFields()) {
-      addClassroom(classroomData.class_name, classroomData.sec, 1, classroomData.year);
       onSave();
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
     }
   };
 
   return (
+  <>
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{classroomData.class_name ? "Edit Classroom" : "Add New Classroom"}</DialogHeader>
+      <DialogHeader>{btnStatus} Classroom</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>
@@ -132,10 +127,11 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
           Cancel
         </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
-          {classroomData.class_name ? "Save" : "Add"}
+          {btnStatus}
         </Button>
       </DialogFooter>
     </Dialog>
+  </>
   );
 }
 

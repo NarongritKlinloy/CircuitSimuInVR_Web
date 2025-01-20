@@ -23,7 +23,7 @@ export const studentTableData = [
     {
         id: "65015168",
         name: "Apidetch Thepsanit",
-        sec: "101",
+        sec: "102",
         semester: "1",
         year: "2564"
     },

@@ -9,11 +9,10 @@ export function PracticeMgn() {
   useEffect(() => {
     const getPractice = async () => {
       const data = await practiceTableData();
-      //console.log("data: ", data);
       setPractice(data);
     };
     getPractice();
-  }, []);
+  }, [practice]);
 
   // ฟังก์ชันกรองข้อมูล Practice Table
   const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
