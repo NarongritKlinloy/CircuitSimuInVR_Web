@@ -8,10 +8,9 @@ import { addClassroomAPI } from "@/data/add-classroom";
 export function ClassroomMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState([]);
-  
   useEffect(() => {
     const getClassroom = async () => {
-      const data = await classroomTableData();
+      const data = await classroomTableData(sessionStorage.getItem("email"));
       setClassroom(data);
     };
     getClassroom();
@@ -26,6 +25,7 @@ export function ClassroomMgn() {
     sec: "",
     semester: "",
     year: "",
+    uid: sessionStorage.getItem("email"),
   });
 
   // ฟังก์ชันค้นหา
