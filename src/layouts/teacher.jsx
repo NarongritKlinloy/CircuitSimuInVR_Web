@@ -3,6 +3,7 @@ import { Cog6ToothIcon } from "@heroicons/react/24/solid";
 import { IconButton } from "@material-tailwind/react";
 import {
   T_Sidenav,
+  DashboardNavbar,
   T_DashboardNavbar,
   Configurator,
   Footer,
@@ -25,7 +26,7 @@ export function Teacher() {
       />
 
       <div className="p-4 xl:ml-80">
-        <T_DashboardNavbar routes={routes} />
+        <DashboardNavbar routes={routes} />
         <Configurator />
         <IconButton
           size="lg"
