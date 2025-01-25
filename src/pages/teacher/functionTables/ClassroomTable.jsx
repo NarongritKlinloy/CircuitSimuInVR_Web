@@ -13,8 +13,10 @@ import {
 
 import {
     PencilSquareIcon,
+    UsersIcon,
     TrashIcon,
     UserPlusIcon,
+    PlusCircleIcon,
 } from "@heroicons/react/24/solid";
 
 import React, { useState } from "react";
@@ -26,6 +28,7 @@ import { editClassroomAPI } from "@/data/edit-classroom";
 function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isAddTAOpen, setIsAddTAOpen] = useState(false);
     const [selectedClassroom, setSelectedClassroom] = useState(null);
 
     // handle data change
@@ -36,13 +39,13 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
         }));
     };
 
-    // เปิด Modal และโหลดข้อมูล
+    // เปิด Modal Edit และโหลดข้อมูล
     const openEditModal = (classroom) => {
         setSelectedClassroom(classroom);
         setIsEditOpen(true);
     };
 
-    // ปิด Modal
+    // ปิด Modal Edit
     const closeEditModal = () => {
         setIsEditOpen(false);
         setSelectedClassroom(null);
@@ -51,7 +54,25 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = async () => {
         editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
+        closeEditModal();
+    };
 
+
+    // เปิด Modal Add TA
+    const openAddTAModal = (classroom) => {
+        setSelectedClassroom(classroom);
+        setIsAddTAOpen(true);
+    };
+
+    // ปิด Modal ADD TA
+    const closeAddTAModal = () => {
+        setIsAddTAOpen(false);
+        setSelectedClassroom(null);
+    };
+
+    // ฟังก์ชันยืนยันการแก้ไข
+    const handleAddTA = async () => {
+        // editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
         closeEditModal();
     };
 
@@ -109,6 +130,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                     "year",
                                     "student",
                                     "add student",
+                                    "add assistant",
                                     "edit",
                                     "delete",
                                 ].map((header) => (
@@ -185,6 +207,20 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                 >
                                                     <UserPlusIcon className="h-5 w-5 mx-auto" />
                                                 </Link>
+                                            </td>
+
+                                            {/* Add TA Button */}
+                                            <td className={`${rowClassName} text-center`}>
+                                                <button
+                                                    onClick={() =>
+                                                        openAddTAModal({
+                                                            uid
+                                                        })
+                                                    }
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                >
+                                                    <UsersIcon className="h-5 w-5 mx-auto" />
+                                                    </button>
                                             </td>
 
                                             {/* Edit Classroom Button */}
@@ -279,6 +315,33 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                     </Button>
                     <Button variant="gradient" color="green" onClick={handleSaveEdit}>
                         Save
+                    </Button>
+                </DialogFooter>
+            </Dialog>
+
+            {/* Add TA Modal */}
+            <Dialog open={isAddTAOpen} handler={closeAddTAModal}>
+                <DialogHeader>Add Teacher Assistant</DialogHeader>
+                <DialogBody>
+                    <Typography className="mb-4">
+                        class : {selectedClassroom?.class_name}
+                    </Typography>
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <Input
+                                label="Email"
+                                name="uid"
+                                onChange={inputHandle}
+                            />
+                        </div>
+                    </div>
+                </DialogBody>
+                <DialogFooter>
+                    <Button variant="text" color="red" onClick={closeAddTAModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="gradient" color="green" onClick={handleAddTA}>
+                        Add
                     </Button>
                 </DialogFooter>
             </Dialog>
