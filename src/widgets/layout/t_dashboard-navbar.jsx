@@ -44,6 +44,13 @@ export function T_DashboardNavbar({routes}) {
       }
     })
   }, [pathname])
+  // เก็บชื่อผู้ใช้จาก sessionStorage
+  const [userName, setUserName] = useState("");
+
+  useEffect(() => {
+    const name = sessionStorage.getItem("name");
+    setUserName(name || ""); // ถ้าไม่มี name ให้ตั้งค่าเป็นค่าว่าง
+  }, []);
   
   return (
     <Navbar
@@ -105,14 +112,15 @@ export function T_DashboardNavbar({routes}) {
           </IconButton>
 
           
-          <Link to="/auth/sign-in">
+          
             <Button
               variant="text"
               color="blue-gray"
               className="hidden items-center gap-1 px-4 xl:flex normal-case"
+              disabled
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
-              Sign In
+              {userName}
             </Button>
             <IconButton
               variant="text"
@@ -121,7 +129,7 @@ export function T_DashboardNavbar({routes}) {
             >
               <UserCircleIcon className="h-5 w-5 text-blue-gray-500" />
             </IconButton>
-          </Link>
+         
 
           
           <Menu>
