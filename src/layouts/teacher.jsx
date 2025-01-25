@@ -16,7 +16,7 @@ export function Teacher() {
 
   return (
     <div className="min-h-screen bg-blue-gray-50/50">
-
+ 
       <T_Sidenav
         routes={routes}
         brandImg={

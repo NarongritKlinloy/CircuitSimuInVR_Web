@@ -18,7 +18,8 @@ export function PracticeMgn() {
   const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
     [practice_name, practice_detail].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
-    )
+      // console.log(field)
+    ) 
   );
 
   return (

@@ -145,7 +145,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                         color="blue-gray"
                                                         className="font-semibold"
                                                     >
-                                                        {class_id}
+                                                        {key+1}
                                                     </Typography>
                                                 </div>
                                             </td>
