@@ -19,5 +19,4 @@ function SearchAndAdd({ search, setSearch, toggleAddModal }) {
     </Card>
   );
 }
-
 export default SearchAndAdd;

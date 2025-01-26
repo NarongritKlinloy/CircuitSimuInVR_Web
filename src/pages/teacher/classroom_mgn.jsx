@@ -30,8 +30,8 @@ export function ClassroomMgn() {
 
   // ฟังก์ชันค้นหา
   const filteredClassroom = classrooms.filter(({ class_name, sec }) =>
-    [class_name, sec].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
+    [class_name, sec].some((field) => 
+      String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
 
