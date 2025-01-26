@@ -1,42 +1,52 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchAndAddSection from "./functionTables/SearchAndAdd";
 import ClassroomTable from "./functionTables/ClassroomTable";
 import ClassroomModal from "./functionTables/classroommodal";
 import { classroomTableData } from "@/data/classroom-table-data";
+import { addClassroomAPI } from "@/data/add-classroom";
 
 export function ClassroomMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
-  const [classrooms, setClassroom] = useState(classroomTableData);
-
+  const [classrooms, setClassroom] = useState([]);
+  useEffect(() => {
+    const getClassroom = async () => {
+      const data = await classroomTableData(sessionStorage.getItem("email"));
+      setClassroom(data);
+    };
+    getClassroom();
+  }, [classrooms]);
+  
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
   const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
   const [editingClassroom, setEditingClassroom] = useState(null);
   const [newClassroom, setNewClassroom] = useState({
-    classname: "",
+    class_name: "",
     sec: "",
     semester: "",
     year: "",
+    uid: sessionStorage.getItem("email"),
   });
 
   // ฟังก์ชันค้นหา
-  const filteredClassroom = classrooms.filter(({ classname, sec }) =>
-    [classname, sec].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
+  const filteredClassroom = classrooms.filter(({ class_name, sec }) =>
+    [class_name, sec].some((field) => 
+      String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
 
   // ฟังก์ชันเพิ่ม
-  const handleAddClassroom = () => {
+  const handleAddClassroom = async() => {
     setClassroom([...classrooms, newClassroom]);
-    setNewClassroom({ classname: "", sec: "", semester: "", year: "" });
+    addClassroomAPI(newClassroom);
+    setNewClassroom({ class_name: "", sec: "", year: "" , semester: ""});
     setIsAddClassroomOpen(false);
   };
 
   // ฟังก์ชันแก้ไข
-  const handleEditAuthor = () => {
-    setClassroom((prevAuthors) =>
-      prevAuthors.map((classroom) =>
+  const handleEditClassroom = () => {
+    setClassroom((prev) =>
+      prev.map((classroom) =>
         classroom.name === editingClassroom.name ? editingClassroom : classroom
       )
     );
@@ -50,6 +60,7 @@ export function ClassroomMgn() {
         search={ search }
         setSearch={ setSearch }
         toggleAddModal={() => setIsAddClassroomOpen(true)}
+        
       />
       
       {/* Section ตาราง Classroom */}
@@ -69,6 +80,7 @@ export function ClassroomMgn() {
         classroomData={newClassroom}
         setClassroomData={setNewClassroom}
         onSave={handleAddClassroom}
+        btnStatus={"Add"}
       />
 
       {/* Modal edit classroom */}
@@ -77,7 +89,8 @@ export function ClassroomMgn() {
         toggleModal={() => setIsEditClassroomOpen(false)}
         classroomData={editingClassroom}
         setClassroomData={setEditingClassroom}
-        onSave={handleEditAuthor}
+        onSave={handleEditClassroom}
+        btnStatus={"Edit"}
       />
 
     </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import Swal from 'sweetalert2';
+import Swal from "sweetalert2";
 import {
   Typography,
   Card,
@@ -22,29 +22,36 @@ export function TeacherReports() {
   const [loading, setLoading] = useState(true); // สถานะโหลดข้อมูล
   const [error, setError] = useState(null); // สถานะข้อผิดพลาด
 
-  const [isAddReportOpen, setIsAddReportOpen] = useState(false); // สำหรับเปิด/ปิด Modal Add New Report
+  // Modal แสดงรายละเอียดรายงาน
+  const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
 
-  // ฟังก์ชันแปลงวันที่ให้เป็นรูปแบบ YYYY-MM-DD
-const getCurrentDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // เติม 0 ข้างหน้าเดือน
-  const day = String(today.getDate()).padStart(2, "0"); // เติม 0 ข้างหน้าวัน
-  return `${year}-${month}-${day}`;
-};
+  // Modal สำหรับเพิ่มรายงานใหม่
+  const [isAddReportOpen, setIsAddReportOpen] = useState(false);
+
+  // ฟังก์ชันดึงวันที่ปัจจุบัน (YYYY-MM-DD)
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // State เก็บข้อมูลฟอร์มในการเพิ่มรายงาน
   const [newReport, setNewReport] = useState({
-    report_uid:sessionStorage.getItem("email"),
+    report_uid: sessionStorage.getItem("email"),
     report_name: "",
     report_detail: "",
-    report_date: getCurrentDate(), // เพิ่มฟิลด์สำหรับวันที่
-  }); // สำหรับเก็บข้อมูลใหม่ของ report
-  const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
+    report_date: getCurrentDate(), // ค่าเริ่มต้นเป็นวันที่ปัจจุบัน
+  });
 
+  // เก็บ Error ของฟอร์ม
+  const [errors, setErrors] = useState({});
+
+  // ใช้สำหรับนำทาง
   const navigate = useNavigate();
 
-
-
-  // ฟังก์ชันดึงข้อมูลจาก TeacherReportData
+  // ดึงข้อมูลรายงานจากฟังก์ชัน TeacherReportData
   useEffect(() => {
     const fetchReports = async () => {
       try {
@@ -58,114 +65,51 @@ const getCurrentDate = () => {
         setLoading(false);
       }
     };
-    fetchReports(); // เรียกฟังก์ชันดึงข้อมูล
-  }, []); // ทำงานครั้งเดียวตอน component ถูก mount
+    fetchReports();
+  }, []);
 
-  
-// ฟังก์ชันดึงข้อมูลจาก TeacherReportData
-// const fetchReports = async () => {
-//   try {
-//     setLoading(true);
-//     const data = await TeacherReportData(); // เรียกฟังก์ชันที่นำเข้ามา
-//     setReports(data); // เก็บข้อมูลใน state
-//   } catch (err) {
-//     setError("Error fetching reports. Please try again.");
-//     console.error(err);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-useEffect(() => {
-  console.log("Reports state:", reports); // ตรวจสอบว่า reports state ถูกอัพเดตหรือไม่
-}, [reports]); // ตรวจสอบทุกครั้งที่ state เปลี่ยน
+  // ลองเช็กใน Console เวลา state `reports` อัปเดต
+  useEffect(() => {
+    console.log("Reports state:", reports);
+  }, [reports]);
 
-
-  // ฟังก์ชันเปิด/ปิด modal แสดงรายละเอียด
-  const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
+  // ฟังก์ชันเปิด/ปิด Dialog รายละเอียด
   const handleDialogOpen = (detail) => {
-    
     setSelectedDescription(detail);
     setDialogDetailOpen(true);
   };
 
-  // // ฟังก์ชันรีเซ็ต Error และข้อมูล
-  // const resetState = () => {
-  //   console.log("Resetting form state...");
-  //   setErrors({}); // รีเซ็ต Error ให้เป็นค่าว่าง
-  //   setNewReport({ report_name: "", report_detail: "", report_date: "" }); // รีเซ็ตข้อมูลใหม่
-  //   console.log("Form state reset.");
-  // };
-  const resetState = (defaultState = { report_name: "", report_detail: "", report_date: "" }) => {
-    console.log("Resetting form state...");
+  // ฟังก์ชันรีเซ็ต Error และฟอร์ม
+  const resetState = (
+    defaultState = { report_name: "", report_detail: "", report_date: "" }
+  ) => {
     setErrors({});
     setNewReport(defaultState);
-    console.log("Form state reset.");
   };
-  
 
-  // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
+  // ฟังก์ชัน Validate ข้อมูลฟอร์มก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-    if (!newReport.report_name) newErrors.report_name = "Report Name is required";
-    if (!newReport.report_detail) newErrors.report_detail = "Detail is required";
-    // if (!newReport.report_date) newErrors.report_date = "Report Date is required"; // ตรวจสอบ report_date
+    if (!newReport.report_name) {
+      newErrors.report_name = "Report Name is required";
+    }
+    if (!newReport.report_detail) {
+      newErrors.report_detail = "Detail is required";
+    }
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
-  
 
-  // ฟังก์ชันบันทึกข้อมูล
-  // const handleSave = async () => {
-  //   console.log("Data to send to API:", newReport);
-    // fetchReports(); // ดึงข้อมูลใหม่หลังจากเพิ่ม
-    // setIsAddReportOpen(false); // ปิด Modal
-    // resetState(); // รีเซ็ตข้อมูล
-   
-
-  //   if (validateFields()) {
-     
-  //     try {
-       
-  //       const response = await axios.post(`http://localhost:5000/api/addreport`,newReport);
-  //       if (response.status == 200) {
-  //         Swal.fire({
-  //           title: "Added!",
-  //           text: `${newReport.report_name} has been added.`,
-  //           icon: "success",
-  //           confirmButtonText: "OK",
-  //           customClass: {
-  //             confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-  //           },
-  //         });
-  //         // fetchReports(); // ดึงข้อมูลใหม่
-  //         resetState(); // รีเซ็ตข้อมูลในฟอร์ม
-  //       }
-  //     } catch (err) {
-  //       Swal.fire({
-  //         title: "Added!",
-  //         text: `Can not add ${newReport.report_name}`,
-  //         icon: "error",
-  //         confirmButtonText: "OK",
-  //         customClass: {
-  //           confirmButton: "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-  //         },
-  //       });
-  //     }
-      
-  //   }
-  //   setIsAddReportOpen(false); // ปิด Modalv
-  // };
-
-
-
+  // ฟังก์ชันบันทึกข้อมูล (ส่งไป API)
   const handleSave = async () => {
     console.log("Data to send to API:", newReport);
-  
-    // เช็คว่า valid แล้วค่อยดำเนินการ
+
     if (validateFields()) {
       try {
-        const response = await axios.post(`http://localhost:5000/api/addreport`, newReport);
-  
+        const response = await axios.post(
+          `http://localhost:5000/api/addreport`,
+          newReport
+        );
         if (response.status === 200) {
           Swal.fire({
             title: "Added!",
@@ -173,15 +117,14 @@ useEffect(() => {
             icon: "success",
             confirmButtonText: "OK",
             customClass: {
-              confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+              confirmButton:
+                "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
             },
           }).then(() => {
-            navigate(0); // นำทางไปยังหน้าเดิม (เหมือนรีเฟรช)
-            
+            // หลังจากกด OK ใน sweetalert เราจะรีเฟรชหน้า ด้วย navigate(0)
+            navigate(0);
           });
-          // resetState();
         }
-
       } catch (err) {
         Swal.fire({
           title: "Error!",
@@ -189,33 +132,41 @@ useEffect(() => {
           icon: "error",
           confirmButtonText: "OK",
           customClass: {
-            confirmButton: "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+            confirmButton:
+              "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
           },
         });
       }
     }
-
-    setIsAddReportOpen(false); // ปิด Modal
-    
+    setIsAddReportOpen(false);
   };
-  
-  
+
+  // ปิด Dialog Add Report พร้อมรีเซ็ต
   const handleClose = () => {
     resetState();
     setIsAddReportOpen(false);
   };
 
+  // ส่วนแสดง Loading หรือ Error
   if (loading) return <p>Loading...</p>;
   if (error) return <p>{error}</p>;
 
   return (
     <div className="mx-auto my-20 flex flex-col gap-8">
       <Card>
-        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
+        <CardHeader
+          variant="gradient"
+          color="gray"
+          className="mb-8 p-6 flex justify-between items-center"
+        >
           <Typography variant="h6" color="white">
             Reports
           </Typography>
-          <Button variant="gradient" color="green" onClick={() => setIsAddReportOpen(true)}>
+          <Button
+            variant="gradient"
+            color="green"
+            onClick={() => setIsAddReportOpen(true)}
+          >
             New Report
           </Button>
         </CardHeader>
@@ -237,7 +188,7 @@ useEffect(() => {
                   <td className="border px-4 py-2">{report.report_name}</td>
                   <td className="border px-4 py-2">{report.report_uid}</td>
                   <td className="border px-4 py-2">
-                    {new Date(report.report_date).toLocaleDateString('en-GB')}
+                    {new Date(report.report_date).toLocaleDateString("en-GB")}
                   </td>
                   <td className="border px-4 py-2">
                     <Button
@@ -281,7 +232,9 @@ useEffect(() => {
             <Input
               label="Report Name"
               value={newReport.report_name || ""}
-              onChange={(e) => setNewReport({ ...newReport, report_name: e.target.value })}
+              onChange={(e) =>
+                setNewReport({ ...newReport, report_name: e.target.value })
+              }
               error={!!errors.report_name}
             />
             {errors.report_name && (
@@ -292,15 +245,24 @@ useEffect(() => {
 
             {/* Textarea for Detail */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="detail" className="text-sm font-medium text-gray-700">
+              <label
+                htmlFor="report_detail"
+                className="text-sm font-medium text-gray-700"
+              >
                 Detail
               </label>
               <textarea
-                id="detail"
+                id="report_detail"
                 rows="4"
-                className={`p-2 border ${errors.report_detail ? "border-red-500" : "border-gray-300"} rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`p-2 border ${
+                  errors.report_detail
+                    ? "border-red-500"
+                    : "border-gray-300"
+                } rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 value={newReport.report_detail || ""}
-                onChange={(e) => setNewReport({ ...newReport, report_detail: e.target.value })}
+                onChange={(e) =>
+                  setNewReport({ ...newReport, report_detail: e.target.value })
+                }
               />
               {errors.report_detail && (
                 <Typography variant="small" color="red" className="mt-1">
@@ -309,24 +271,25 @@ useEffect(() => {
               )}
             </div>
 
-            {/* Input for Report Date */}
-            {/* <div className="flex flex-col gap-2">
-              <label htmlFor="report_date" className="text-sm font-medium text-gray-700">
+            {/* ตัวอย่าง: หากต้องการให้ผู้ใช้เลือกวันที่เอง
+            <div className="flex flex-col gap-2">
+              <label
+                htmlFor="report_date"
+                className="text-sm font-medium text-gray-700"
+              >
                 Report Date
               </label>
               <input
                 type="date"
                 id="report_date"
                 value={newReport.report_date || ""}
-                onChange={(e) => setNewReport({ ...newReport, report_date: e.target.value })}
+                onChange={(e) =>
+                  setNewReport({ ...newReport, report_date: e.target.value })
+                }
                 className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              {errors.report_date && (
-                <Typography variant="small" color="red" className="mt-1">
-                  {errors.report_date}
-                </Typography>
-              )}
-            </div> */}
+            </div>
+            */}
           </div>
         </DialogBody>
         <DialogFooter>

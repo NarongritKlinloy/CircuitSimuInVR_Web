@@ -1,24 +1,12 @@
-export const practiceTableData = [
-  { id :"1",
-    name: "Practice 1",
-    detail: "Toggle LED",
-    status: false,
-    date: "11/01/19",
-  },
-  {
-    id :"2",
-    name: "Practice 2",
-    detail: "Combinational Logic",
-    status: false,
-    date: "11/01/19",
-  },
-  { 
-    id :"3",
-    name: "Practice 3",
-    detail: "Multivibrator Circuit",
-    status: true,
-    date: "11/01/19",
+import axios from 'axios';
+export const practiceTableData = async () => {
+  try{
+    const response = await axios.get('http://localhost:5000/api/practice');
+    return response.data;
+  } 
+  catch (error) {
+    console.error('Error fetching practice', error);
+    return [];
   }
-];
-
+}
 export default practiceTableData;

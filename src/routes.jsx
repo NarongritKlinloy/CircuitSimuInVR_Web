@@ -31,12 +31,12 @@ export const routes = [
         element: <Tables />,
       },
       
-      {
-        icon: <UserCircleIcon {...icon} />,
-        name: "Admin",
-        path: "/profile",
-        element: <Profile />,
-      },
+      // {
+      //   icon: <UserCircleIcon {...icon} />,
+      //   name: "Admin",
+      //   path: "/profile",
+      //   element: <Profile />,
+      // },
       
       {
         icon: <DocumentTextIcon {...icon} />,

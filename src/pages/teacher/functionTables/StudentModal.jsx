@@ -10,14 +10,15 @@ import {
   Typography,
 } from "@material-tailwind/react";
 import { studentTableData } from "@/data/student-table-data";
-
-function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave }) {
+ 
+function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnStatus, onSave }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
   // declare user id
   const userId = studentTableData.length + 1;
+  
   useEffect(() => {
-    setStudentData({ id: userId });
+    setStudentData({ ...studentData, id: userId  })
   }, [])
 
   if (!studentData) return null;
@@ -37,12 +38,11 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-    if (!studentData.name) newErrors.name = "Name is required";
-    if (!studentData.sec) newErrors.sec = "Sec is required";
-    if (!studentData.semester) newErrors.semester = "Semester is required";
-    if (!studentData.year) newErrors.year = "Year is required";
 
+    if (!studentData.uid) newErrors.uid = "ID Student is required";
+    
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
   };
 
@@ -54,9 +54,10 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
     }
   };
 
+
   return (
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{studentData.name ? "Edit Student" : "Add New Student"}</DialogHeader>
+      <DialogHeader>{btnStatus} Student</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>
@@ -69,7 +70,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
                 if (file) {
                   const reader = new FileReader();
                   reader.onloadend = () => {
-                    setStudentData({ ...studentDataData, picture: reader.result });
+                    setStudentData({ ...studentData, picture: reader.result });
                   };
                   reader.readAsDataURL(file);
                 }
@@ -84,34 +85,32 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
           </div>
           <div>
             <Input
-              label="Name"
-              value={studentData.name || ""}
+              label="Student ID"
+              value={studentData.uid || ""}
               onChange={(e) =>
-                setStudentData({ ...studentData, name: e.target.value })
+                setStudentData({ ...studentData, uid: e.target.value })
               }
-              error={!!errors.name}
+              error={!!errors.uid}
             />
-            {errors.name && (
+            {errors.uid && (
               <Typography variant="small" color="red" className="mt-1">
-                {errors.name}
+                {errors.uid}
               </Typography>
             )}
           </div>
 
-          <div className="flex gap-4">
+          {/* <div className="flex gap-4">
             <div className="w-1/3">
               <Select
                 label="Select Sec"
-                value={studentData.sec || ""}
-                onChange={(e) =>
-                  setStudentData({ ...studentData, sec: e.target.value })
-                }
-                error={!!errors.sec}
+                value={studentData.sec}
+                onChange={(e) => setStudentData({ ...studentData, sec: e })}
               >
                 <Option value="101">101</Option>
                 <Option value="102">102</Option>
                 <Option value="103">103</Option>
               </Select>
+
               {errors.sec && (
                 <Typography variant="small" color="red" className="mt-1">
                   {errors.sec}
@@ -141,6 +140,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
                 onChange={(e) =>
                   setStudentData({ ...studentData, year: e.target.value })
                 }
+
                 error={!!errors.year}
               />
               {errors.year && (
@@ -149,7 +149,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
                 </Typography>
               )}
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogBody>
       <DialogFooter>
@@ -157,7 +157,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, onSave
           Cancel
         </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
-          {studentData.name ? "Save" : "Add"}
+          {btnStatus}
         </Button>
       </DialogFooter>
     </Dialog>

@@ -1,17 +1,25 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import SearchAndAddSection from "./functionTables/searchpractice";
 import PracticeTable from "./functionTables/PracticeTable";
 import { practiceTableData } from "@/data/practice-table-data";
 
 export function PracticeMgn() {
   const [search, setSearch] = useState(""); // คำค้นหา
-  const [practice, setPractice] = useState(practiceTableData);
+  const [practice, setPractice] = useState([]);
+  useEffect(() => {
+    const getPractice = async () => {
+      const data = await practiceTableData();
+      setPractice(data);
+    };
+    getPractice();
+  }, [practice]);
 
   // ฟังก์ชันกรองข้อมูล Practice Table
-  const filteredPractice = practice.filter(({ name, detail}) =>
-    [name, detail].some((field) =>
+  const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
+    [practice_name, practice_detail].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
-    )
+      // console.log(field)
+    ) 
   );
 
   return (

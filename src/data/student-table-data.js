@@ -1,31 +1,11 @@
-export const studentTableData = [
-    {
-        id: "65015041",
-        name: "Narongrit Klinloy",
-        sec: "101",
-        semester: "1",
-        year: "2564"
-    },
-    {
-        id: "65015101",
-        name: "Phontakorn Puanpayom",
-        sec: "101",
-        semester: "1",
-        year: "2564"
-    },
-    {
-        id: "65015123",
-        name: "Muthita Buakham",
-        sec: "101",
-        semester: "1",
-        year: "2564"
-    },
-    {
-        id: "65015168",
-        name: "Apidetch Thepsanit",
-        sec: "101",
-        semester: "1",
-        year: "2564"
-    },
-];
+import axios from "axios";
+export const studentTableData = async (class_id) => {
+  try {
+    const response = await axios.get(`http://localhost:5000/api/classroom/student/${class_id}`);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching classroom student', error);
+    return [];
+  }
+};
 export default studentTableData;

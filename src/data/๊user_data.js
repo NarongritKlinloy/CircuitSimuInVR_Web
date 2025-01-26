@@ -10,7 +10,6 @@ export const fetchUsersData = async () => {
   }
 };
 
-// ใช้ fetchAuthorsData เพื่อดึงข้อมูล
 fetchUsersData().then((data) => {
-  console.log("Users Data:", data); // ใช้แทน authorsTableData แบบฮาร์ดโค้ด
+  console.log("Users Data:", data); 
 });

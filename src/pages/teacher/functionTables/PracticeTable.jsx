@@ -1,19 +1,19 @@
 import React from "react";
-import { Card, CardHeader, CardBody, Typography, Avatar, Switch } from "@material-tailwind/react";
+import { Card, CardHeader, CardBody, Typography, Switch } from "@material-tailwind/react";
 import Swal from "sweetalert2";
+import { updatePracticeStatusAPI } from "@/data/change-status-practice";
 
 function PracticeTable({ practice, onStatusChange }) {
+
   const switchCheck = (e, practiceItem) => {
     const isChecked = e.target.checked;
-
     if (isChecked) {
+      updatePracticeStatusAPI(practiceItem.practice_id, practiceItem.practice_status);
       Swal.fire({
         title: "Practice Status",
         text: "Practice is on",
         confirmButtonColor: "#3085d6",
         icon: "success",
-      }).then(() => {
-        onStatusChange(practiceItem.id, true); // Update status to true
       });
     } else {
       Swal.fire({
@@ -26,16 +26,15 @@ function PracticeTable({ practice, onStatusChange }) {
         confirmButtonText: "Confirm",
       }).then((result) => {
         if (result.isConfirmed) {
+          updatePracticeStatusAPI(practiceItem.practice_id, practiceItem.practice_status);
           Swal.fire({
             title: "Practice Status",
             text: "Practice is closed",
             confirmButtonColor: "#3085d6",
             icon: "success",
-          }).then(() => {
-            onStatusChange(practiceItem.id, false); // Update status to false
           });
         } else if (result.isDismissed) {
-          e.target.checked = true; // Keep the switch on
+          e.target.checked = true;
           Swal.fire({
             title: "Practice Status",
             text: "Practice is on",
@@ -56,14 +55,17 @@ function PracticeTable({ practice, onStatusChange }) {
           </Typography>
         </CardHeader>
 
-        <CardBody className="overflow-x-scroll pt-0 pb-2">
-          <table className="w-full min-w-[640px] table-auto">
+        <CardBody className="overflow-x-auto pt-0 pb-2">
+          <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
               <tr>
-                {["Name", "Detail", "Create Date", "Status"].map((el) => (
+                {["No.", "Name", "Detail", "Create Date", "Status"].map((el) => (
                   <th
                     key={el}
-                    className="border-b border-blue-gray-50 px-5 text-left"
+                    className={`border-b border-blue-gray-50 px-5 py-2 ${el === "Name" || el === "Detail"
+                      ? "text-left" 
+                      : "text-center"
+                    }`}
                   >
                     <Typography
                       variant="small"
@@ -75,42 +77,45 @@ function PracticeTable({ practice, onStatusChange }) {
                 ))}
               </tr>
             </thead>
-
             <tbody>
-              {practice.map(({ id, name, detail, date, status }, key) => {
-                // const className = `py-3 px-5 ${
-                //   key === practice.length - 1 ? "" : "border-b border-blue-gray-50"
-                // }`;
+              {practice.map((data, key) => {
                 const isLast = key === practice.length - 1;
                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                 return (
-                  <tr key={id}>
-                    {/* <td className={className}> */}
-                    <td className={`${rowClassName}`}>
-                      <div className="flex items-center gap-4">
-                        <Typography variant="small" color="blue-gray" className="font-semibold">
-                          {id}
-                        </Typography>
-                        {name}
+                  <tr key={data.practice_id}>
+                    <td className={`${rowClassName} text-center`}>
+                      <div className="flex justify-center items-center gap-4">
+                        <div>
+                          <Typography variant="small" color="blue-gray" className="font-semibold">
+                            {data.practice_id}
+                          </Typography>
+                        </div>
                       </div>
                     </td>
 
-                    <td className={`${rowClassName}`}>
-                      <Typography className="text-xs font-normal text-blue-gray-500">
-                        {detail}
+
+                    <td className={`${rowClassName} text-left`}>
+                      <Typography className="text-s font-normal text-blue-gray-500">
+                        {data.practice_name}
                       </Typography>
                     </td>
-                    <td className={`${rowClassName}`}>
-                      <Typography className="text-xs font-normal text-blue-gray-500">
-                        {date}
+
+                    <td className={`${rowClassName} text-left`}>
+                      <Typography className="text-s font-normal text-blue-gray-500">
+                        {data.practice_detail}
+                      </Typography>
+                    </td>
+                    <td className={`${rowClassName} text-center`}>
+                      <Typography className="text-s font-normal text-blue-gray-500">
+                        {data.create_date}
                       </Typography>
                     </td>
 
                     <td className={`${rowClassName}`}>
                       <Switch
-                        checked={status}
-                        onClick={(e) => switchCheck(e, { id, name, detail, date, status })}
+                        checked={data.practice_status}
+                        onClick={(e) => switchCheck(e, data)}
                       />
                     </td>
                   </tr>
@@ -123,6 +128,4 @@ function PracticeTable({ practice, onStatusChange }) {
     </div>
   );
 }
-
-
 export default PracticeTable;

@@ -28,3 +28,12 @@
 1. ติดตั้งแพ็คเกจ google ก่อน :
     ```bash
     npm install @react-oauth/google
+2. ติดตั้งแพ็คเกจ axios ก่อน :
+    ```bash
+    npm install axios
+2. ติดตั้งแพ็คเกจ node mon ก่อน :
+    ```bash
+    npm i nodemon
+3. หลังจากนั้นก็ค่อยใช้คำสั่ง 
+    ```bash
+    npm start

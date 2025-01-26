@@ -12,6 +12,7 @@ function SearchAndAddStudent({ search, setSearch, toggleAddModal }) {
             onChange={(e) => setSearch(e.target.value)}
           />
         </div>
+        
         <div className="flex gap-2">
           <Button variant="gradient" color="green" onClick={toggleAddModal}>
             Add
@@ -21,5 +22,5 @@ function SearchAndAddStudent({ search, setSearch, toggleAddModal }) {
     </Card>
   );
 }
-
+ 
 export default SearchAndAddStudent;

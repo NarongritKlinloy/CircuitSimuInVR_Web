@@ -8,16 +8,9 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { classroomTableData } from "@/data/classroom-table-data";
 
-function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave }) {
+function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave , btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
-
-  // declare user id
-  const userId = classroomTableData.length + 1;
-  useEffect(() => {
-    setClassroomData({ id: userId });
-  },[])
 
   if (!classroomData) return null;
 
@@ -35,17 +28,20 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-    if (!classroomData.classname) newErrors.classname = "Classname is required";
+
+    if (!classroomData.class_name) newErrors.classname = "Classname is required";
     if (!classroomData.sec) newErrors.sec = "Sec is required";
     if (!classroomData.semester) newErrors.semester = "Semester is required";
     if (!classroomData.year) newErrors.year = "Year is required";
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
+    const result = Object.keys(newErrors).length === 0 ? true : false
+    return result;
   };
 
   // ฟังก์ชันบันทึกข้อมูล
   const handleSave = () => {
+    const result = validateFields();
     if (validateFields()) {
       onSave();
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
@@ -53,22 +49,23 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   };
 
   return (
+  <>
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{classroomData.classname ? "Edit Classroom" : "Add New Classroom"}</DialogHeader>
+      <DialogHeader>{btnStatus} Classroom</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>
             <Input
               label="Name"
-              value={classroomData.classname || ""}
+              value={classroomData.class_name || ""}
               onChange={(e) =>
-                setClassroomData({ ...classroomData, classname: e.target.value })
+                setClassroomData({ ...classroomData, class_name: e.target.value })
               }
-              error={!!errors.classname}
+              error={!!errors.class_name}
             />
             {errors.classname && (
               <Typography variant="small" color="red" className="mt-1">
-                {errors.classname}
+                {errors.class_name}
               </Typography>
             )}
           </div>
@@ -129,10 +126,11 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
           Cancel
         </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
-          {classroomData.classname ? "Save" : "Add"}
+          {btnStatus}
         </Button>
       </DialogFooter>
     </Dialog>
+  </>
   );
 }
 
