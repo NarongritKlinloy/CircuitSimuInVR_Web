@@ -1,8 +1,25 @@
 import React, { useState, useEffect } from "react";
 import { textarea, Input, Typography, Card, CardHeader, CardBody, Button, Dialog, DialogHeader, DialogBody, DialogFooter } from "@material-tailwind/react";
 import { TeacherReportData } from "@/data/teacher-report";
+import { useNavigate } from "react-router-dom";
+
 
 export function TeacherReports() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+
   const [selectedDescription, setSelectedDescription] = useState("");
   const [report, setReport] = useState([]);
 

@@ -5,8 +5,25 @@ import StudentTable from "./functionTables/StudentTable";
 import StudentModal from "./functionTables/StudentModal";
 import { studentTableData } from "@/data/student-table-data";
 import { addStudentAPI } from "@/data/add-student-classroom";
+import { useNavigate } from "react-router-dom";
+
 
 export function StudentMgn() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+
   const [search, setSearch] = useState("");
   const [students, setStudent] = useState([]);
   useEffect(() => {
