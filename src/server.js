@@ -345,14 +345,25 @@ app.post('/api/classroom/student', (req, res) => {
       return res.status(400).json({ message: "User is not a student" });
     }
 
-    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
-    const enrollDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
-    db.query(sql_enroll, [processedUid, class_id, enrollDate], (err, result) => {
+    const sql_enroll_select = "SELECT * FROM enrollment WHERE uid = ?";
+    db.query(sql_enroll_select, [processedUid], (err, result) => {
       if(err){
-        console.error("Error insert student:", err);
-        return res.status(500).json({error: "Insert student failed"});
+        console.error("Error select enrollment:", err);
+        return res.status(500).json({error: "Select enrollment failed"});
       }
-      res.status(200).send({message: "Added student to classroom successfully"});
+      if(result.length > 0){
+        return res.status(400).json({ message: "Students already have a classroom" });
+      }
+
+      const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
+      const enrollDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+      db.query(sql_enroll, [processedUid, class_id, enrollDate], (err, result) => {
+        if(err){
+          console.error("Error insert student:", err);
+          return res.status(500).json({error: "Insert student failed"});
+        }
+        res.status(200).send({message: "Added student to classroom successfully"});
+      });
     });
   });
 });

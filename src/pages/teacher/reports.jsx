@@ -4,11 +4,11 @@ import { TeacherReportData } from "@/data/teacher-report";
 
 export function TeacherReports() {
   const [selectedDescription, setSelectedDescription] = useState("");
-  const [report, setReport] = useState(TeacherReportData);
+  const [report, setReport] = useState([]);
 
   useEffect(() => {
     const getReport = async () => {
-      const data = TeacherReportData;
+      const data = TeacherReportData();
       setReport(data);
     };
     getReport();
