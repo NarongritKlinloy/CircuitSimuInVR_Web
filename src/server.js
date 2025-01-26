@@ -15,8 +15,8 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
-  database: "project_circuit",
+  password: "root",
+  database: "circuit_project",
 });
 
 db.connect((err) => {
@@ -144,29 +144,72 @@ app.put('/api/practice/update-status', (req, res) => {
 });
 
 //ดึงข้อมูล classroom
-app.get('/api/classroom', (req, res) => {
-  const sql = "SELECT * FROM classroom";
+app.get('/api/classroom/:uid', (req, res) => {
+  const { uid } = req.params;
 
-  db.query(sql, (err, result) => {
+  const sql_teach ="SELECT class_id FROM teach WHERE uid = ?";
+  db.query(sql_teach, [uid], (err, result) => {
     if(err){
       console.error("Error filtering data: ", err);
-      return res.status(500).json({error: "Query data practice failed"});
+      return res.status(500).json({error: "Query data teach failed"});
     }
-    res.status(200).json(result);
+
+    // ตรวจสอบว่ามีข้อมูลใน result หรือไม่
+    if (result.length === 0) {
+      return res.status(404).json({ message: "No classrooms found for this user" });
+    }
+
+    // ดึง class_id ทั้งหมดจาก result
+    const class_id = result.map(row => row.class_id);
+    const sql_classroom = "SELECT * FROM classroom WHERE class_id IN (?)";
+    db.query(sql_classroom, [class_id], (err, result) => {
+      if(err){
+        console.error("Error filtering data: ", err);
+        return res.status(500).json({error: "Query data classroom failed"});
+      }
+      res.status(200).json(result);
+    });
   });
 });
 
 //เพิ่มข้อมูล classroom
 app.post('/api/classroom', (req, res) => {
-  const { class_name, sec, semester, year } = req.body;
-  const sql = "INSERT INTO classroom (class_name, sec, semester, year) VALUES (?, ?, ?, ?)";
+  const { class_name, sec, semester, year, uid } = req.body;
+  if (!uid) {
+    return res.status(400).json({ error: "Missing 'uid' parameter" });
+  }
 
-  db.query(sql,[class_name, sec, semester, year], (err, result) => {
+  const sql_select_classroom = "SELECT * FROM classroom WHERE class_name = ? AND sec = ? AND semester = ? AND year = ?";
+  db.query(sql_select_classroom, [class_name, sec, semester, year], (err, result) => {
     if(err){
-      console.error("Error add data: ", err);
-      return res.status(500).json({error: "Query add data classroom failed"});
+      console.error("Error select data: ", err);
+      return res.status(500).json({error: "Query select data classroom failed"});
     }
-    res.status(200).send({message: "Added classroom successfully"});
+
+    //ถ้ามีข้อมูลให้แจ้งเตือน
+    if (result.length > 0){
+      return res.status(400).json({ message: "Classroom already exists" });
+    }
+
+    //ถ้าไม่มีข้อมูลให้เพิ่ม
+    const sql_insert_classroom = "INSERT INTO classroom (class_name, sec, semester, year) VALUES (?, ?, ?, ?)";
+    db.query(sql_insert_classroom,[class_name, sec, semester, year], (err, result) => {
+      if(err){
+        console.error("Error add data: ", err);
+        return res.status(500).json({error: "Query add data classroom failed"});
+      }
+
+      const class_id = result.insertId;
+      const sql_teach = "INSERT INTO teach (uid, class_id, role) VALUES (?, ?, 1)";
+      db.query(sql_teach, [uid, class_id], (err, result) => {
+        if(err){
+          console.error("Error add data: ", err);
+          return res.status(500).json({error: "Query add data teach failed"});
+        }
+      });
+
+      res.status(200).send({message: "Added classroom and teach successfully"});
+    });
   });
 });
 
@@ -174,19 +217,32 @@ app.post('/api/classroom', (req, res) => {
 app.delete('/api/classroom/:class_id', (req, res) => {
   const { class_id } = req.params;
   
-  const sql = "DELETE FROM classroom WHERE class_id = ?";
-  db.query(sql, [class_id], (err, result) => {
+  const sql_classroom = "DELETE FROM classroom WHERE class_id = ?";
+  db.query(sql_classroom, [class_id], (err, result) => {
     if(err){
       console.error("Error deleting classroom:", err);
-      return res.status(500).json({error: "Delete failed"});
+      return res.status(500).json({error: "Delete classroom failed"});
     }
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Classroom not found" });
     }
-    res.status(200).json({ message: "Classroom deleted successfully" });
   });
+
+  const sql_teach = "DELETE FROM teach WHERE class_id = ?";
+  db.query(sql_teach, [class_id], (err, result) => {
+    if(err){
+      console.error("Error deleting teach:", err);
+      return res.status(500).json({error: "Delete teach failed"});
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Teach not found" });
+    }
+    res.status(200).json({ message: "Classroom and teach deleted successfully" });
+  });
+
 });
 
+//แก้ไข classroom
 app.put('/api/classroom/:id', async(req, res) => {
   try{
     const { id } = req.params;
@@ -221,6 +277,102 @@ app.put('/api/classroom/:id', async(req, res) => {
       return res.status(status).json({message});
     }
 });
+
+//ดึงข้อมูลจำนวน student ที่อยู่ใน classroom
+app.get('/api/classroom/student/count/:class_id', (req, res) => {
+  const { class_id } = req.params;
+  const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  db.query(sql_enroll, [class_id], (err, result) => {
+    if(err){
+      console.error("Error select enrollment:", err);
+      return res.status(500).json({error: "Select enrollment failed"});
+    }
+    res.status(200).json(result.length);
+  });
+});
+
+//ดึงข้อมูล student ที่อยู่ใน classroom
+app.get('/api/classroom/student/:class_id', (req, res) => {
+  const { class_id } = req.params;
+  const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  db.query(sql_enroll, [class_id], (err, result) => {
+    if(err){
+      console.error("Error select enrollment:", err);
+      return res.status(500).json({error: "Select enrollment failed"});
+    }
+    // ตรวจสอบว่ามีข้อมูลใน result หรือไม่
+    if (result.length === 0) {
+      return res.status(200).json(result);
+    }
+    // ดึง uid ทั้งหมดจาก result
+    const uid = result.map(row => row.uid);
+    const sql_user = "SELECT * FROM user WHERE uid IN (?)";
+    db.query(sql_user, [uid], (err, result) => {
+      if(err){
+        console.error("Error select user student:", err);
+        return res.status(500).json({error: "Select user student failed"});
+      }
+      //console.log(result);
+      res.status(200).json(result);
+    });
+  });
+});
+
+//เพิ่ม student เข้า classroom
+app.post('/api/classroom/student', (req, res) => {
+  const { uid, class_id } = req.body;
+  if (!uid || !class_id) {
+    return res.status(400).json({ error: "Missing parameter" });
+  }
+  let processedUid = uid;
+  // Check if the uid already ends with '@kmitl.ac.th'
+  if (!uid.endsWith("@kmitl.ac.th")) {
+    processedUid = `${uid}@kmitl.ac.th`;
+  }
+
+  const sql_user = "SELECT * FROM user WHERE uid = ?";
+  db.query(sql_user, [processedUid], (err, result) => {
+    if(err){
+      console.error("Error select user:", err);
+      return res.status(500).json({error: "Select user failed"});
+    }
+    //ตรวจสอบ user ว่ามีอยู่ไหมหรือเป็น student ไหม
+    if(result.length === 0){
+      return res.status(404).json({ message: "User not found" });
+    }
+    const user = result[0];
+    if(user.role_id !== 3){
+      return res.status(400).json({ message: "User is not a student" });
+    }
+
+    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
+    const enrollDate = new Date().toISOString().slice(0, 19).replace('T', ' ');
+    db.query(sql_enroll, [processedUid, class_id, enrollDate], (err, result) => {
+      if(err){
+        console.error("Error insert student:", err);
+        return res.status(500).json({error: "Insert student failed"});
+      }
+      res.status(200).send({message: "Added student to classroom successfully"});
+    });
+  });
+});
+
+//ลบ student ออกจาก classroom
+app.delete('/api/classroom/student/:uid/:class_id', (req, res) => {
+  const { uid, class_id } = req.params;
+  const sql_classroom = "DELETE FROM enrollment WHERE uid = ? AND class_id = ?";
+  db.query(sql_classroom, [uid, class_id], (err, result) => {
+    if(err){
+      console.error("Error deleting enrollment:", err);
+      return res.status(500).json({error: "Delete enrollment failed"});
+    }
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Enrollment not found" });
+    }
+    res.status(200).json({ message: "Enrollment deleted successfully" });
+  });
+});
+
 
 // ประกาศ port ที่ทำงานอยู่
 app.listen(PORT, () => {

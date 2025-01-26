@@ -19,17 +19,35 @@ import {
     PlusCircleIcon,
 } from "@heroicons/react/24/solid";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { deleteClassroomAPI } from "@/data/delete-classroom";
 import { editClassroomAPI } from "@/data/edit-classroom";
+import { countStudentAPI } from "@/data/student-count";
 
 function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isAddTAOpen, setIsAddTAOpen] = useState(false);
     const [selectedClassroom, setSelectedClassroom] = useState(null);
+
+    //นับจำนวน student
+    const [studentCount, setStudentCount] = useState({});
+    useEffect(() => {
+        const fetchStudentCounts = async () => {
+            const countPromises = classrooms.map(async (classroom) => {
+                const count = await countStudentAPI(classroom.class_id);
+                return { [classroom.class_id]: count };
+            });
+
+            const counts = await Promise.all(countPromises);
+            setStudentCount(Object.assign({}, ...counts));
+        };
+
+        fetchStudentCounts();
+    }, [classrooms]);
+
 
     // handle data change
     const inputHandle = (event) => {
@@ -153,7 +171,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </thead>
                         <tbody>
                             {classrooms.map(
-                                ({ class_id, class_name, sec, semester, year, total }, key) => {
+                                ({ class_id, class_name, sec, semester, year }, key) => {
                                     const isLast = key === classrooms.length - 1;
                                     const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"
                                         }`;
@@ -195,15 +213,18 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
                                                 <Typography className="text-s font-normal text-blue-gray-500">
-                                                    {total}
+                                                    {studentCount[class_id]}
                                                 </Typography>
                                             </td>
 
                                             {/* Add Student Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
-                                                    to={`/teacher/student_mgn/${class_name}`}
+                                                    to={`/teacher/student_mgn/${class_name} (${sec})`}
                                                     className="text-green-500 hover:text-green-700"
+                                                    onClick={() => {
+                                                        sessionStorage.setItem("class_id", class_id);
+                                                    }}
                                                 >
                                                     <UserPlusIcon className="h-5 w-5 mx-auto" />
                                                 </Link>
