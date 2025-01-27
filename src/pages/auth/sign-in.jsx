@@ -4,14 +4,29 @@ import {
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
+import { signInAPI } from "@/data/sign-in-user";
+import { useEffect } from "react";
 
 export function SignIn() {
   const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "teacher") {
+        navigate("/teacher/home");
+      } else if (role === "admin") {
+        navigate("/dashboard/home");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+    }
+  }, [navigate]);
+
   const handleGoogleLoginSuccess = (credentialResponse) => {
-    const jwt = credentialResponse.credential;
-    const payload = JSON.parse(atob(jwt.split(".")[1]));
-    const email = payload.email;
-    const name = payload.name;
+  const jwt = credentialResponse.credential;
+  const payload = JSON.parse(atob(jwt.split(".")[1]));
+  const email = payload.email;
+  const name = payload.name;
 
     if (!email.endsWith("@kmitl.ac.th")) {
       Swal.fire({
@@ -46,8 +61,12 @@ export function SignIn() {
           sessionStorage.setItem("email", email);
           sessionStorage.setItem("name", name);
           if (role === "admin") {
+            const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 2, date);
             navigate("/dashboard/home"); // Redirect ไปหน้า Admin
           } else if (role === "teacher") {
+            const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+            signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
             navigate("/teacher/home"); // Redirect ไปหน้า Teacher
           }
         }
@@ -68,10 +87,7 @@ export function SignIn() {
         text: "You are not authorized to access the admin system.",
         confirmButtonText: "OK",
       }).then(() => {
-        sessionStorage.setItem("email", email);
-        sessionStorage.setItem("name", name);
-        sessionStorage.setItem("role", "admin");
-        navigate("/dashboard/home");
+        navigate("/auth/sign-in");
       });
     } else {
       Swal.fire({
@@ -83,6 +99,8 @@ export function SignIn() {
         sessionStorage.setItem("email", email);
         sessionStorage.setItem("name", name);
         sessionStorage.setItem("role", "teacher");
+        const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
+        signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
         navigate("/teacher/home");
       });
     }

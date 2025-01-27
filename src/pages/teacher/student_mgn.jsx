@@ -4,15 +4,31 @@ import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
 import StudentTable from "./functionTables/StudentTable";
 import StudentModal from "./functionTables/StudentModal";
 import { studentTableData } from "@/data/student-table-data";
+import { addStudentAPI } from "@/data/add-student-classroom";
+import { useNavigate } from "react-router-dom";
+
 
 export function StudentMgn() {
-  const { classname } = useParams();
-  const [search, setSearch] = useState("");
-  const [students, setStudent] = useState(studentTableData);
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
 
+  const [search, setSearch] = useState("");
+  const [students, setStudent] = useState([]);
   useEffect(() => {
     const getStudent = async () => {
-      const data = await studentTableData();
+      const data = await studentTableData(sessionStorage.getItem("class_id"));
       setStudent(data);
     };
     getStudent();
@@ -23,23 +39,23 @@ export function StudentMgn() {
   const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
   const [editingStudent, setEditingStudent] = useState(null);
   const [newStudent, setNewStudent] = useState({
-    name: "",
-    sec: "",
-    semester: "",
-    year: "",
+    uid: "",
+    class_id: sessionStorage.getItem("class_id"),
   });
 
   // seach 
-  const filteredStudent = students.filter(({ name, id }) =>
-    [name, id].some((field) =>
+  const filteredStudent = students.filter(({ uid , class_id}) =>
+    [uid, class_id ].some((field) =>
       field.toLowerCase().includes(search.toLowerCase())
     )
   );
 
   // add
   const handleAddStudent = () => {
+    //console.log(newStudent);
+    addStudentAPI(newStudent);
     setStudent([...students, newStudent]);
-    setNewStudent({ name: "", sec: "", semester: "", year: "" });
+    setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id")});
     setIsAddStudentOpen(false);
   };
 

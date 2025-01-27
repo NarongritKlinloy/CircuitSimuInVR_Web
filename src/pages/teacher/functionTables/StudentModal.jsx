@@ -11,7 +11,7 @@ import {
 } from "@material-tailwind/react";
 import { studentTableData } from "@/data/student-table-data";
  
-function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnStatus }) {
+function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnStatus, onSave }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
   // declare user id
@@ -39,10 +39,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
   const validateFields = () => {
     const newErrors = {};
 
-    if (!studentData.name) newErrors.name = "Name is required";
-    if (!studentData.sec) newErrors.sec = "Sec is required";
-    if (!studentData.semester) newErrors.semester = "Semester is required";
-    if (!studentData.year) newErrors.year = "Year is required";
+    if (!studentData.uid) newErrors.uid = "ID Student is required";
     
     setErrors(newErrors);
     
@@ -89,15 +86,15 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
           <div>
             <Input
               label="Student ID"
-              value={studentData.name || ""}
+              value={studentData.uid || ""}
               onChange={(e) =>
-                setStudentData({ ...studentData, name: e.target.value })
+                setStudentData({ ...studentData, uid: e.target.value })
               }
-              error={!!errors.name}
+              error={!!errors.uid}
             />
-            {errors.name && (
+            {errors.uid && (
               <Typography variant="small" color="red" className="mt-1">
-                {errors.name}
+                {errors.uid}
               </Typography>
             )}
           </div>

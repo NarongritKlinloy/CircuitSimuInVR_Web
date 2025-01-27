@@ -13,20 +13,41 @@ import {
 
 import {
     PencilSquareIcon,
+    UsersIcon,
     TrashIcon,
     UserPlusIcon,
+    PlusCircleIcon,
 } from "@heroicons/react/24/solid";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import { deleteClassroomAPI } from "@/data/delete-classroom";
 import { editClassroomAPI } from "@/data/edit-classroom";
+import { countStudentAPI } from "@/data/student-count";
 
 function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
+    const [isAddTAOpen, setIsAddTAOpen] = useState(false);
     const [selectedClassroom, setSelectedClassroom] = useState(null);
+
+    //นับจำนวน student
+    const [studentCount, setStudentCount] = useState({});
+    useEffect(() => {
+        const fetchStudentCounts = async () => {
+            const countPromises = classrooms.map(async (classroom) => {
+                const count = await countStudentAPI(classroom.class_id);
+                return { [classroom.class_id]: count };
+            });
+
+            const counts = await Promise.all(countPromises);
+            setStudentCount(Object.assign({}, ...counts));
+        };
+
+        fetchStudentCounts();
+    }, [classrooms]);
+
 
     // handle data change
     const inputHandle = (event) => {
@@ -36,13 +57,13 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
         }));
     };
 
-    // เปิด Modal และโหลดข้อมูล
+    // เปิด Modal Edit และโหลดข้อมูล
     const openEditModal = (classroom) => {
         setSelectedClassroom(classroom);
         setIsEditOpen(true);
     };
 
-    // ปิด Modal
+    // ปิด Modal Edit
     const closeEditModal = () => {
         setIsEditOpen(false);
         setSelectedClassroom(null);
@@ -51,7 +72,25 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = async () => {
         editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
+        closeEditModal();
+    };
 
+
+    // เปิด Modal Add TA
+    const openAddTAModal = (classroom) => {
+        setSelectedClassroom(classroom);
+        setIsAddTAOpen(true);
+    };
+
+    // ปิด Modal ADD TA
+    const closeAddTAModal = () => {
+        setIsAddTAOpen(false);
+        setSelectedClassroom(null);
+    };
+
+    // ฟังก์ชันยืนยันการแก้ไข
+    const handleAddTA = async () => {
+        // editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
         closeEditModal();
     };
 
@@ -109,6 +148,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                     "year",
                                     "student",
                                     "add student",
+                                    "add assistant",
                                     "edit",
                                     "delete",
                                 ].map((header) => (
@@ -131,7 +171,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </thead>
                         <tbody>
                             {classrooms.map(
-                                ({ class_id, class_name, sec, semester, year, total }, key) => {
+                                ({ class_id, class_name, sec, semester, year }, key) => {
                                     const isLast = key === classrooms.length - 1;
                                     const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"
                                         }`;
@@ -145,7 +185,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                         color="blue-gray"
                                                         className="font-semibold"
                                                     >
-                                                        {class_id}
+                                                        {key+1}
                                                     </Typography>
                                                 </div>
                                             </td>
@@ -173,18 +213,35 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
                                                 <Typography className="text-s font-normal text-blue-gray-500">
-                                                    {total}
+                                                    {studentCount[class_id]}
                                                 </Typography>
                                             </td>
 
                                             {/* Add Student Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
-                                                    to={`/teacher/student_mgn/${class_name}`}
+                                                    to={`/teacher/student_mgn/${class_name} (${sec})`}
                                                     className="text-green-500 hover:text-green-700"
+                                                    onClick={() => {
+                                                        sessionStorage.setItem("class_id", class_id);
+                                                    }}
                                                 >
                                                     <UserPlusIcon className="h-5 w-5 mx-auto" />
                                                 </Link>
+                                            </td>
+
+                                            {/* Add TA Button */}
+                                            <td className={`${rowClassName} text-center`}>
+                                                <button
+                                                    onClick={() =>
+                                                        openAddTAModal({
+                                                            uid
+                                                        })
+                                                    }
+                                                    className="text-blue-500 hover:text-blue-700"
+                                                >
+                                                    <UsersIcon className="h-5 w-5 mx-auto" />
+                                                    </button>
                                             </td>
 
                                             {/* Edit Classroom Button */}
@@ -279,6 +336,33 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                     </Button>
                     <Button variant="gradient" color="green" onClick={handleSaveEdit}>
                         Save
+                    </Button>
+                </DialogFooter>
+            </Dialog>
+
+            {/* Add TA Modal */}
+            <Dialog open={isAddTAOpen} handler={closeAddTAModal}>
+                <DialogHeader>Add Teacher Assistant</DialogHeader>
+                <DialogBody>
+                    <Typography className="mb-4">
+                        class : {selectedClassroom?.class_name}
+                    </Typography>
+                    <div className="flex flex-col gap-4">
+                        <div>
+                            <Input
+                                label="Email"
+                                name="uid"
+                                onChange={inputHandle}
+                            />
+                        </div>
+                    </div>
+                </DialogBody>
+                <DialogFooter>
+                    <Button variant="text" color="red" onClick={closeAddTAModal}>
+                        Cancel
+                    </Button>
+                    <Button variant="gradient" color="green" onClick={handleAddTA}>
+                        Add
                     </Button>
                 </DialogFooter>
             </Dialog>

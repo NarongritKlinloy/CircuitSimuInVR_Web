@@ -4,14 +4,30 @@ import ClassroomTable from "./functionTables/ClassroomTable";
 import ClassroomModal from "./functionTables/classroommodal";
 import { classroomTableData } from "@/data/classroom-table-data";
 import { addClassroomAPI } from "@/data/add-classroom";
+import { useNavigate } from "react-router-dom";
+
 
 export function ClassroomMgn() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState([]);
-  
   useEffect(() => {
     const getClassroom = async () => {
-      const data = await classroomTableData();
+      const data = await classroomTableData(sessionStorage.getItem("email"));
       setClassroom(data);
     };
     getClassroom();
@@ -26,12 +42,13 @@ export function ClassroomMgn() {
     sec: "",
     semester: "",
     year: "",
+    uid: sessionStorage.getItem("email"),
   });
 
   // ฟังก์ชันค้นหา
   const filteredClassroom = classrooms.filter(({ class_name, sec }) =>
-    [class_name, sec].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
+    [class_name, sec].some((field) => 
+      String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
 

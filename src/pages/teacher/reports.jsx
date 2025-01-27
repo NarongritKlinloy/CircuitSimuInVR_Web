@@ -1,213 +1,253 @@
 import React, { useState, useEffect } from "react";
-import { textarea, Input, Typography, Card, CardHeader, CardBody, Button, Dialog, DialogHeader, DialogBody, DialogFooter } from "@material-tailwind/react";
+import {
+  // textarea, // ถ้าไม่ได้ใช้จริงสามารถลบออกได้
+  Input,
+  Typography,
+  Card,
+  CardHeader,
+  CardBody,
+  Button,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+} from "@material-tailwind/react";
 import { TeacherReportData } from "@/data/teacher-report";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export function TeacherReports() {
-  const [selectedDescription, setSelectedDescription] = useState("");
-  const [report, setReport] = useState(TeacherReportData);
+  const navigate = useNavigate();
 
+  // ตรวจสอบ role
   useEffect(() => {
-    const getReport = async () => {
-      const data = TeacherReportData;
-      setReport(data);
-    };
-    getReport();
-  }, [report]);
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      } else if (role === null) {
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
 
-  // Modal Report Detail
+  // ===== ประกาศ State หลักที่เกี่ยวข้อง =====
+  const [reports, setReports] = useState([]);   // แก้จาก [report, setReport]
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [selectedDescription, setSelectedDescription] = useState("");
   const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
+
+  // Modal สำหรับเพิ่มรายงานใหม่
+  const [isAddReportOpen, setIsAddReportOpen] = useState(false);
+
+  // ฟังก์ชันดึงวันที่ปัจจุบัน (YYYY-MM-DD)
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  // State เก็บข้อมูลฟอร์มการเพิ่มรายงาน
+  const [newReport, setNewReport] = useState({
+    report_uid: sessionStorage.getItem("email"),
+    report_name: "",
+    report_detail: "",
+    report_date: getCurrentDate(), // ค่าเริ่มต้นเป็นวันที่ปัจจุบัน
+  });
+
+  // State สำหรับเก็บ Error ของฟอร์ม
+  const [errors, setErrors] = useState({});
+
+  // ดึงข้อมูลรายงานจากฟังก์ชัน TeacherReportData
+  useEffect(() => {
+    const fetchReports = async () => {
+      try {
+        setLoading(true);
+        const data = await TeacherReportData(); // ฟังก์ชันดึงข้อมูล (return เป็น array)
+        setReports(data); // เก็บข้อมูลใน state
+      } catch (err) {
+        setError("Error fetching reports. Please try again.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchReports();
+  }, []);
+
+  // ตรวจสอบค่าใน console เมื่อ reports มีการเปลี่ยนแปลง
+  useEffect(() => {
+    console.log("Reports state:", reports);
+  }, [reports]);
+
+  // ฟังก์ชันเปิด/ปิด Dialog รายละเอียด
   const handleDialogOpen = (detail) => {
     setSelectedDescription(detail);
     setDialogDetailOpen(true);
   };
 
-  // Add new report Modal State
-  const [isAddReportOpen, setIsAddReportOpen] = useState(false);
-  const [newReport, setNewReport] = useState({
-    title: "",
-    detail: "",
-  });
+  // ฟังก์ชัน Validate ข้อมูลฟอร์มก่อนบันทึก
+  const validateFields = () => {
+    const newErrors = {};
+    if (!newReport.report_name) {
+      newErrors.report_name = "Report Name is required";
+    }
+    if (!newReport.report_detail) {
+      newErrors.report_detail = "Detail is required";
+    }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
 
-  const today = new Date();
+  // ฟังก์ชันบันทึกข้อมูล (ส่งไป API)
+  const handleSave = async () => {
+    console.log("Data to send to API:", newReport);
 
-  // Modal Add new report 
-  const handleAddReport = () => {
-    setReport([...report, newReport]);
-    setNewReport({ title: "", detail: "" });
+    if (validateFields()) {
+      try {
+        const response = await axios.post("http://localhost:5000/api/addreport", newReport);
+        if (response.status === 200) {
+          Swal.fire({
+            title: "Added!",
+            text: `${newReport.report_name} has been added.`,
+            icon: "success",
+            confirmButtonText: "OK",
+            customClass: {
+              confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+            },
+          }).then(() => {
+            // หลังจากกด OK ใน sweetalert ให้รีเฟรชหน้า
+            navigate(0);
+          });
+        }
+      } catch (err) {
+        Swal.fire({
+          title: "Error!",
+          text: `Cannot add ${newReport.report_name}. Please try again.`,
+          icon: "error",
+          confirmButtonText: "OK",
+          customClass: {
+            confirmButton: "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+          },
+        });
+      }
+    }
     setIsAddReportOpen(false);
   };
 
-  const [errors, setErrors] = useState({});
-  if (!newReport) return null;
-
-  // ฟังก์ชันรีเซ็ต Error และข้อมูล
-  const resetState = () => {
-    setErrors({}); // รีเซ็ต Error ให้เป็นค่าว่าง
+  // ฟังก์ชันปิด Dialog Add Report และรีเซ็ตฟอร์ม
+  const resetState = (defaultState = { report_name: "", report_detail: "", report_date: "" }) => {
+    setErrors({});
+    setNewReport(defaultState);
   };
-
-  // ฟังก์ชันจัดการปิด Modal พร้อมรีเซ็ต
   const handleClose = () => {
-    resetState(); // รีเซ็ตสถานะ Error
-    setIsAddReportOpen(false); // ปิด Modal
+    resetState();
+    setIsAddReportOpen(false);
   };
 
-  // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
-  const validateFields = () => {
-    const newErrors = {};
-
-    if (!newReport.title) newErrors.title = "Title is required";
-    if (!newReport.detail) newErrors.detail = "Please give detail";
-
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0; // คืนค่า true ถ้าไม่มี Error
-  };
-
-  // ฟังก์ชันบันทึกข้อมูล
-  const handleSave = () => {
-    if (validateFields()) {
-      handleAddReport();
-      resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
-    }
-  };
+  // ส่วนแสดง Loading หรือ Error
+  if (loading) return <p>Loading...</p>;
+  if (error) return <p>{error}</p>;
 
   return (
     <div className="mx-auto my-20 flex flex-col gap-8">
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
           <Typography variant="h6" color="white">
-            Report
+            Reports
           </Typography>
           <Button variant="gradient" color="green" onClick={() => setIsAddReportOpen(true)}>
             New Report
           </Button>
         </CardHeader>
-        <CardBody className="overflow-x-scroll pt-0 pb-2">
-          <table className="w-full min-w-[640px] table-auto">
+        <CardBody className="overflow-x-auto pt-0 pb-2">
+          <table className="w-full min-w-max table-auto border-collapse border mx-auto text-center">
             <thead>
               <tr>
-                {["Title", "Detail", "date", "status", ""].map((el) => (
-                  <th
-                    key={el}
-                    className="border-b border-blue-gray-50 py-3 px-5 text-left"
-                  >
-                    <Typography
-                      variant="small"
-                      className="text-[11px] font-bold uppercase text-blue-gray-400"
-                    >
-                      {el}
-                    </Typography>
-                  </th>
-                ))}
+                <th className="border px-4 py-2">No.</th>
+                <th className="border px-4 py-2">Name</th>
+                <th className="border px-4 py-2">User</th>
+                <th className="border px-4 py-2">Create Date</th>
+                <th className="border px-4 py-2">Detail</th>
               </tr>
             </thead>
             <tbody>
-              {report.map(({ title, detail, date, status }, key) => {
-                const className = `py-3 px-5 ${key === report.length - 1 ? "" : "border-b border-blue-gray-50"
-                  }`;
-
-                return (
-                  <tr key={title}>
-                    <td className={className}>
-                      <div className="flex items-center gap-3">
-                        <div>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-semibold"
-                          >
-                            {title}
-                          </Typography>
-                        </div>
-                      </div>
-                    </td>
-
-                    <td className={className}>
-                      <Typography
-                        className="text-xs font-normal text-blue-gray-500 truncate"
-                        onClick={() => handleDialogOpen(detail)}
-                        style={{ cursor: "pointer" }}
-                      >
-                        {detail.length > 50
-                          ? `${detail.slice(0, 50)}...`
-                          : detail}
-                      </Typography>
-                    </td>
-                    <td className={className}>
-                      <Typography className="text-xs font-semibold text-blue-gray-600">
-                        {date}
-                      </Typography>
-                    </td>
-
-                    <td className={className}>
-                      <Typography
-                        className={`text-xs font-semibold ${status?.toLowerCase() === 'success' ? 'text-green-500' : 'text-red-500'
-                          }`}
-                      >
-                        {status}
-                      </Typography>
-                    </td>
-
-                  </tr>
-                );
-              })}
+              {reports.map((item, index) => (
+                <tr key={item.report_id}>
+                  <td className="border px-4 py-2">{index + 1}</td>
+                  <td className="border px-4 py-2">{item.report_name}</td>
+                  <td className="border px-4 py-2">{item.report_uid}</td>
+                  <td className="border px-4 py-2">
+                    {new Date(item.report_date).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="border px-4 py-2">
+                    <Button variant="text" color="blue" onClick={() => handleDialogOpen(item.report_detail)}>
+                      Detail
+                    </Button>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </CardBody>
       </Card>
 
-
-      {/* Modal Report Detail */}
+      {/* Modal รายละเอียด */}
       <Dialog open={dialogDetailOpen} handler={() => setDialogDetailOpen(false)}>
-        <DialogHeader>Detailed Description</DialogHeader>
+        <DialogHeader>Detail</DialogHeader>
         <DialogBody>
           <Typography>{selectedDescription}</Typography>
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="gradient"
-            color="blue"
-            onClick={() => setDialogDetailOpen(false)}
-          >
+          <Button variant="gradient" color="blue" onClick={() => setDialogDetailOpen(false)}>
             Close
           </Button>
         </DialogFooter>
       </Dialog>
-
 
       {/* Modal Add new report */}
       <Dialog open={isAddReportOpen} handler={handleClose}>
         <DialogHeader>Add New Report</DialogHeader>
         <DialogBody>
           <div className="flex flex-col gap-4">
-            {/* Input for Title */}
+            {/* Input for Report Name */}
             <Input
-              label="Title"
-              value={newReport.title || ""}
-              onChange={(e) => setNewReport({ ...newReport, title: e.target.value })}
-              error={!!errors.title}
+              label="Report Name"
+              value={newReport.report_name || ""}
+              onChange={(e) => setNewReport({ ...newReport, report_name: e.target.value })}
+              error={!!errors.report_name}
             />
-            {errors.title && (
+            {errors.report_name && (
               <Typography variant="small" color="red" className="mt-1">
-                {errors.title}
+                {errors.report_name}
               </Typography>
             )}
 
             {/* Textarea for Detail */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="detail" className="text-sm font-medium text-gray-700">
+              <label htmlFor="report_detail" className="text-sm font-medium text-gray-700">
                 Detail
               </label>
               <textarea
-                id="detail"
+                id="report_detail"
                 rows="4"
-                className={`p-2 border ${errors.detail ? "border-red-500" : "border-gray-300"} rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                value={newReport.detail || ""}
-                onChange={(e) => setNewReport({ ...newReport, detail: e.target.value })}
+                className={`p-2 border ${
+                  errors.report_detail ? "border-red-500" : "border-gray-300"
+                } rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                value={newReport.report_detail || ""}
+                onChange={(e) => setNewReport({ ...newReport, report_detail: e.target.value })}
               />
-              {errors.detail && (
+              {errors.report_detail && (
                 <Typography variant="small" color="red" className="mt-1">
-                  {errors.detail}
+                  {errors.report_detail}
                 </Typography>
               )}
             </div>
@@ -217,7 +257,6 @@ export function TeacherReports() {
           <Button variant="text" color="red" onClick={handleClose}>
             Cancel
           </Button>
-          {/* <Button variant="gradient" color="green" onClick={handleSave}> */}
           <Button variant="gradient" color="green" onClick={handleSave}>
             Submit
           </Button>

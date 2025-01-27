@@ -8,7 +8,6 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
-import { classroomTableData } from "@/data/classroom-table-data";
 
 function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave , btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
