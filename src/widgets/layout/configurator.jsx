@@ -178,6 +178,7 @@ export function Configurator() {
                 },
               }).then((result) => {
                 if (result.isConfirmed) {
+                  sessionStorage.clear();
                   navigate("/auth/sign-in"); // เปลี่ยนหน้าไปที่ /auth/sign-in
                 }
               });
