@@ -1,26 +1,27 @@
 import React, { useState, useEffect } from "react";
+import { textarea, Input, Typography, Card, CardHeader, CardBody, Button, Dialog, DialogHeader, DialogBody, DialogFooter } from "@material-tailwind/react";
+import { TeacherReportData } from "@/data/teacher-report";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
-import Swal from "sweetalert2";
-import {
-  Typography,
-  Card,
-  CardHeader,
-  CardBody,
-  Button,
-  Dialog,
-  DialogHeader,
-  DialogBody,
-  DialogFooter,
-  Input,
-} from "@material-tailwind/react";
-import { TeacherReportData } from "@/data/teacher-report"; // นำเข้าฟังก์ชัน
+
 
 export function TeacherReports() {
-  const [selectedDescription, setSelectedDescription] = useState(""); // เก็บรายละเอียดสำหรับ modal
-  const [reports, setReports] = useState([]); // สถานะสำหรับเก็บข้อมูล API
-  const [loading, setLoading] = useState(true); // สถานะโหลดข้อมูล
-  const [error, setError] = useState(null); // สถานะข้อผิดพลาด
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+
+  const [selectedDescription, setSelectedDescription] = useState("");
+  const [report, setReport] = useState([]);
 
   // Modal แสดงรายละเอียดรายงาน
   const [dialogDetailOpen, setDialogDetailOpen] = useState(false);

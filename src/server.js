@@ -381,6 +381,34 @@ app.delete('/api/classroom/student/:uid/:class_id', (req, res) => {
   });
 });
 
+//เพิ่ม user เข้าระบบ
+app.post('/api/user/:uid/:name/:role_id/:last_active', (req, res) => {
+  const { uid, name, role_id, last_active } = req.params;
+  const sql_select_user = "SELECT * FROM user WHERE uid = ?";
+  db.query(sql_select_user, [uid], (err, result) => {
+    if(err){
+      console.error("Error selecting user:", err);
+      return res.status(500).json({error: "Select user failed"});
+    }
+    if(result.length > 0){
+      const sql_update_last_active = "UPDATE user SET name = ?, role_id = ?, last_active = ? WHERE uid = ?";
+      db.query(sql_update_last_active, [name, role_id ,last_active, uid], (err, result) => {
+        if(err){
+          console.error("Error update last active:", err);
+          return res.status(500).json({error: "Update last active failed"});
+        }
+      });
+    }else{
+      const sql_insert_user = "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, ?)";
+      db.query(sql_insert_user, [uid, name, role_id, last_active], (err, result) => {
+        if(err){
+          console.error("Error insert user:", err);
+          return res.status(500).json({error: "Insert user failed"});
+        }
+      });
+    }
+    res.status(200).json({ message: "sign in successfully" });
+
 // --------------------------- Report (Champ) ---------------------------
 
 // ดึงข้อมูล report
@@ -432,6 +460,7 @@ app.post('/api/addreport', (req, res) => {
       message: "เพิ่มรายงานสำเร็จ",
       report_id: result.insertId,
     });
+
   });
 });
 
