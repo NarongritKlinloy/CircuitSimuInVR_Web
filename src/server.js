@@ -408,6 +408,8 @@ app.post('/api/user/:uid/:name/:role_id/:last_active', (req, res) => {
       });
     }
     res.status(200).json({ message: "sign in successfully" });
+  }); 
+}); 
 
 // --------------------------- Report (Champ) ---------------------------
 
@@ -464,7 +466,7 @@ app.post('/api/addreport', (req, res) => {
   });
 });
 
-// --------------------------------- Start Server ---------------------------------
+// ประกาศ port ที่ทำงานอยู่
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

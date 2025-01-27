@@ -1,17 +1,32 @@
 import React, { useState, useEffect } from "react";
-import { textarea, Input, Typography, Card, CardHeader, CardBody, Button, Dialog, DialogHeader, DialogBody, DialogFooter } from "@material-tailwind/react";
+import {
+  // textarea, // ถ้าไม่ได้ใช้จริงสามารถลบออกได้
+  Input,
+  Typography,
+  Card,
+  CardHeader,
+  CardBody,
+  Button,
+  Dialog,
+  DialogHeader,
+  DialogBody,
+  DialogFooter,
+} from "@material-tailwind/react";
 import { TeacherReportData } from "@/data/teacher-report";
 import { useNavigate } from "react-router-dom";
-
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export function TeacherReports() {
   const navigate = useNavigate();
+
+  // ตรวจสอบ role
   useEffect(() => {
     try {
       const role = sessionStorage.getItem("role");
       if (role === "admin") {
         navigate("/dashboard/home");
-      }else if(role === null){
+      } else if (role === null) {
         navigate("/auth/sign-in");
       }
     } catch (error) {
@@ -20,10 +35,12 @@ export function TeacherReports() {
     }
   }, [navigate]);
 
-  const [selectedDescription, setSelectedDescription] = useState("");
-  const [report, setReport] = useState([]);
+  // ===== ประกาศ State หลักที่เกี่ยวข้อง =====
+  const [reports, setReports] = useState([]);   // แก้จาก [report, setReport]
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  // Modal แสดงรายละเอียดรายงาน
+  const [selectedDescription, setSelectedDescription] = useState("");
   const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
 
   // Modal สำหรับเพิ่มรายงานใหม่
@@ -38,7 +55,7 @@ export function TeacherReports() {
     return `${year}-${month}-${day}`;
   };
 
-  // State เก็บข้อมูลฟอร์มในการเพิ่มรายงาน
+  // State เก็บข้อมูลฟอร์มการเพิ่มรายงาน
   const [newReport, setNewReport] = useState({
     report_uid: sessionStorage.getItem("email"),
     report_name: "",
@@ -46,18 +63,15 @@ export function TeacherReports() {
     report_date: getCurrentDate(), // ค่าเริ่มต้นเป็นวันที่ปัจจุบัน
   });
 
-  // เก็บ Error ของฟอร์ม
+  // State สำหรับเก็บ Error ของฟอร์ม
   const [errors, setErrors] = useState({});
-
-  // ใช้สำหรับนำทาง
-  const navigate = useNavigate();
 
   // ดึงข้อมูลรายงานจากฟังก์ชัน TeacherReportData
   useEffect(() => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const data = await TeacherReportData(); // เรียกฟังก์ชันที่นำเข้ามา
+        const data = await TeacherReportData(); // ฟังก์ชันดึงข้อมูล (return เป็น array)
         setReports(data); // เก็บข้อมูลใน state
       } catch (err) {
         setError("Error fetching reports. Please try again.");
@@ -69,7 +83,7 @@ export function TeacherReports() {
     fetchReports();
   }, []);
 
-  // ลองเช็กใน Console เวลา state `reports` อัปเดต
+  // ตรวจสอบค่าใน console เมื่อ reports มีการเปลี่ยนแปลง
   useEffect(() => {
     console.log("Reports state:", reports);
   }, [reports]);
@@ -78,14 +92,6 @@ export function TeacherReports() {
   const handleDialogOpen = (detail) => {
     setSelectedDescription(detail);
     setDialogDetailOpen(true);
-  };
-
-  // ฟังก์ชันรีเซ็ต Error และฟอร์ม
-  const resetState = (
-    defaultState = { report_name: "", report_detail: "", report_date: "" }
-  ) => {
-    setErrors({});
-    setNewReport(defaultState);
   };
 
   // ฟังก์ชัน Validate ข้อมูลฟอร์มก่อนบันทึก
@@ -107,10 +113,7 @@ export function TeacherReports() {
 
     if (validateFields()) {
       try {
-        const response = await axios.post(
-          `http://localhost:5000/api/addreport`,
-          newReport
-        );
+        const response = await axios.post("http://localhost:5000/api/addreport", newReport);
         if (response.status === 200) {
           Swal.fire({
             title: "Added!",
@@ -118,11 +121,10 @@ export function TeacherReports() {
             icon: "success",
             confirmButtonText: "OK",
             customClass: {
-              confirmButton:
-                "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+              confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
             },
           }).then(() => {
-            // หลังจากกด OK ใน sweetalert เราจะรีเฟรชหน้า ด้วย navigate(0)
+            // หลังจากกด OK ใน sweetalert ให้รีเฟรชหน้า
             navigate(0);
           });
         }
@@ -133,8 +135,7 @@ export function TeacherReports() {
           icon: "error",
           confirmButtonText: "OK",
           customClass: {
-            confirmButton:
-              "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+            confirmButton: "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
           },
         });
       }
@@ -142,7 +143,11 @@ export function TeacherReports() {
     setIsAddReportOpen(false);
   };
 
-  // ปิด Dialog Add Report พร้อมรีเซ็ต
+  // ฟังก์ชันปิด Dialog Add Report และรีเซ็ตฟอร์ม
+  const resetState = (defaultState = { report_name: "", report_detail: "", report_date: "" }) => {
+    setErrors({});
+    setNewReport(defaultState);
+  };
   const handleClose = () => {
     resetState();
     setIsAddReportOpen(false);
@@ -155,19 +160,11 @@ export function TeacherReports() {
   return (
     <div className="mx-auto my-20 flex flex-col gap-8">
       <Card>
-        <CardHeader
-          variant="gradient"
-          color="gray"
-          className="mb-8 p-6 flex justify-between items-center"
-        >
+        <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
           <Typography variant="h6" color="white">
             Reports
           </Typography>
-          <Button
-            variant="gradient"
-            color="green"
-            onClick={() => setIsAddReportOpen(true)}
-          >
+          <Button variant="gradient" color="green" onClick={() => setIsAddReportOpen(true)}>
             New Report
           </Button>
         </CardHeader>
@@ -183,20 +180,16 @@ export function TeacherReports() {
               </tr>
             </thead>
             <tbody>
-              {reports.map((report, index) => (
-                <tr key={report.report_id}>
+              {reports.map((item, index) => (
+                <tr key={item.report_id}>
                   <td className="border px-4 py-2">{index + 1}</td>
-                  <td className="border px-4 py-2">{report.report_name}</td>
-                  <td className="border px-4 py-2">{report.report_uid}</td>
+                  <td className="border px-4 py-2">{item.report_name}</td>
+                  <td className="border px-4 py-2">{item.report_uid}</td>
                   <td className="border px-4 py-2">
-                    {new Date(report.report_date).toLocaleDateString("en-GB")}
+                    {new Date(item.report_date).toLocaleDateString("en-GB")}
                   </td>
                   <td className="border px-4 py-2">
-                    <Button
-                      variant="text"
-                      color="blue"
-                      onClick={() => handleDialogOpen(report.report_detail)}
-                    >
+                    <Button variant="text" color="blue" onClick={() => handleDialogOpen(item.report_detail)}>
                       Detail
                     </Button>
                   </td>
@@ -214,11 +207,7 @@ export function TeacherReports() {
           <Typography>{selectedDescription}</Typography>
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="gradient"
-            color="blue"
-            onClick={() => setDialogDetailOpen(false)}
-          >
+          <Button variant="gradient" color="blue" onClick={() => setDialogDetailOpen(false)}>
             Close
           </Button>
         </DialogFooter>
@@ -233,9 +222,7 @@ export function TeacherReports() {
             <Input
               label="Report Name"
               value={newReport.report_name || ""}
-              onChange={(e) =>
-                setNewReport({ ...newReport, report_name: e.target.value })
-              }
+              onChange={(e) => setNewReport({ ...newReport, report_name: e.target.value })}
               error={!!errors.report_name}
             />
             {errors.report_name && (
@@ -246,24 +233,17 @@ export function TeacherReports() {
 
             {/* Textarea for Detail */}
             <div className="flex flex-col gap-2">
-              <label
-                htmlFor="report_detail"
-                className="text-sm font-medium text-gray-700"
-              >
+              <label htmlFor="report_detail" className="text-sm font-medium text-gray-700">
                 Detail
               </label>
               <textarea
                 id="report_detail"
                 rows="4"
                 className={`p-2 border ${
-                  errors.report_detail
-                    ? "border-red-500"
-                    : "border-gray-300"
+                  errors.report_detail ? "border-red-500" : "border-gray-300"
                 } rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 value={newReport.report_detail || ""}
-                onChange={(e) =>
-                  setNewReport({ ...newReport, report_detail: e.target.value })
-                }
+                onChange={(e) => setNewReport({ ...newReport, report_detail: e.target.value })}
               />
               {errors.report_detail && (
                 <Typography variant="small" color="red" className="mt-1">
@@ -271,26 +251,6 @@ export function TeacherReports() {
                 </Typography>
               )}
             </div>
-
-            {/* ตัวอย่าง: หากต้องการให้ผู้ใช้เลือกวันที่เอง
-            <div className="flex flex-col gap-2">
-              <label
-                htmlFor="report_date"
-                className="text-sm font-medium text-gray-700"
-              >
-                Report Date
-              </label>
-              <input
-                type="date"
-                id="report_date"
-                value={newReport.report_date || ""}
-                onChange={(e) =>
-                  setNewReport({ ...newReport, report_date: e.target.value })
-                }
-                className="p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-            </div>
-            */}
           </div>
         </DialogBody>
         <DialogFooter>
