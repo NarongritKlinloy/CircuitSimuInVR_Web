@@ -13,7 +13,7 @@ app.use(express.json());
 const db = mysql.createConnection({
   host: "localhost",
   user: "root",
-  password: "boomza532",
+  password: "Dream241244",
   database: "project_circuit",
 });
 
@@ -290,26 +290,36 @@ app.get('/api/classroom/student/count/:class_id', (req, res) => {
 // ดึงข้อมูล student ที่อยู่ใน classroom
 app.get('/api/classroom/student/:class_id', (req, res) => {
   const { class_id } = req.params;
-  const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  const sql_enroll = `SELECT * FROM project_circuit.enrollment
+                      LEFT JOIN classroom ON enrollment.class_id = classroom.class_id
+                      WHERE enrollment.class_id = ?`;
+
   db.query(sql_enroll, [class_id], (err, result) => {
     if (err) {
       console.error("Error select enrollment:", err);
       return res.status(500).json({ error: "Select enrollment failed" });
     }
+
     // ถ้ายังไม่มี student
     if (result.length === 0) {
       return res.status(200).json(result);
     }
+
     // ดึง uid ทั้งหมดจาก result
     const uid = result.map(row => row.uid);
+    const sec = result[0].sec;
     const sql_user = "SELECT * FROM user WHERE uid IN (?)";
+    
     db.query(sql_user, [uid], (err, result2) => {
       if (err) {
         console.error("Error select user student:", err);
         return res.status(500).json({ error: "Select user student failed" });
       }
+      
+      result2[0].sec = sec;
       res.status(200).json(result2);
     });
+
   });
 });
 

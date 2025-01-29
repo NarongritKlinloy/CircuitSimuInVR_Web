@@ -26,11 +26,13 @@ export function StudentMgn() {
 
   const [search, setSearch] = useState("");
   const [students, setStudent] = useState([]);
+
+  const getStudent = async () => {
+    const data = await studentTableData(sessionStorage.getItem("class_id"));
+    setStudent(data);
+  };
+
   useEffect(() => {
-    const getStudent = async () => {
-      const data = await studentTableData(sessionStorage.getItem("class_id"));
-      setStudent(data);
-    };
     getStudent();
   }, [students]);
 
@@ -44,9 +46,9 @@ export function StudentMgn() {
   });
 
   // seach 
-  const filteredStudent = students.filter(({ uid , class_id}) =>
-    [uid, class_id ].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
+  const filteredStudent = students.filter(({ uid , class_id , sec}) =>
+    [uid, class_id , sec].some((field) =>
+      String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
 
@@ -80,10 +82,6 @@ export function StudentMgn() {
 
       <StudentTable
         students={filteredStudent}
-        onEditClick={(student) => {
-          setEditingStudent(student);
-          setIsEditStudentOpen(true);
-        }}
       />
       
       <StudentModal

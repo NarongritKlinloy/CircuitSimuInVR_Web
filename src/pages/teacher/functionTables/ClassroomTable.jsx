@@ -235,7 +235,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                 <button
                                                     onClick={() =>
                                                         openAddTAModal({
-                                                            uid
+                                                            class_name
                                                         })
                                                     }
                                                     className="text-blue-500 hover:text-blue-700"

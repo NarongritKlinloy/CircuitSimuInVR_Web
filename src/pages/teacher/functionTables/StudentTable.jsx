@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState , useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
+import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button, select } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import { deleteStudentAPI } from "@/data/delete-student-classroom";
+import { string } from "prop-types";
 
 function StudentTable({ students, onEditClick, onDelete }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
@@ -44,6 +45,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
         closeEditModal();
     };
 
+   
     // ฟังก์ชันยืนยันการลบ
     const confirmDelete = (uid) => {
         Swal.fire({
@@ -101,7 +103,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {students.map(({ uid, name, last_active}, key) => {
+                            {students.map(({ uid, name, last_active ,sec}, key) => {
                                 const isLast = key === students.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -130,7 +132,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ id, name, sec, semester, year })}
+                                                onClick={() => openEditModal({ uid, name , sec})}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
@@ -164,36 +166,20 @@ function StudentTable({ students, onEditClick, onDelete }) {
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-4">
                             <div className="w-1/2">
-                                <Input readOnly
+                                <Input 
+                                    readOnly
                                     label="student id"
                                     name="stdid"
-                                    value={selectedStudent?.id}
+                                    value={selectedStudent?.uid}
                                     onChange={inputHandle}
                                 />
                             </div>
                             <div className="w-1/2">
-                                <Input  readOnly
+                                <Input  
+                                    readOnly
                                     label="name"
                                     name="name"
                                     value={selectedStudent?.name}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                        </div>
-                        <div className="flex gap-4">
-                            <div className="w-1/2">
-                                <Input readOnly
-                                    label="semester"
-                                    name="semester"
-                                    value={selectedStudent?.semester}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                            <div className="w-1/2">
-                                <Input  readOnly
-                                    label="year"
-                                    name="year"
-                                    value={selectedStudent?.year}
                                     onChange={inputHandle}
                                 />
                             </div>
@@ -203,16 +189,17 @@ function StudentTable({ students, onEditClick, onDelete }) {
                             <Select 
                                 label="Select Sec"
                                 name="sec"
-                                value={selectedStudent?.sec} 
-                                onChange={(e) =>
+                                value={selectedStudent?.sec ? String(selectedStudent.sec) : ""}
+                                onChange={(e)=>{
                                     setSelectedStudent((prev) => ({
-                                        ...prev, sec: e
+                                        ...prev, "sec" : e
                                     }))
-                                }
+                                }}                        
                             >
                                 <Option value="101">101</Option>
                                 <Option value="102">102</Option>
                                 <Option value="103">103</Option>
+                                <Option value="111">111</Option>
                             </Select>
                         </div>
                     </div>
