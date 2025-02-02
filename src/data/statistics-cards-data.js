@@ -32,6 +32,17 @@ export const countAdminAPI = async () => {
 };
 const admin_count = await countAdminAPI();
 
+export const countReportAPI = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/report/count');
+    return response.data.count;
+  } catch (error) {
+    console.error("Error counting report:", error);
+    return 0;
+  }
+};
+const report_count = await countReportAPI();
+
 export const statisticsCardsData = [
   {
     color: "gray",
@@ -48,7 +59,7 @@ export const statisticsCardsData = [
     color: "gray",
     icon: DocumentTextIcon,
     title: "Total report",
-    value: "3",
+    value: report_count,
     footer: {
       color: "text-green-500",
       value: "+55%",
