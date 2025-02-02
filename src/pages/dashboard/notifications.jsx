@@ -15,8 +15,25 @@ import {
 } from "@material-tailwind/react";
 import { InformationCircleIcon } from "@heroicons/react/24/outline";
 import { ReportTableData } from "@/data/report-data";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 export function Notifications() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "teacher") {
+        navigate("/teacher/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+
   const [dialogOpen, setDialogOpen] = React.useState(false);
   const [selectedDescription, setSelectedDescription] = React.useState("");
   const [report, setReport] = React.useState(ReportTableData);
