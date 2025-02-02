@@ -2,8 +2,24 @@ import React, { useState, useEffect } from "react";
 import SearchAndAddSection from "./functionTables/searchpractice";
 import PracticeTable from "./functionTables/PracticeTable";
 import { practiceTableData } from "@/data/practice-table-data";
+import { useNavigate } from "react-router-dom";
+
 
 export function PracticeMgn() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
   const [search, setSearch] = useState(""); // คำค้นหา
   const [practice, setPractice] = useState([]);
   useEffect(() => {

@@ -7,7 +7,10 @@ import {
   TrashIcon,
   UserPlusIcon,
 } from "@heroicons/react/24/solid";
+
 import {
+  // textarea, // ถ้าไม่ได้ใช้จริงสามารถลบออกได้
+  Input,
   Typography,
   Card,
   CardHeader,
@@ -17,17 +20,38 @@ import {
   DialogHeader,
   DialogBody,
   DialogFooter,
-  Input,
 } from "@material-tailwind/react";
-import { TeacherReportData } from "@/data/teacher-report"; // นำเข้าฟังก์ชัน
+import { TeacherReportData } from "@/data/teacher-report";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
 
 export function TeacherReports() {
-  const [selectedDescription, setSelectedDescription] = useState(""); // เก็บรายละเอียดสำหรับ modal
-  const [reports, setReports] = useState([]); // สถานะสำหรับเก็บข้อมูล API
-  const [loading, setLoading] = useState(true); // สถานะโหลดข้อมูล
-  const [error, setError] = useState(null); // สถานะข้อผิดพลาด
+  const navigate = useNavigate();
+
+  // ตรวจสอบ role
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "admin") {
+        navigate("/dashboard/home");
+      } else if (role === null) {
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+
+  // ===== ประกาศ State หลักที่เกี่ยวข้อง =====
+  const [reports, setReports] = useState([]);   // แก้จาก [report, setReport]
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const [isAddReportOpen, setIsAddReportOpen] = useState(false); // สำหรับเปิด/ปิด Modal Add New Report
+  const [selectedDescription, setSelectedDescription] = useState("");
+  const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
 
 // ฟังก์ชันเปิด/ปิด modal สำหรับ Add New Report
 const toggleAddModal = () => {
@@ -45,6 +69,10 @@ const getCurrentDate = () => {
 
 const [newReport, setNewReport] = useState({
     report_uid:sessionStorage.getItem("email"),
+
+  // State เก็บข้อมูลฟอร์มการเพิ่มรายงาน
+  const [newReport, setNewReport] = useState({
+    report_uid: sessionStorage.getItem("email"),
     report_name: "",
     report_detail: "",
     report_date: getCurrentDate(), // เพิ่มฟิลด์สำหรับวันที่
@@ -52,18 +80,16 @@ const [newReport, setNewReport] = useState({
 
   const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
 
-// console.log("newReportData---() ---> "+newReport.report_uid)
+  // State สำหรับเก็บ Error ของฟอร์ม
+  const [errors, setErrors] = useState({});
 
-  // const navigate = useNavigate();
+  // ดึงข้อมูลรายงานจากฟังก์ชัน TeacherReportData
 
-
-
-  // ฟังก์ชันดึงข้อมูลจาก TeacherReportData
   useEffect(() => {
     const fetchReports = async () => {
       try {
         setLoading(true);
-        const data = await TeacherReportData(); // เรียกฟังก์ชันที่นำเข้ามา
+        const data = await TeacherReportData(); // ฟังก์ชันดึงข้อมูล (return เป็น array)
         setReports(data); // เก็บข้อมูลใน state
       } catch (err) {
         setError("Error fetching reports. Please try again.");
@@ -110,6 +136,12 @@ useEffect(() => {
   console.log("Reports state:", reports); // ตรวจสอบว่า reports state ถูกอัพเดตหรือไม่
 }, [reports]); // ตรวจสอบทุกครั้งที่ state เปลี่ยน
 
+  // ตรวจสอบค่าใน console เมื่อ reports มีการเปลี่ยนแปลง
+  useEffect(() => {
+    console.log("Reports state:", reports);
+  }, [reports]);
+
+
 
 
 
@@ -129,6 +161,7 @@ useEffect(() => {
   
 
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
+
   const validateFields = () => {
     const newErrors = {};
     if (!newReport.report_name) newErrors.report_name = "Report Name is required";
@@ -201,12 +234,32 @@ useEffect(() => {
       const response = await axios.post(`http://localhost:5000/api/addreport`, newReport);
   
       if (response.status === 200) {
+
+    if (validateFields()) {
+      try {
+        const response = await axios.post("http://localhost:5000/api/addreport", newReport);
+        if (response.status === 200) {
+          Swal.fire({
+            title: "Added!",
+            text: `${newReport.report_name} has been added.`,
+            icon: "success",
+            confirmButtonText: "OK",
+            customClass: {
+              confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+            },
+          }).then(() => {
+            // หลังจากกด OK ใน sweetalert ให้รีเฟรชหน้า
+            navigate(0);
+          });
+        }
+      } catch (err) {
         Swal.fire({
           title: "Added!",
           text: `${newReport.report_name} has been added.`,
           icon: "success",
           confirmButtonText: "OK",
           customClass: {
+
             confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
           },
         }).then(() => {
@@ -227,8 +280,12 @@ useEffect(() => {
     }
     setIsAddReportOpen(false); // ปิด Modal
   };
-  
-  
+
+  // ฟังก์ชันปิด Dialog Add Report และรีเซ็ตฟอร์ม
+  const resetState = (defaultState = { report_name: "", report_detail: "", report_date: "" }) => {
+    setErrors({});
+    setNewReport(defaultState);
+  };
   const handleClose = () => {
     resetState(); // รีเซ็ตสถานะ Error
     setIsAddReportOpen(false);
@@ -250,9 +307,12 @@ useEffect(() => {
           <Typography variant="h6" color="white">
             Reports
           </Typography>
+
           {/* <Button variant="gradient" color="green" onClick={toggleAddModal}>
+          <Button variant="gradient" color="green" onClick={() => setIsAddReportOpen(true)}>
             New Report
           </Button> */}
+    
         </CardHeader>
         <CardBody className="overflow-x-auto pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto border-collapse">
@@ -335,6 +395,22 @@ useEffect(() => {
             );
           })}
         </tbody>
+              {reports.map((item, index) => (
+                <tr key={item.report_id}>
+                  <td className="border px-4 py-2">{index + 1}</td>
+                  <td className="border px-4 py-2">{item.report_name}</td>
+                  <td className="border px-4 py-2">{item.report_uid}</td>
+                  <td className="border px-4 py-2">
+                    {new Date(item.report_date).toLocaleDateString("en-GB")}
+                  </td>
+                  <td className="border px-4 py-2">
+                    <Button variant="text" color="blue" onClick={() => handleDialogOpen(item.report_detail)}>
+                      Detail
+                    </Button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
           </table>
         </CardBody>
       </Card>
@@ -346,11 +422,7 @@ useEffect(() => {
           <Typography >{selectedDescription}</Typography>
         </DialogBody>
         <DialogFooter>
-          <Button
-            variant="gradient"
-            color="blue"
-            onClick={() => setDialogDetailOpen(false)}
-          >
+          <Button variant="gradient" color="blue" onClick={() => setDialogDetailOpen(false)}>
             Close
           </Button>
         </DialogFooter>
@@ -377,12 +449,16 @@ useEffect(() => {
             {/* Textarea for Detail */}
             <div className="flex flex-col gap-2">
               <label htmlFor="detail" className="text-sm font-medium text-gray-700">
+              //<label htmlFor="report_detail" className="text-sm font-medium text-gray-700">
                 Detail
               </label>
               <textarea
                 id="detail"
                 rows="4"
                 className={`p-2 border ${errors.report_detail ? "border-red-500" : "border-gray-300"} rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                className={`p-2 border ${
+                  errors.report_detail ? "border-red-500" : "border-gray-300"
+                } rounded focus:outline-none focus:ring-2 focus:ring-blue-500`}
                 value={newReport.report_detail || ""}
                 onChange={(e) => setNewReport({ ...newReport, report_detail: e.target.value })}
               />
@@ -392,7 +468,6 @@ useEffect(() => {
                 </Typography>
               )}
             </div>
-
           </div>
         </DialogBody>
         <DialogFooter>

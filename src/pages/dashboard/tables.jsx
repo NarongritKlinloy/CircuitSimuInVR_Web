@@ -5,8 +5,24 @@ import AuthorModal from "./functionTables/authormodal";
 import TeacherTable from "./functionTables/teachertable";
 import { authorsTableData } from "@/data/authors-table-data";
 import { teachersTableData } from "@/data/teachersTableData";
+import { useNavigate } from "react-router-dom";
 
 export function Tables() {
+  const navigate = useNavigate();
+  useEffect(() => {
+    try {
+      const role = sessionStorage.getItem("role");
+      if (role === "teacher") {
+        navigate("/teacher/home");
+      }else if(role === null){
+        navigate("/auth/sign-in");
+      }
+    } catch (error) {
+      console.error("Error accessing sessionStorage:", error);
+      navigate("/auth/sign-in");
+    }
+  }, [navigate]);
+  
   const [search, setSearch] = useState(""); // คำค้นหา
 
   const [authors, setAuthors] = useState([]); // เก็บรายชื่อผู้ใช้
