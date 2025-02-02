@@ -20,8 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "root",
-  database: "circuit_project",
+  password: "123456789",
+  database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -681,6 +681,20 @@ app.post("/api/addreport", async (req, res) => {
     });
   }
 });
+
+// ✅ ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)
+app.get('/api/adminreport', async (req, res) => {
+  try {
+      const sql = "SELECT * FROM report";
+      const [result] = await db.query(sql); // ✅ ใช้ await รอให้ Query เสร็จ
+
+      res.status(200).json(result);
+  } catch (error) {
+      console.error("❌ Error fetching admin reports:", error);
+      res.status(500).json({ error: "Query data Report failed" });
+  }
+});
+
 
 // -----------------------------------------------------------
 // 9) เริ่มต้น Server
