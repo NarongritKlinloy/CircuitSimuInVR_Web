@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SearchAndAddReport from "../teacher/functionTables/SearchAndAddReport";
+import SearchAdmin from "../teacher/functionTables/SearchAdmin";
 import axios from "axios";
 import Swal from 'sweetalert2';
 import {
@@ -242,7 +242,7 @@ useEffect(() => {
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
        {/* Section การค้นหาและปุ่ม Add */}
-       <SearchAndAddReport 
+       <SearchAdmin 
         toggleAddModal={toggleAddModal} 
       />
 
