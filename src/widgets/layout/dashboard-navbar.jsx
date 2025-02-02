@@ -1,5 +1,6 @@
 /*Nav Bar ส่วนที่เป็นการแจ้งเตือน*/
 import { useLocation, Link } from "react-router-dom";
+import axios from "axios";
 import {
   Navbar,
   Typography,
@@ -27,6 +28,8 @@ import {
   setOpenConfigurator,
   setOpenSidenav,
 } from "@/context";
+// import axios from 'axios';
+import {NotificationReportData} from "@/data/CountNoti_Report";
   
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
@@ -41,6 +44,32 @@ export function DashboardNavbar() {
     const name = sessionStorage.getItem("name");
     setUserName(name || ""); // ถ้าไม่มี name ให้ตั้งค่าเป็นค่าว่าง
   }, []);
+
+
+  const [notificationCount, setNotificationCount] = useState(0);
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await NotificationReportData();
+        if (data.length > 0) {
+          setNotificationCount(data[0]["COUNT(*)"]);
+        }
+      } catch (error) {
+        console.error('Error fetching notifications:', error);
+      }
+    };
+
+    fetchNotifications(); // เรียกใช้งานครั้งแรกทันที
+
+    const interval = setInterval(fetchNotifications, 10000); // อัปเดตทุก 10 วินาที
+    console.log(interval)
+    return () => clearInterval(interval); // เคลียร์ Interval เมื่อ Component ถูก Unmount
+  }, []);
+
+  
+
+
   return (
     <Navbar
       color={fixedNavbar ? "white" : "transparent"}
@@ -123,11 +152,32 @@ export function DashboardNavbar() {
 
           
           <Menu>
-            <MenuHandler>
+            {/* <MenuHandler>
               <IconButton variant="text" color="blue-gray">
                 <BellIcon className="h-5 w-5 text-blue-gray-500" />
               </IconButton>
-            </MenuHandler>
+            </MenuHandler> */}
+
+<MenuHandler>
+  <div className="relative">
+    <IconButton variant="text" color="blue-gray">
+      <BellIcon className="h-6 w-6 text-blue-gray-500" />
+    </IconButton>
+
+    {/* <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-1">
+        {"100"}
+      </span> */}
+
+    {/* Badge สำหรับแสดงจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน */}
+    {notificationCount > 0 && (
+      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
+        {notificationCount}
+      </span>
+    )}
+  </div>
+</MenuHandler>
+
+            
             <MenuList className="w-max border-0">
 
               <MenuItem className="flex items-center gap-3">
