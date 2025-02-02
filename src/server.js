@@ -11,7 +11,7 @@ app.use(express.json());
 
 // เชื่อมต่อกับ MySQL
 const db = mysql.createConnection({
-  host: "localhost",
+  hhost: "localhost",
   user: "root",
   password: "boomza532",
   database: "project_circuit",
