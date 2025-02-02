@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
 import SearchAndAddReport from "./functionTables/SearchAndAddReport";
-import axios from "axios";
-import Swal from 'sweetalert2';
 import {
   PencilSquareIcon,
   TrashIcon,
@@ -53,22 +51,20 @@ export function TeacherReports() {
   const [selectedDescription, setSelectedDescription] = useState("");
   const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
 
-// ฟังก์ชันเปิด/ปิด modal สำหรับ Add New Report
-const toggleAddModal = () => {
-  setIsAddReportOpen((prev) => !prev);
-};
+  // ฟังก์ชันเปิด/ปิด modal สำหรับ Add New Report
+  const toggleAddModal = () => {
+    setIsAddReportOpen((prev) => !prev);
+  };
 
   // ฟังก์ชันแปลงวันที่ให้เป็นรูปแบบ YYYY-MM-DD
-const getCurrentDate = () => {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0"); // เติม 0 ข้างหน้าเดือน
-  const day = String(today.getDate()).padStart(2, "0"); // เติม 0 ข้างหน้าวัน
-  return `${year}-${month}-${day}`;
-};
+  const getCurrentDate = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0"); // เติม 0 ข้างหน้าเดือน
+    const day = String(today.getDate()).padStart(2, "0"); // เติม 0 ข้างหน้าวัน
+    return `${year}-${month}-${day}`;
+  };
 
-const [newReport, setNewReport] = useState({
-    report_uid:sessionStorage.getItem("email"),
 
   // State เก็บข้อมูลฟอร์มการเพิ่มรายงาน
   const [newReport, setNewReport] = useState({
@@ -77,9 +73,6 @@ const [newReport, setNewReport] = useState({
     report_detail: "",
     report_date: getCurrentDate(), // เพิ่มฟิลด์สำหรับวันที่
   }); // สำหรับเก็บข้อมูลใหม่ของ report
-
-  const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
-
   // State สำหรับเก็บ Error ของฟอร์ม
   const [errors, setErrors] = useState({});
 
@@ -101,45 +94,41 @@ const [newReport, setNewReport] = useState({
     fetchReports(); // เรียกฟังก์ชันดึงข้อมูล
   }, []); // ทำงานครั้งเดียวตอน component ถูก mount
 
-const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
-const API_URL = (`http://localhost:5000/api/report?email=${email}`);
- // ฟังก์ชันดึงข้อมูลจาก API
- const fetchUsers = async () => {
-  try {
-    const response = await axios.get(API_URL);
-    setReports(response.data); // อัปเดต state
-  } catch (error) {
-    console.error("Error fetching users:", error);
-  }
-};
+  const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
+  const API_URL = (`http://localhost:5000/api/report?email=${email}`);
+  // ฟังก์ชันดึงข้อมูลจาก API
+  const fetchUsers = async () => {
+    try {
+      const response = await axios.get(API_URL);
+      setReports(response.data); // อัปเดต state
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
 
-// ฟังก์ชันเปิด/ปิด modal แสดงรายละเอียด
-const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
-const handleDialogOpen = (detail) => {
-  setSelectedDescription(detail);
-  setDialogDetailOpen(true);
-};
-// ฟังก์ชันดึงข้อมูลจาก TeacherReportData
-// const fetchReports = async () => {
-//   try {
-//     setLoading(true);
-//     const data = await TeacherReportData(); // เรียกฟังก์ชันที่นำเข้ามา
-//     setReports(data); // เก็บข้อมูลใน state
-//   } catch (err) {
-//     setError("Error fetching reports. Please try again.");
-//     console.error(err);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
-useEffect(() => {
-  console.log("Reports state:", reports); // ตรวจสอบว่า reports state ถูกอัพเดตหรือไม่
-}, [reports]); // ตรวจสอบทุกครั้งที่ state เปลี่ยน
+  // ฟังก์ชันเปิด/ปิด modal แสดงรายละเอียด
+  const handleDialogOpen = (detail) => {
+    setSelectedDescription(detail);
+    setDialogDetailOpen(true);
+  };
+    // ฟังก์ชันดึงข้อมูลจาก TeacherReportData
+    // const fetchReports = async () => {
+    //   try {
+    //     setLoading(true);
+    //     const data = await TeacherReportData(); // เรียกฟังก์ชันที่นำเข้ามา
+    //     setReports(data); // เก็บข้อมูลใน state
+    //   } catch (err) {
+    //     setError("Error fetching reports. Please try again.");
+    //     console.error(err);
+    //   } finally {
+    //     setLoading(false);
+    //   }
+    // };
+  useEffect(() => {
+    console.log("Reports state:", reports); // ตรวจสอบว่า reports state ถูกอัพเดตหรือไม่
+  }, [reports]); // ตรวจสอบทุกครั้งที่ state เปลี่ยน
 
   // ตรวจสอบค่าใน console เมื่อ reports มีการเปลี่ยนแปลง
-  useEffect(() => {
-    console.log("Reports state:", reports);
-  }, [reports]);
 
 
 
@@ -229,12 +218,6 @@ useEffect(() => {
       setIsAddReportOpen(true); // ให้ Modal ค้างอยู่
       return; // หยุดการทำงานของฟังก์ชัน
     }
-  
-    try {
-      const response = await axios.post(`http://localhost:5000/api/addreport`, newReport);
-  
-      if (response.status === 200) {
-
     if (validateFields()) {
       try {
         const response = await axios.post("http://localhost:5000/api/addreport", newReport);
@@ -252,21 +235,6 @@ useEffect(() => {
             navigate(0);
           });
         }
-      } catch (err) {
-        Swal.fire({
-          title: "Added!",
-          text: `${newReport.report_name} has been added.`,
-          icon: "success",
-          confirmButtonText: "OK",
-          customClass: {
-
-            confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-          },
-        }).then(() => {
-          fetchUsers(); // ดึงข้อมูลใหม่
-          resetState(); // รีเซ็ตฟอร์ม
-        });
-      }
     } catch (err) {
       Swal.fire({
         title: "Error!",
@@ -394,7 +362,7 @@ useEffect(() => {
               </tr>
             );
           })}
-        </tbody>
+
               {reports.map((item, index) => (
                 <tr key={item.report_id}>
                   <td className="border px-4 py-2">{index + 1}</td>
@@ -445,11 +413,11 @@ useEffect(() => {
                 {errors.report_name}
               </Typography>
             )}
-
+          </div>
             {/* Textarea for Detail */}
             <div className="flex flex-col gap-2">
-              <label htmlFor="detail" className="text-sm font-medium text-gray-700">
-              //<label htmlFor="report_detail" className="text-sm font-medium text-gray-700">
+              <label htmlFor="detail" className="text-sm font-medium text-gray-700"/>
+              <label htmlFor="report_detail" className="text-sm font-medium text-gray-700">
                 Detail
               </label>
               <textarea
@@ -468,7 +436,6 @@ useEffect(() => {
                 </Typography>
               )}
             </div>
-          </div>
         </DialogBody>
         <DialogFooter>
           <Button variant="text" color="red" onClick={handleClose}>
@@ -482,5 +449,4 @@ useEffect(() => {
     </div>
   );
 }
-
 export default TeacherReports;
