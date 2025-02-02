@@ -696,6 +696,21 @@ app.get('/api/adminreport', async (req, res) => {
 });
 
 
+//ดึงข้อมูลจำนวน report ที่ยังไม่อ่าน ฝั่ง Admin   ไม่อ่าน is_read = 0 และ อ่านแล้ว is_raed = 1
+app.get('/api/countnotifications', (req, res) => {
+  
+  const sql = "SELECT COUNT(*) FROM `notifications` WHERE is_read = 0 ";
+ 
+
+  db.query(sql, (err, result) => {
+    if(err){
+      console.error("Error filtering data: ", err);
+      return res.status(500).json({error: "Query data notifications failed"});
+    }
+    res.status(200).json(result);
+  });
+});
+
 // -----------------------------------------------------------
 // 9) เริ่มต้น Server
 // -----------------------------------------------------------

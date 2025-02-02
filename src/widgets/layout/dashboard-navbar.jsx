@@ -169,9 +169,14 @@ export function DashboardNavbar() {
       </span> */}
 
     {/* Badge สำหรับแสดงจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน */}
-    {notificationCount > 0 && (
+    {/* {notificationCount > 0 && (
       <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
         {notificationCount}
+      </span>
+    )} */}
+    {notificationCount == 0 && (
+      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
+        {""}
       </span>
     )}
   </div>
