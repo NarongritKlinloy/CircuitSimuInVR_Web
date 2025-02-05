@@ -6,6 +6,8 @@ import StudentModal from "./functionTables/StudentModal";
 import { useNavigate } from "react-router-dom";
 import { studentTableData } from "@/data/student-table-data";
 import { addStudentAPI } from "@/data/add-student-classroom";
+import { TATableData } from "@/data/TA-table-data";
+import { addTAAPI } from "@/data/add-TA";
 
 
 export function TAManagement() {

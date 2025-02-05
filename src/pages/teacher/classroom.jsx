@@ -25,13 +25,16 @@ export function ClassroomMgn() {
 
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState([]);
+  
+
+  const getClassroom = async () => {
+    const data = await classroomTableData(sessionStorage.getItem("email"));
+    setClassroom(data);
+  };
+  
   useEffect(() => {
-    const getClassroom = async () => {
-      const data = await classroomTableData(sessionStorage.getItem("email"));
-      setClassroom(data);
-    };
     getClassroom();
-  }, [classrooms]);
+  }, []);
   
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);

@@ -120,7 +120,7 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    console.log("Verifying Google Token...");
+    console.log("📡 Verifying Google Token...");
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -690,7 +690,7 @@ app.get('/api/adminreport', async (req, res) => {
 
       res.status(200).json(result);
   } catch (error) {
-      console.error("Error fetching admin reports:", error);
+      console.error("❌ Error fetching admin reports:", error);
       res.status(500).json({ error: "Query data Report failed" });
   }
 });
@@ -699,7 +699,16 @@ app.get('/api/adminreport', async (req, res) => {
 //ดึงข้อมูลจำนวน report ที่ยังไม่อ่าน ฝั่ง Admin   ไม่อ่าน is_read = 0 และ อ่านแล้ว is_raed = 1
 app.get('/api/countnotifications', (req, res) => {
   
+//   const sql = "SELECT COUNT(*) FROM `notifications` WHERE is_read = 0 ";
+ 
 
+//   db.query(sql, (err, result) => {
+//     if(err){
+//       console.error("Error filtering data: ", err);
+//       return res.status(500).json({error: "Query data notifications failed"});
+//     }
+//     res.status(200).json(result);
+//   });
 });
 
 // -----------------------------------------------------------

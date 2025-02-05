@@ -216,7 +216,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             {/* Add Student Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
-                                                    to={`/teacher/student_mgn/${class_name} (${sec})`}
+                                                    to={`/teacher/student/${class_name} (${sec})`}
                                                     className="text-green-500 hover:text-green-700"
                                                     onClick={() => {
                                                         sessionStorage.setItem("class_id", class_id);

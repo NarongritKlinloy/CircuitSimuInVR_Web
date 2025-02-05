@@ -20,6 +20,7 @@ export const routes = [
       {
         icon: <HomeIcon {...icon} />,
         name: "dashboard",
+        label: "dashboard",
         path: "/home",
         element: <Home />,
       },
@@ -27,6 +28,7 @@ export const routes = [
       {
         icon: <UsersIcon {...icon} />,
         name: "Users",
+        label: "Users",
         path: "/Users",
         element: <Tables />,
       },
@@ -41,6 +43,7 @@ export const routes = [
       {
         icon: <DocumentTextIcon {...icon} />,
         name: "Report",
+        label: "Report",
         path: "/report",
         element: <Notifications />,
       },
