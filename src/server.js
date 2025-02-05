@@ -120,7 +120,7 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    console.log("📡 Verifying Google Token...");
+    console.log("Verifying Google Token...");
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
