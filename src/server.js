@@ -42,7 +42,7 @@ const db = mysql.createPool({
 const wss = new WebSocketServer({ port: 8080 });
 wss.on("connection", (ws) => {
   console.log("Unity Connected via WebSocket");
-  ws.send("🔹 Connected to WebSocket Server");
+  ws.send("Connected to WebSocket Server");
 });
 
 // ฟังก์ชันแจ้งเตือน Unity
@@ -120,7 +120,7 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    console.log("📡 Verifying Google Token...");
+    console.log("Verifying Google Token...");
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
