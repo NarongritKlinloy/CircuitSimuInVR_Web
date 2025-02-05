@@ -31,18 +31,18 @@ const db = mysql.createPool({
 (async function testDB() {
   try {
     const conn = await db.getConnection();
-    console.log("✅ Connected to MySQL (Connection Pool)");
+    console.log("Connected to MySQL (Connection Pool)");
     conn.release();
   } catch (error) {
-    console.error("❌ Cannot connect to MySQL:", error);
+    console.error("Cannot connect to MySQL:", error);
   }
 })();
 
 // 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
 const wss = new WebSocketServer({ port: 8080 });
 wss.on("connection", (ws) => {
-  console.log("✅ Unity Connected via WebSocket");
-  ws.send("🔹 Connected to WebSocket Server");
+  console.log("Unity Connected via WebSocket");
+  ws.send("Connected to WebSocket Server");
 });
 
 // ฟังก์ชันแจ้งเตือน Unity
@@ -72,7 +72,7 @@ app.get("/callback", (req, res) => {
           })
           .then(response => response.json())
           .then(data => {
-              console.log("✅ Login Success:", data);
+              console.log("Login Success:", data);
 
               // แจ้งเตือน Unity ผ่าน WebSocket (หากต้องการให้ไปเรียกผ่าน REST อีกที อาจต้องทำ endpoint ให้ตรง)
               fetch("http://localhost:8080/notify", {
@@ -88,7 +88,7 @@ app.get("/callback", (req, res) => {
               setTimeout(() => { window.open('', '_self', ''); window.close(); }, 1000);
           })
           .catch(error => {
-              console.error("❌ Error:", error);
+              console.error("Error:", error);
               window.location.href = "http://localhost:5000/error";
           });
       } else {
@@ -115,8 +115,8 @@ app.post("/register", async (req, res) => {
   const { accessToken } = req.body;
 
   if (!accessToken) {
-    console.error("❌ No accessToken received!");
-    return res.status(400).json({ error: "❌ No accessToken provided" });
+    console.error("No accessToken received!");
+    return res.status(400).json({ error: "No accessToken provided" });
   }
 
   try {
@@ -125,7 +125,7 @@ app.post("/register", async (req, res) => {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    console.log("✅ Google Response:", googleResponse.data);
+    console.log("Google Response:", googleResponse.data);
     const { email, name } = googleResponse.data;
     const last_active = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
       .replace(/\//g, "-")
@@ -142,22 +142,22 @@ app.post("/register", async (req, res) => {
         role_id,
         email,
       ]);
-      console.log(`✅ User ${email} updated successfully`);
+      console.log(`User ${email} updated successfully`);
       notifyUnity(accessToken);
-      return res.json({ message: "✅ User updated successfully" });
+      return res.json({ message: "User updated successfully" });
     } else {
       // ยังไม่มี -> สร้างใหม่
       await db.query(
         "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, ?)",
         [email, name, role_id, last_active]
       );
-      console.log(`✅ User ${email} registered successfully`);
+      console.log(`User ${email} registered successfully`);
       notifyUnity(accessToken);
-      return res.json({ message: "✅ User registered successfully" });
+      return res.json({ message: "User registered successfully" });
     }
   } catch (error) {
-    console.error("❌ Google Token Verification Failed:", error);
-    return res.status(400).json({ error: "❌ Invalid Google Token" });
+    console.error("Google Token Verification Failed:", error);
+    return res.status(400).json({ error: "Invalid Google Token" });
   }
 });
 
@@ -193,7 +193,7 @@ async function getUsersByRole(roleId) {
   return rows;
 }
 
-// 📚 ดึงข้อมูลนักเรียน (role_id = 3)
+// ดึงข้อมูลนักเรียน (role_id = 3)
 app.get("/api/student", async (req, res) => {
   try {
     const students = await getUsersByRole(3);
@@ -204,7 +204,7 @@ app.get("/api/student", async (req, res) => {
   }
 });
 
-// 👨‍🏫 ดึงข้อมูลครู (role_id = 1)
+// ดึงข้อมูลครู (role_id = 1)
 app.get("/api/teacher", async (req, res) => {
   try {
     const teachers = await getUsersByRole(1);
@@ -424,7 +424,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 app.get("/api/classroom/student/count/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
-
+  
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
     return res.status(200).json(rows.length);
@@ -445,17 +445,14 @@ app.get("/api/classroom/student/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    // ดึง uid ทั้งหมดจาก result
-    const uid = result.map(row => row.uid);
+    const uids = rows.map((r) => r.uid);
     const sql_user = "SELECT * FROM user WHERE uid IN (?)";
-    db.query(sql_user, [uid], (err, result2) => {
-      if (err) {
-        console.error("Error select user student:", err);
-        return res.status(500).json({ error: "Select user student failed" });
-      }
-      res.status(200).json(result2);
-    });
-  });
+    const [userRows] = await db.query(sql_user, [uids]);
+    return res.status(200).json(userRows);
+  } catch (err) {
+    console.error("Error select user student:", err);
+    return res.status(500).json({ error: "Select user student failed" });
+  }
 });
 
 // เพิ่ม student เข้า classroom
@@ -685,11 +682,11 @@ app.post("/api/addreport", async (req, res) => {
   }
 });
 
-// ✅ ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)
+// ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)
 app.get('/api/adminreport', async (req, res) => {
   try {
       const sql = "SELECT * FROM report";
-      const [result] = await db.query(sql); // ✅ ใช้ await รอให้ Query เสร็จ
+      const [result] = await db.query(sql); // ใช้ await รอให้ Query เสร็จ
 
       res.status(200).json(result);
   } catch (error) {
@@ -700,7 +697,7 @@ app.get('/api/adminreport', async (req, res) => {
 
 
 //ดึงข้อมูลจำนวน report ที่ยังไม่อ่าน ฝั่ง Admin   ไม่อ่าน is_read = 0 และ อ่านแล้ว is_raed = 1
-// app.get('/api/countnotifications', (req, res) => {
+app.get('/api/countnotifications', (req, res) => {
   
 //   const sql = "SELECT COUNT(*) FROM `notifications` WHERE is_read = 0 ";
  
@@ -712,11 +709,11 @@ app.get('/api/adminreport', async (req, res) => {
 //     }
 //     res.status(200).json(result);
 //   });
-// });
+});
 
 // -----------------------------------------------------------
 // 9) เริ่มต้น Server
 // -----------------------------------------------------------
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });
