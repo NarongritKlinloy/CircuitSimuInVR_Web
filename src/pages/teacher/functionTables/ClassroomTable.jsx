@@ -117,11 +117,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                     customClass: {
                         confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
                     },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.reload();
-                    }
-                });
+                })
             }
         });
     };
@@ -235,11 +231,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                 <button
                                                     onClick={() =>
                                                         openAddTAModal({
-<<<<<<< HEAD
-                                                            class_name
-=======
                                                             class_id
->>>>>>> 3c08c72a5ccd368d668d76dfc17f96844ec9537f
                                                         })
                                                     }
                                                     className="text-blue-500 hover:text-blue-700"

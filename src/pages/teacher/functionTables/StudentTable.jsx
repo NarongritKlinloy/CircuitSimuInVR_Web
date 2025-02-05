@@ -132,11 +132,8 @@ function StudentTable({ students, onEditClick, onDelete }) {
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-<<<<<<< HEAD
                                                 onClick={() => openEditModal({ uid, name , sec})}
-=======
-                                                onClick={() => openEditModal({ uid })}
->>>>>>> 3c08c72a5ccd368d668d76dfc17f96844ec9537f
+
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
