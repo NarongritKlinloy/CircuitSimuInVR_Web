@@ -20,7 +20,7 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "boomza532",
+  password: "Dream241244",
   database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
@@ -424,7 +424,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 app.get("/api/classroom/student/count/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
-
+  
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
     return res.status(200).json(rows.length);
@@ -484,9 +484,32 @@ app.post("/api/classroom/student", async (req, res) => {
     }
 
     // ถ้ายัง -> เพิ่ม
-    const enrollDate = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
-      .replace(/\//g, "-")
-      .replace(",", "");
+    // const enrollDate = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", 
+    //   year: "numeric", 
+    //   month: "2-digit", 
+    //   day: "2-digit", 
+    //   hour: "2-digit", 
+    //   minute: "2-digit", 
+    //   second: "2-digit",
+    //   hour12: false
+    // })
+    //   .replace(/\//g, "-")
+    //   .replace(",", "");
+    const options = { 
+      timeZone: "Asia/Bangkok", 
+      year: "numeric", 
+      month: "2-digit", 
+      day: "2-digit", 
+      hour: "2-digit", 
+      minute: "2-digit", 
+      second: "2-digit", 
+      hour12: false 
+  };
+  
+  const formatter = new Intl.DateTimeFormat("en-GB", options);
+  const parts = formatter.formatToParts(new Date());
+  const enrollDate = `${parts[4].value}-${parts[2].value}-${parts[0].value} ${parts[6].value}:${parts[8].value}:${parts[10].value}`;
+
     const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
     await db.query(sql_enroll, [processedUid, class_id, enrollDate]);
     res.status(200).send({ message: "Added student to classroom successfully" });
@@ -699,16 +722,16 @@ app.get('/api/adminreport', async (req, res) => {
 //ดึงข้อมูลจำนวน report ที่ยังไม่อ่าน ฝั่ง Admin   ไม่อ่าน is_read = 0 และ อ่านแล้ว is_raed = 1
 app.get('/api/countnotifications', (req, res) => {
   
-  const sql = "SELECT COUNT(*) FROM `notifications` WHERE is_read = 0 ";
+//   const sql = "SELECT COUNT(*) FROM `notifications` WHERE is_read = 0 ";
  
 
-  db.query(sql, (err, result) => {
-    if(err){
-      console.error("Error filtering data: ", err);
-      return res.status(500).json({error: "Query data notifications failed"});
-    }
-    res.status(200).json(result);
-  });
+//   db.query(sql, (err, result) => {
+//     if(err){
+//       console.error("Error filtering data: ", err);
+//       return res.status(500).json({error: "Query data notifications failed"});
+//     }
+//     res.status(200).json(result);
+//   });
 });
 
 // -----------------------------------------------------------

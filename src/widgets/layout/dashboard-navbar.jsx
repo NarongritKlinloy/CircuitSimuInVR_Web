@@ -23,6 +23,11 @@ import {
   Bars3Icon,
 } from "@heroicons/react/24/solid";
 import { useState, useEffect } from "react";
+// import routes from "@/t_routes";
+
+import adminRoutes from "@/routes";
+import teacherRoutes from "@/t_routes";
+
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
@@ -34,8 +39,23 @@ import {NotificationReportData} from "@/data/CountNoti_Report";
 export function DashboardNavbar() {
   const [controller, dispatch] = useMaterialTailwindController();
   const { fixedNavbar, openSidenav } = controller;
+
+  const userRole = sessionStorage.getItem("role"); // ใช้ sessionStorage ให้ตรงกัน
+  const activeRoutes = userRole === "admin" ? adminRoutes : teacherRoutes;
+
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
+  
+  // show name label
+  // หาหน้า label ที่ตรง
+  const pageLabel = activeRoutes
+    .flatMap(route => route.pages)
+    .find(({ path }) => path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student")));
+  // const pageLabel = routes[0].pages.find(({ path }) => {
+  //   return path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student"));
+  // });
+  // const checkPage = "/"+page; 
+  // const pageLabel = routes[0].pages.filter(({path})=> (path == checkPage));
 
   // เก็บชื่อผู้ใช้จาก sessionStorage
   const [userName, setUserName] = useState("");
@@ -108,7 +128,8 @@ export function DashboardNavbar() {
           </Breadcrumbs>
 
           <Typography variant="h3" color="blue-gray">
-            {page}
+            {/* {pageLabel[0].label} */}
+            {pageLabel ? pageLabel.label : "Unknown Page"}
           </Typography>
 
 

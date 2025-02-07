@@ -16,7 +16,7 @@ export const addStudentAPI = async (data) => {
     }
   } catch (err) {
     Swal.fire({
-      title: "Added!",
+      title: "Failed!",
       text: `Can not add ${data.uid}`,
       icon: "error",
       confirmButtonText: "OK",

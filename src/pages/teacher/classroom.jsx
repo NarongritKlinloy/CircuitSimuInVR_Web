@@ -25,18 +25,24 @@ export function ClassroomMgn() {
 
   const [search, setSearch] = useState(""); // คำค้นหา
   const [classrooms, setClassroom] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+  
+  const getClassroom = async () => {
+    const data = await classroomTableData(sessionStorage.getItem("email"));
+    setClassroom(data);
+  };
+
+  const handleRefresh = () => {
+    setRefresh(prev => !prev);
+    // setRefresh((prev) => !prev);
+  };
+
   useEffect(() => {
-    const getClassroom = async () => {
-      const data = await classroomTableData(sessionStorage.getItem("email"));
-      setClassroom(data);
-    };
     getClassroom();
-  }, [classrooms]);
+  }, [refresh]);
   
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
-  const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
-  const [editingClassroom, setEditingClassroom] = useState(null);
   const [newClassroom, setNewClassroom] = useState({
     class_name: "",
     sec: "",
@@ -44,6 +50,9 @@ export function ClassroomMgn() {
     year: "",
     uid: sessionStorage.getItem("email"),
   });
+
+  const [isEditClassroomOpen, setIsEditClassroomOpen] = useState(false);
+  const [editingClassroom, setEditingClassroom] = useState(null);
 
   // ฟังก์ชันค้นหา
   const filteredClassroom = classrooms.filter(({ class_name, sec }) =>
@@ -54,10 +63,11 @@ export function ClassroomMgn() {
 
   // ฟังก์ชันเพิ่ม
   const handleAddClassroom = async() => {
-    setClassroom([...classrooms, newClassroom]);
+    // setClassroom([...classrooms, newClassroom]);
     addClassroomAPI(newClassroom);
-    setNewClassroom({ class_name: "", sec: "", year: "" , semester: ""});
+    setNewClassroom({ class_name: "", sec: "", year: "" , semester: "", uid: sessionStorage.getItem("email")});
     setIsAddClassroomOpen(false);
+    handleRefresh();
   };
 
   // ฟังก์ชันแก้ไข
@@ -87,6 +97,7 @@ export function ClassroomMgn() {
           setEditingClassroom(classroom);
           setIsEditClassroomOpen(true);
         }}
+        checkStatus={handleRefresh}
       />
       
     

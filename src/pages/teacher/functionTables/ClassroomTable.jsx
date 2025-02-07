@@ -26,7 +26,7 @@ import { deleteClassroomAPI } from "@/data/delete-classroom";
 import { editClassroomAPI } from "@/data/edit-classroom";
 import { countStudentAPI } from "@/data/student-count";
 
-function ClassroomTable({ classrooms, onEditClick, onDelete }) {
+function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isAddTAOpen, setIsAddTAOpen] = useState(false);
@@ -71,8 +71,13 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
 
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = async () => {
-        editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
-        closeEditModal();
+        try {
+            await editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
+            checkStatus();
+            closeEditModal();
+        } catch (error) {
+            console.error("Error updating classroom: ",error)
+        }
     };
 
 
@@ -105,23 +110,11 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete",
             cancelButtonText: "Cancel",
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                deleteClassroomAPI(classroom.class_id);
+                await deleteClassroomAPI(classroom.class_id, classroom.class_name);
                 console.log(`Deleted : ${classroom.class_name}`);
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${classroom.class_name} has been deleted.`,
-                    icon: "success",
-                    confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-                    },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.reload();
-                    }
-                });
+                checkStatus();
             }
         });
     };
@@ -220,7 +213,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             {/* Add Student Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
-                                                    to={`/teacher/student_mgn/${class_name} (${sec})`}
+                                                    to={`/teacher/student/${class_name} (${sec})`}
                                                     className="text-green-500 hover:text-green-700"
                                                     onClick={() => {
                                                         sessionStorage.setItem("class_id", class_id);
@@ -369,5 +362,4 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
         </div>
     );
 }
-
 export default ClassroomTable;
