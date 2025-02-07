@@ -484,9 +484,32 @@ app.post("/api/classroom/student", async (req, res) => {
     }
 
     // ถ้ายัง -> เพิ่ม
-    const enrollDate = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" })
-      .replace(/\//g, "-")
-      .replace(",", "");
+    // const enrollDate = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", 
+    //   year: "numeric", 
+    //   month: "2-digit", 
+    //   day: "2-digit", 
+    //   hour: "2-digit", 
+    //   minute: "2-digit", 
+    //   second: "2-digit",
+    //   hour12: false
+    // })
+    //   .replace(/\//g, "-")
+    //   .replace(",", "");
+    const options = { 
+      timeZone: "Asia/Bangkok", 
+      year: "numeric", 
+      month: "2-digit", 
+      day: "2-digit", 
+      hour: "2-digit", 
+      minute: "2-digit", 
+      second: "2-digit", 
+      hour12: false 
+  };
+  
+  const formatter = new Intl.DateTimeFormat("en-GB", options);
+  const parts = formatter.formatToParts(new Date());
+  const enrollDate = `${parts[4].value}-${parts[2].value}-${parts[0].value} ${parts[6].value}:${parts[8].value}:${parts[10].value}`;
+  
     const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
     await db.query(sql_enroll, [processedUid, class_id, enrollDate]);
     res.status(200).send({ message: "Added student to classroom successfully" });
@@ -690,7 +713,7 @@ app.get('/api/adminreport', async (req, res) => {
 
       res.status(200).json(result);
   } catch (error) {
-      console.error("❌ Error fetching admin reports:", error);
+      console.error("Error fetching admin reports:", error);
       res.status(500).json({ error: "Query data Report failed" });
   }
 });
