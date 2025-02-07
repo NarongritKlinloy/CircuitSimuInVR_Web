@@ -1,12 +1,12 @@
 import axios from 'axios';
 import Swal from 'sweetalert2';
-import { Result } from 'postcss';
+
 export const deleteClassroomAPI = async (class_id, class_name) => {
     try {
         const result = await axios.delete(`http://localhost:5000/api/classroom/${class_id}`);
         console.log(result.data.message);
-        if (result.status == 200) {
-            Swal.fire({
+        if (result.status === 200) {
+            await Swal.fire({
                 title: "Deleted!",
                 text: `${class_name} has been deleted.`,
                 icon: "success",
@@ -18,7 +18,7 @@ export const deleteClassroomAPI = async (class_id, class_name) => {
         }
     } catch (error) {
         console.error("Error deleting classroom:", error);
-        Swal.fire({
+        await Swal.fire({
             title: "Failed!",
             text: `Can not delete ${class_name}`,
             icon: "error",

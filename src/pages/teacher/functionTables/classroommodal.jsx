@@ -9,7 +9,7 @@ import {
   Typography,
 } from "@material-tailwind/react";
 
-function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave , btnStatus }) {
+function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, onSave , btnStatus}) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
   if (!classroomData) return null;
@@ -28,12 +28,10 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
   const validateFields = () => {
     const newErrors = {};
-
     if (!classroomData.class_name) newErrors.class_name = "Classname is required";
     if (!classroomData.sec) newErrors.sec = "Sec is required";
     if (!classroomData.semester) newErrors.semester = "Semester is required";
     if (!classroomData.year) newErrors.year = "Year is required";
-
     setErrors(newErrors);
     const result = Object.keys(newErrors).length === 0 ? true : false
     return result;
@@ -45,7 +43,6 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
     if (result) {
       onSave();
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
-      // chkStatus();
     }
   };
 
