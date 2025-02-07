@@ -120,7 +120,7 @@ app.post("/register", async (req, res) => {
   }
 
   try {
-    console.log("📡 Verifying Google Token...");
+    console.log("Verifying Google Token...");
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
@@ -509,7 +509,7 @@ app.post("/api/classroom/student", async (req, res) => {
   const formatter = new Intl.DateTimeFormat("en-GB", options);
   const parts = formatter.formatToParts(new Date());
   const enrollDate = `${parts[4].value}-${parts[2].value}-${parts[0].value} ${parts[6].value}:${parts[8].value}:${parts[10].value}`;
-  
+
     const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
     await db.query(sql_enroll, [processedUid, class_id, enrollDate]);
     res.status(200).send({ message: "Added student to classroom successfully" });

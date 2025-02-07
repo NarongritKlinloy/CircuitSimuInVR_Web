@@ -29,7 +29,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   const validateFields = () => {
     const newErrors = {};
 
-    if (!classroomData.class_name) newErrors.classname = "Classname is required";
+    if (!classroomData.class_name) newErrors.class_name = "Classname is required";
     if (!classroomData.sec) newErrors.sec = "Sec is required";
     if (!classroomData.semester) newErrors.semester = "Semester is required";
     if (!classroomData.year) newErrors.year = "Year is required";
@@ -42,12 +42,22 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
   // ฟังก์ชันบันทึกข้อมูล
   const handleSave = () => {
     const result = validateFields();
-    if (validateFields()) {
+    if (result) {
       onSave();
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
+      // chkStatus();
     }
   };
 
+  // แก้เป็น async function เพื่อให้รอ onSave() ทำงานเสร็จก่อน
+  // const handleSave = async () => {
+  //   if (validateFields()) {
+  //     await onSave(); // รอให้บันทึกข้อมูลสำเร็จ
+  //     resetState();
+  //     chkStatus(); // เรียกเช็คสถานะหลังจากข้อมูลถูกบันทึก
+  //   }
+  // };
+  
   return (
   <>
     <Dialog open={isOpen} handler={handleClose}>

@@ -109,15 +109,6 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             if (result.isConfirmed) {
                 deleteClassroomAPI(classroom.class_id);
                 console.log(`Deleted : ${classroom.class_name}`);
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${classroom.class_name} has been deleted.`,
-                    icon: "success",
-                    confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-                    },
-                })
             }
         });
     };
@@ -365,5 +356,4 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
         </div>
     );
 }
-
 export default ClassroomTable;
