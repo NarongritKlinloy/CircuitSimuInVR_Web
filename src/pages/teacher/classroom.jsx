@@ -32,14 +32,15 @@ export function ClassroomMgn() {
     setClassroom(data);
   };
 
+  // toggle refresh status
   const handleRefresh = () => {
     setRefresh(prev => !prev);
-    // setRefresh((prev) => !prev);
   };
 
+  // auto refresh page after data change
   useEffect(() => {
     getClassroom();
-  }, [refresh]);
+  }, [refresh]); //
   
   // Modal State
   const [isAddClassroomOpen, setIsAddClassroomOpen] = useState(false);
@@ -97,7 +98,7 @@ export function ClassroomMgn() {
           setEditingClassroom(classroom);
           setIsEditClassroomOpen(true);
         }}
-        checkStatus={handleRefresh}
+        checkStatus={handleRefresh} // send fn to refresh page
       />
       
     
