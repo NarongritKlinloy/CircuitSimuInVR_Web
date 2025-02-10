@@ -50,7 +50,12 @@ export function DashboardNavbar() {
   // หาหน้า label ที่ตรง
   const pageLabel = activeRoutes
     .flatMap(route => route.pages)
-    .find(({ path }) => path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student")));
+    .find(({ path }) => 
+      path === `/${page}` || 
+      (path.startsWith("/student") && pathname.startsWith("/teacher/student")) ||
+      (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn"))
+    );
+  
   // const pageLabel = routes[0].pages.find(({ path }) => {
   //   return path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student"));
   // });

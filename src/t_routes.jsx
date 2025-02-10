@@ -52,9 +52,9 @@ export const routes = [
       },
       {
         icon: <DocumentTextIcon {...icon} />,
-        name: "Teaher Assistant",
+        name: "Teacher Assistant",
         label: "Teacher Assistant",
-        path: "/TA_mgn",
+        path: "/TA_mgn/:classname",
         element: <TAManagement />,
       },
     ]

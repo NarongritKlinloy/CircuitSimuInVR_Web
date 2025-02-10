@@ -225,16 +225,20 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
 
                                             {/* Add TA Button */}
                                             <td className={`${rowClassName} text-center`}>
-                                                <button
-                                                    onClick={() =>
-                                                        openAddTAModal({
-                                                            class_id
-                                                        })
-                                                    }
+                                                <Link
+                                                    to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                                                    onClick={() => {
+                                                        sessionStorage.setItem("class_id", class_id);
+                                                    }}
+                                                    // onClick={() =>
+                                                    //     openAddTAModal({
+                                                    //         class_id
+                                                    //     })
+                                                    // }
                                                     className="text-blue-500 hover:text-blue-700"
                                                 >
                                                     <UsersIcon className="h-5 w-5 mx-auto" />
-                                                    </button>
+                                                </Link>
                                             </td>
 
                                             {/* Edit Classroom Button */}

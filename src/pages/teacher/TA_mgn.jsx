@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
-import StudentTable from "./functionTables/StudentTable";
-import StudentModal from "./functionTables/StudentModal";
 import { useNavigate } from "react-router-dom";
-import { studentTableData } from "@/data/student-table-data";
-import { addStudentAPI } from "@/data/add-student-classroom";
+import TATable from "./functionTables/TATable";
+import TAModal from "./functionTables/TAModal";
+import SearchAndAddTA from "./functionTables/SearchAndAddTA";
 import { TATableData } from "@/data/TA-table-data";
 import { addTAAPI } from "@/data/add-TA";
 
@@ -27,80 +25,81 @@ export function TAManagement() {
   }, [navigate]);
 
   const [search, setSearch] = useState("");
-  const [students, setStudent] = useState([]);
+  const [TAs, setTA] = useState([]);
 
-  const getStudent = async () => {
-    const data = await studentTableData(sessionStorage.getItem("class_id"));
-    setStudent(data);
+
+  const getTA = async () => {
+    const data = await TATableData(sessionStorage.getItem("class_id"));
+    setTA(data);
   };
 
   useEffect(() => {
-    getStudent();
-  }, [students]);
+    getTA();
+  }, [TAs]);
 
   // Modal State
-  const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
-  const [isEditStudentOpen, setIsEditStudentOpen] = useState(false);
-  const [editingStudent, setEditingStudent] = useState(null);
-  const [newStudent, setNewStudent] = useState({
+  const [isAddTAOpen, setIsAddTAOpen] = useState(false);
+  const [isEditTAOpen, setIsEditTAOpen] = useState(false);
+  const [editingTA, setEditingTA] = useState(null);
+  const [newTA, setNewTA] = useState({
     uid: "",
     class_id: sessionStorage.getItem("class_id"),
   });
 
   // seach 
-  const filteredStudent = students.filter(({ uid , class_id , sec}) =>
-    [uid, class_id , sec].some((field) =>
+  const filteredTA = TAs.filter(({ uid}) =>
+    [uid].some((field) =>
       String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
 
   // add
-  const handleAddStudent = () => {
-    //console.log(newStudent);
-    addStudentAPI(newStudent);
-    setStudent([...students, newStudent]);
-    setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id")});
-    setIsAddStudentOpen(false);
+  const handleAddTA = () => {
+    // console.log(newTA);
+    addTAAPI(newTA);
+    setTA([...TAs, newTA]);
+    setNewTA({ uid: "", class_id: sessionStorage.getItem("class_id")});
+    setIsAddTAOpen(false);
   };
 
 
-  const handleEditStudent = () => {
-    setStudent((prevStudent) =>
-      prevStudent.map((student) =>
-        student.name === editingStudent.name ? editingStudent : student
+  const handleEditTA = () => {
+    setTA((prevTA) =>
+      prevTA.map((TA) =>
+        TA.name === editingTA.TA ? editingTA : TA
       )
     );
-    setIsEditStudentOpen(false);
+    setIsEditTAOpen(false);
   };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       
-      <SearchAndAddStudent
+      <SearchAndAddTA
         search={search}
         setSearch={setSearch}
-        toggleAddModal={() => setIsAddStudentOpen(true)}
+        toggleAddModal={() => setIsAddTAOpen(true)}
       />
 
-      <StudentTable
-        students={filteredStudent}
+      <TATable
+        TAs={filteredTA}
       />
       
-      <StudentModal
-        isOpen={isAddStudentOpen}
-        toggleModal={() => setIsAddStudentOpen(false)}
-        studentData={newStudent}
-        setStudentData={setNewStudent}
-        onSave={handleAddStudent}
+      <TAModal
+        isOpen={isAddTAOpen}
+        toggleModal={() => setIsAddTAOpen(false)}
+        TAData={newTA}
+        setTAData={setNewTA}
+        onSave={handleAddTA}
         btnStatus={"Add"}
       />
 
-      <StudentModal
-        isOpen={isEditStudentOpen}
-        toggleModal={() => setIsEditStudentOpen(false)}
-        studentData={editingStudent}
-        setStudentData={setEditingStudent}
-        onSave={handleEditStudent}
+      <TAModal
+        isOpen={isEditTAOpen}
+        toggleModal={() => setIsEditTAOpen(false)}
+        TAData={editingTA}
+        setTAData={setEditingTA}
+        onSave={handleEditTA}
         btnStatus={"Edit"}
       />
     </div>
