@@ -189,7 +189,19 @@ useEffect(() => {
 
   const handleSave = async () => {
     console.log("Data to send to API:", newReport);
-  
+    
+
+    // ตรวจสอบว่า report_uid มีค่าหรือไม่
+    if (!newReport.report_uid) {
+      Swal.fire({
+        title: "Error!",
+        text: "เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ส่ง (report_uid)",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+    
     // ตรวจสอบความถูกต้องของฟิลด์
     if (!validateFields()) {
       // console.log("Validation failed. Fields are missing.");

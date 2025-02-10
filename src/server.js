@@ -20,7 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
+  // password: "Dream241244",
+  password: "123456789",
   database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
@@ -675,37 +676,56 @@ app.get("/api/report", async (req, res) => {
   }
 });
 
-// เพิ่มข้อมูล report
+
+/**** */
+// ✅ API: เพิ่ม Report + Notification
 app.post("/api/addreport", async (req, res) => {
   const { report_uid, report_name, report_detail, report_date } = req.body;
+
   if (!report_uid || !report_name || !report_detail || !report_date) {
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
   }
-  const parsedDate = new Date(report_date);
-  if (isNaN(parsedDate.getTime())) {
-    return res.status(400).json({ error: "รูปแบบวันที่ไม่ถูกต้อง" });
-  }
-  console.log("Request body:", req.body);
-  const sql = `
-    INSERT INTO report (report_uid, report_name, report_detail, report_date)
-    VALUES (?, ?, ?, ?)
-  `;
+
+  const connection = await db.getConnection();
+  await connection.beginTransaction();
+
   try {
-    const [result] = await db.query(sql, [report_uid, report_name, report_detail, parsedDate]);
-    return res.status(200).json({
-      message: "เพิ่มรายงานสำเร็จ",
-      report_id: result.insertId,
+    // ✅ เพิ่ม Report
+    const [reportResult] = await connection.execute(
+      `INSERT INTO report (report_uid, report_name, report_detail, report_date) 
+      VALUES (?, ?, ?, ?)`,
+      [report_uid, report_name, report_detail, report_date]
+    );
+
+    const reportId = reportResult.insertId;
+
+      // ✅ เพิ่ม Notification (แก้ไขค่าที่ผิด)
+  const message = `มีรายงานใหม่: ${report_name}`;
+  await connection.execute(
+    `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
+    VALUES (?, ?, ?, ?, ?)`, 
+    [reportId, "admin", message, "report", 0]  // ✅ "admin" เป็นผู้รับแจ้งเตือน
+  );
+
+    await connection.commit();
+    connection.release();
+
+    res.status(200).json({
+      message: "✅ เพิ่มรายงานและแจ้งเตือนสำเร็จ",
+      report_id: reportId,
     });
-  } catch (err) {
-    console.error("Error adding report:", err.message);
-    return res.status(500).json({
-      error: "ไม่สามารถเพิ่มข้อมูลรายงานได้",
-      details: err.message,
-    });
+
+  } catch (error) {
+    await connection.rollback();
+    connection.release();
+    console.error("❌ Error:", error);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการเพิ่มข้อมูล" });
   }
 });
 
-// ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)
+
+/*******✅ ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)***********/
+
 app.get('/api/adminreport', async (req, res) => {
   try {
       const sql = "SELECT * FROM report";
@@ -718,23 +738,33 @@ app.get('/api/adminreport', async (req, res) => {
   }
 });
 
+/****** ✅ API: ดึงจำนวนแจ้งเตือนที่ยังไม่ได้อ่านหรืออ่านแล้ว********* */
 
-//ดึงข้อมูลจำนวน report ที่ยังไม่อ่าน ฝั่ง Admin   ไม่อ่าน is_read = 0 และ อ่านแล้ว is_raed = 1
-app.get('/api/countnotifications', (req, res) => {
-  
-//   const sql = "SELECT COUNT(*) FROM `notifications` WHERE is_read = 0 ";
- 
+app.get('/api/countnotifications/:is_read', async (req, res) => {
+  try {
+      let { is_read } = req.params;
 
-//   db.query(sql, (err, result) => {
-//     if(err){
-//       console.error("Error filtering data: ", err);
-//       return res.status(500).json({error: "Query data notifications failed"});
-//     }
-//     res.status(200).json(result);
-//   });
+      // ✅ ตรวจสอบค่าของ is_read ต้องเป็น 0 หรือ 1
+      if (is_read !== "0" && is_read !== "1") {
+          return res.status(400).json({ error: "ค่าพารามิเตอร์ is_read ต้องเป็น 0 หรือ 1 เท่านั้น" });
+      }
+
+      // ✅ Query ดึงจำนวนแจ้งเตือน
+      const sql = "SELECT COUNT(*) AS unread_count FROM `notifications` WHERE is_read = ?";
+      const [result] = await db.query(sql, [is_read]);
+
+      res.status(200).json({ unread_count: result[0].unread_count });
+      // console.log("noti--->>"+result)
+
+  } catch (error) {
+      console.error("❌ Error fetching notifications count:", error);
+      res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือน" });
+  }
 });
 
 // -----------------------------------------------------------
+
+
 // 9) เริ่มต้น Server
 // -----------------------------------------------------------
 app.listen(PORT, () => {
