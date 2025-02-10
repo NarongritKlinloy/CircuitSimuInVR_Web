@@ -66,17 +66,18 @@ export function DashboardNavbar() {
   }, []);
 
 
-  const [notificationCount, setNotificationCount] = useState(0);
+  const [notificationCount, setNotificationCount] = useState(0); // ✅ กำหนด state
+  console.log("Nav -- "+notificationCount)
 
   useEffect(() => {
     const fetchNotifications = async () => {
       try {
-        const data = await NotificationReportData();
-        if (data.length > 0) {
-          setNotificationCount(data[0]["COUNT(*)"]);
+        const count = await NotificationReportData(); // ✅ ดึงข้อมูลจาก API
+        if (count !== null && count !== undefined) {
+          setNotificationCount(count); // ✅ อัปเดต State
         }
       } catch (error) {
-        console.error('Error fetching notifications:', error);
+        console.error("❌ Error fetching notifications:", error);
       }
     };
 
@@ -190,16 +191,18 @@ export function DashboardNavbar() {
       </span> */}
 
     {/* Badge สำหรับแสดงจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน */}
-    {/* {notificationCount > 0 && (
+    {notificationCount > 0 && (
       <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
         {notificationCount}
       </span>
-    )} */}
-    {notificationCount == 0 && (
+    )}
+
+    {/* {notificationCount == 0 && (
       <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
         {""}
       </span>
-    )}
+    )} */}
+
   </div>
 </MenuHandler>
 
