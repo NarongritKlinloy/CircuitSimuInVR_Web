@@ -3,10 +3,10 @@ import { useParams } from "react-router-dom";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button, select } from "@material-tailwind/react";
 import Swal from "sweetalert2";
-import { deleteStudentAPI } from "@/data/delete-student-classroom";
+import { deleteTAAPI } from "@/data/delete-TA-classroom";
 import { string } from "prop-types";
 
-function TATable({ TAs }) {
+function TATable({ TAs, checkStatus }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedTA, setSelectedTA] = useState(null);
@@ -57,19 +57,25 @@ function TATable({ TAs }) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete",
             cancelButtonText: "Cancel",
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                deleteStudentAPI(uid, sessionStorage.getItem("class_id"));
-                console.log(`Deleted : ${uid}`);
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${uid} has been deleted.`,
-                    icon: "success", confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-                    }
-                });
+                await deleteTAAPI(uid, sessionStorage.getItem("class_id"));
+                checkStatus();
             }
+        // .then((result) => {
+        //     if (result.isConfirmed) {
+        //         console.log(sessionStorage.getItem("class_id"));
+        //         deleteTAAPI(uid, sessionStorage.getItem("class_id"));
+        //         console.log(`Deleted : ${uid}`);
+        //         Swal.fire({
+        //             title: "Deleted!",
+        //             text: `${uid} has been deleted.`,
+        //             icon: "success", confirmButtonText: "OK",
+        //             customClass: {
+        //                 confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        //             }
+        //         });
+        //     }
         });
     };
 
@@ -122,7 +128,7 @@ function TATable({ TAs }) {
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ uid, name , sec})}
+                                                onClick={() => openEditModal({ uid })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />

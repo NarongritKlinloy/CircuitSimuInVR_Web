@@ -22,13 +22,22 @@ export function PracticeMgn() {
   }, [navigate]);
   const [search, setSearch] = useState(""); // คำค้นหา
   const [practice, setPractice] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+  const getPractice = async () => {
+    const data = await practiceTableData();
+    setPractice(data);
+  };
+
+  // toggle refresh status
+  const handleRefresh = () => {
+    setRefresh(prev => !prev);
+  };
+
+  // auto refresh page after data change
   useEffect(() => {
-    const getPractice = async () => {
-      const data = await practiceTableData();
-      setPractice(data);
-    };
     getPractice();
-  }, [practice]);
+  }, [refresh]);
 
   // ฟังก์ชันกรองข้อมูล Practice Table
   const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
@@ -53,6 +62,7 @@ export function PracticeMgn() {
           setEditingPractice(practice);
           setIsEditPracticeOpen(true);
         }}
+        checkStatus={handleRefresh}
       />
 
     </div>

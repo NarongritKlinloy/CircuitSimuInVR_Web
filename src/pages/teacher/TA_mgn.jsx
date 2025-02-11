@@ -26,6 +26,7 @@ export function TAManagement() {
 
   const [search, setSearch] = useState("");
   const [TAs, setTA] = useState([]);
+    const [refresh, setRefresh] = useState(false);
 
 
   const getTA = async () => {
@@ -33,9 +34,15 @@ export function TAManagement() {
     setTA(data);
   };
 
+  // toggle refresh status
+  const handleRefresh = () => {
+    setRefresh(prev => !prev);
+  };
+
+  // auto refresh page after data change
   useEffect(() => {
     getTA();
-  }, [TAs]);
+  }, [refresh]);
 
   // Modal State
   const [isAddTAOpen, setIsAddTAOpen] = useState(false);
@@ -57,9 +64,10 @@ export function TAManagement() {
   const handleAddTA = () => {
     // console.log(newTA);
     addTAAPI(newTA);
-    setTA([...TAs, newTA]);
+    // setTA([...TAs, newTA]);
     setNewTA({ uid: "", class_id: sessionStorage.getItem("class_id")});
     setIsAddTAOpen(false);
+    handleRefresh();
   };
 
 
@@ -83,6 +91,7 @@ export function TAManagement() {
 
       <TATable
         TAs={filteredTA}
+        checkStatus={handleRefresh} // send fn to refresh page
       />
       
       <TAModal

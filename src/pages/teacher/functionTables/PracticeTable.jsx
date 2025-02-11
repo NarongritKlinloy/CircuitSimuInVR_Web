@@ -3,12 +3,13 @@ import { Card, CardHeader, CardBody, Typography, Switch } from "@material-tailwi
 import Swal from "sweetalert2";
 import { updatePracticeStatusAPI } from "@/data/change-status-practice";
 
-function PracticeTable({ practice, onStatusChange }) {
+function PracticeTable({ practice, onStatusChange, checkStatus}) {
 
   const switchCheck = (e, practiceItem) => {
     const isChecked = e.target.checked;
     if (isChecked) {
       updatePracticeStatusAPI(practiceItem.practice_id, practiceItem.practice_status);
+      checkStatus();
       Swal.fire({
         title: "Practice Status",
         text: "Practice is on",
@@ -27,6 +28,7 @@ function PracticeTable({ practice, onStatusChange }) {
       }).then((result) => {
         if (result.isConfirmed) {
           updatePracticeStatusAPI(practiceItem.practice_id, practiceItem.practice_status);
+          checkStatus();
           Swal.fire({
             title: "Practice Status",
             text: "Practice is closed",
