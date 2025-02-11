@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import { deleteTAAPI } from "@/data/delete-TA-classroom";
 import { string } from "prop-types";
 
-function TATable({ TAs }) {
+function TATable({ TAs, checkStatus }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedTA, setSelectedTA] = useState(null);
@@ -60,14 +60,7 @@ function TATable({ TAs }) {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 await deleteTAAPI(uid, sessionStorage.getItem("class_id"));
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${uid} has been deleted.`,
-                    icon: "success", confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-                    }
-                });
+                checkStatus();
             }
         // .then((result) => {
         //     if (result.isConfirmed) {
