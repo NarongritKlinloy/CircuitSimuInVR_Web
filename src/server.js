@@ -20,8 +20,8 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  // password: "Dream241244",
-  password: "123456789",
+  password: "Dream241244",
+  // password: "123456789",
   database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
@@ -536,6 +536,9 @@ app.delete("/api/classroom/student/:uid/:class_id", async (req, res) => {
   }
 });
 
+
+// ------------ Teacher Assistant (TA) ------------ // 
+
 // เพิ่ม teacher assistant ใน classroom
 app.post("/api/classroom/assistant", async (req, res) => {
   const { uid, class_id } = req.body;
@@ -591,6 +594,8 @@ app.delete("/api/classroom/assistant/:uid/:class_id", async (req, res) => {
   }
 });
 
+// ------------ End Teacher Assistant ------------ // 
+
 //ดึง sec ของ classroom ที่ name, year, semester ตรงกัน
 app.get("/api/classroom/sec/:class_id", async (req, res) => {
   try {
@@ -601,11 +606,11 @@ app.get("/api/classroom/sec/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    const name = rows[0].name;
+    const name = rows[0].class_name;
     const semester = rows[0].semester;
     const year = rows[0].year;
 
-    const sql_sec_classroom = "SELECT * FROM classroom WHERE name = ? AND semester = ? AND year = ?";
+    const sql_sec_classroom = "SELECT * FROM classroom WHERE class_name = ? AND semester = ? AND year = ?";
     const [rows_sec] = await db.query(sql_sec_classroom, [name, semester, year]);
     return res.status(200).json(rows_sec);
 
