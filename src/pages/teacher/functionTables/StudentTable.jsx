@@ -4,9 +4,10 @@ import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button, select } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import { deleteStudentAPI } from "@/data/delete-student-classroom";
+import { editStudentAPI } from "@/data/edit-student-classroom";
 import { string } from "prop-types";
 
-function StudentTable({ students, onEditClick, onDelete }) {
+function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedStudent, setSelectedStudent] = useState(null);
@@ -31,17 +32,13 @@ function StudentTable({ students, onEditClick, onDelete }) {
     };
 
     // ฟังก์ชันยืนยันการแก้ไข
-    const handleSaveEdit = () => {
-        console.log(`Updated ${selectedStudent.name}`);
-        Swal.fire({
-            title: "Updated!",
-            text: `${selectedStudent.name} has been updated`,
-            icon: "success",
-            confirmButtonText: "OK",
-            customClass: {
-                confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-            },
-        });
+    const handleSaveEdit = async () => {
+        try {
+            await editStudentAPI(selectedStudent.uid, sessionStorage.getItem("class_id"));
+            checkStatus();
+        } catch (error) {
+            console.error("Error updating student : ", error)
+        }
         closeEditModal();
     };
 
@@ -57,18 +54,11 @@ function StudentTable({ students, onEditClick, onDelete }) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete",
             cancelButtonText: "Cancel",
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                deleteStudentAPI(uid, sessionStorage.getItem("class_id"));
+                await deleteStudentAPI(uid, sessionStorage.getItem("class_id"));
                 console.log(`Deleted : ${uid}`);
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${uid} has been deleted.`,
-                    icon: "success", confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-                    }
-                });
+                checkStatus();
             }
         });
     };

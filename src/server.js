@@ -630,6 +630,7 @@ app.put("/api/classroom/sec/:uid", async (req, res) => {
       .replace(",", "");
     const sql_enroll = ("UPDATE enrollment SET class_id = ?, enroll_date = ? WHERE uid = ?");
     const [updateResult] = await db.query(sql_enroll, [class_id, enrollDate, uid])
+    console.log(enrollDate);
     if (!updateResult) {
       return res.status(400).json({ error: "Sec failed to update!" });
     }
