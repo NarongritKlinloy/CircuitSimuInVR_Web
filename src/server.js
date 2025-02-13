@@ -438,7 +438,11 @@ app.get("/api/classroom/student/count/:class_id", async (req, res) => {
 // ดึงข้อมูล student ที่อยู่ใน classroom
 app.get("/api/classroom/student/:class_id", async (req, res) => {
   const { class_id } = req.params;
-  const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  // const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  const sql_enroll = `select enrollment.uid, user.name, enrollment.class_id, user.last_active, classroom.sec from enrollment
+                      left join classroom on enrollment.class_id = classroom.class_id
+                      left join user on enrollment.uid = user.uid
+                      where enrollment.class_id = ?`
 
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
@@ -446,10 +450,11 @@ app.get("/api/classroom/student/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    const uids = rows.map((r) => r.uid);
-    const sql_user = "SELECT * FROM user WHERE uid IN (?)";
-    const [userRows] = await db.query(sql_user, [uids]);
-    return res.status(200).json(userRows);
+    // const uids = rows.map((r) => r.uid);
+    // const sql_user = "SELECT * FROM user WHERE uid IN (?)";
+    // const [userRows] = await db.query(sql_user, [uids]);
+    // return res.status(200).json(userRows);
+    return res.status(200).json(rows);
   } catch (err) {
     console.error("Error select user student:", err);
     return res.status(500).json({ error: "Select user student failed" });

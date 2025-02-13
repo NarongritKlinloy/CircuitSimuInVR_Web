@@ -5,12 +5,24 @@ import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, 
 import Swal from "sweetalert2";
 import { deleteStudentAPI } from "@/data/delete-student-classroom";
 import { editStudentAPI } from "@/data/edit-student-classroom";
+import { ClassroomSecAPI } from "@/data/classroom_sec";
 import { string } from "prop-types";
 
 function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedStudent, setSelectedStudent] = useState(null);
+    const [ selectSec, setSelectSec ] = useState([]);
+    
+    const getSec = async () => {
+        const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
+        setSelectSec(data.data);
+        console.log(selectSec);
+    };
+
+    useEffect(() =>{
+        getSec();
+    },[]);
     
     // handle data change
     const inputHandle = (event) => {
@@ -176,6 +188,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                         </div>
                         
                         <div>
+                            
                             <Select 
                                 label="Select Sec"
                                 name="sec"
@@ -186,10 +199,11 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                     }))
                                 }}                        
                             >
-                                <Option value="101">101</Option>
-                                <Option value="102">102</Option>
-                                <Option value="103">103</Option>
-                                <Option value="111">111</Option>
+                                {selectSec.map(({ sec }, key) => {
+                                    (
+                                        <Option value="" key={key}>{sec}</Option>
+                                    )
+                                })},
                             </Select>
                         </div>
                     </div>
