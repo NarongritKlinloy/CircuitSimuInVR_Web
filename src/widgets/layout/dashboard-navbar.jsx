@@ -84,7 +84,7 @@ console.log("User -- "+userRole)
 
     fetchNotifications(); // เรียกใช้งานครั้งแรกทันที
 
-    const interval = setInterval(fetchNotifications, 10000); // อัปเดตทุก 10 วินาที
+    const interval = setInterval(fetchNotifications, 8000); // อัปเดตทุก 8 วินาที
     console.log(interval)
     return () => clearInterval(interval); // เคลียร์ Interval เมื่อ Component ถูก Unmount
   }, []);

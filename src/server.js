@@ -762,6 +762,38 @@ app.get('/api/countnotifications/:is_read', async (req, res) => {
   }
 });
 
+// เปลี่ยน update-notification
+app.put("/api/update-notification", async (req, res) => {
+  const { recipient_uid, report_id } = req.body;
+  const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
+  try {
+    await db.query(sql, [recipient_uid, report_id]);
+    res.status(200).send({ message: "notification updated successfully" });
+  } catch (err) {
+    console.error("Error updating notification:", err);
+    res.status(500).send("Error updating notification");
+  }
+});
+
+//อ่านค่า read = 1 ในการเปลี่ยนสีปุ่ม
+app.get("/api/get-read-notifications", async (req, res) => {
+  const { recipient_uid } = req.query;
+
+  if (!recipient_uid) {
+    return res.status(400).json({ error: "recipient_uid is required" });
+  }
+
+  try {
+    const sql = "SELECT report_id FROM notifications WHERE recipient_uid = ? AND is_read = 1";
+    const [result] = await db.query(sql, [recipient_uid]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("❌ Error fetching read notifications:", error);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือนที่อ่านแล้ว" });
+  }
+});
+
 // -----------------------------------------------------------
 
 
