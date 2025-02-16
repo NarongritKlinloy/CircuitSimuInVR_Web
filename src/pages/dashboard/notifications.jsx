@@ -19,7 +19,8 @@ import {
   DialogFooter,
   Input,
 } from "@material-tailwind/react";
-import { TeacherReportData } from "@/data/teacher-report"; // นำเข้าฟังก์ชัน
+import { updateNotificationAPI } from "@/data/updateNotification";
+import { fetchReadNotifications } from "@/data/fetchReadNoti";
 import ReportTableData from "@/data/report-data";
 
 export function Notifications() {
@@ -53,7 +54,7 @@ const [newReport, setNewReport] = useState({
 
   const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
 
-// console.log("newReportData---() ---> "+newReport.report_uid)
+// console.log("selectedReportId---() ---> "+selectedReportId)
 
   // const navigate = useNavigate();
 
@@ -76,6 +77,26 @@ const [newReport, setNewReport] = useState({
     fetchReports(); // เรียกฟังก์ชันดึงข้อมูล
   }, []); // ทำงานครั้งเดียวตอน component ถูก mount
 
+//useEffect เพื่อโหลดข้อมูล is_read = 1
+  useEffect(() => {
+    const loadReadNotifications = async () => {
+      const email = sessionStorage.getItem("email"); // ✅ ดึง email ของผู้ใช้
+      const readReports = await fetchReadNotifications(email); // ✅ ดึง `report_id` ที่อ่านแล้วจาก API
+  
+      if (readReports && Array.isArray(readReports)) {
+        const reportIds = readReports.map(item => item.report_id); // ✅ แปลงเป็นอาร์เรย์ของ `report_id`
+        setUpdatedReports(reportIds); // ✅ บันทึกค่าเพื่อเปลี่ยนสีปุ่ม
+        fetchUsers(); 
+      }
+    };
+  
+    loadReadNotifications(); // ✅ โหลดข้อมูลเมื่อหน้าโหลด
+  }, []);
+  
+
+
+
+
 const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
 const API_URL = (`http://localhost:5000/api/report?email=${email}`);
  // ฟังก์ชันดึงข้อมูลจาก API
@@ -88,100 +109,66 @@ const API_URL = (`http://localhost:5000/api/report?email=${email}`);
   }
 };
 
+const recipient_uid = sessionStorage.getItem("email"); // ✅ ดึง email ของผู้ใช้
+// ✅ เพิ่ม useState เก็บ report_id ที่เลือก
+const [selectedReportId, setSelectedReportId] = useState(null);
+
+console.log("data-->> "+selectedReportId)
+console.log("recipient_uid", recipient_uid,"selectedReportId",selectedReportId);
 // ฟังก์ชันเปิด/ปิด modal แสดงรายละเอียด
 const [dialogDetailOpen, setDialogDetailOpen] = useState(false);
-const handleDialogOpen = (detail) => {
+
+const handleDialogOpen = (detail,reportId) => {
   setSelectedDescription(detail);
+  setSelectedReportId(reportId); // เก็บ report_id เพื่อใช้ใน handleCloseDialog
   setDialogDetailOpen(true);
+  console.log("recipient_uid", recipient_uid,"selectedReportId",selectedReportId);
 };
-// ฟังก์ชันดึงข้อมูลจาก TeacherReportData
-// const fetchReports = async () => {
-//   try {
-//     setLoading(true);
-//     const data = await TeacherReportData(); // เรียกฟังก์ชันที่นำเข้ามา
-//     setReports(data); // เก็บข้อมูลใน state
-//   } catch (err) {
-//     setError("Error fetching reports. Please try again.");
-//     console.error(err);
-//   } finally {
-//     setLoading(false);
-//   }
-// };
+
+//useState เพื่อเก็บ updatedReports ที่จะบันทึกว่า report_id ไหนอัปเดตสำเร็จแล้ว
+const [updatedReports, setUpdatedReports] = useState([]);
+
+
+
+// const handleClose = () => {
+  //   resetState(); // รีเซ็ตสถานะ Error
+  //   setIsAddReportOpen(false);
+  // };
+
+
+  const handleClose = async () => {
+    setDialogDetailOpen(false); // ✅ ปิด Modal
+  
+    const recipient_uid = sessionStorage.getItem("email");
+    console.log("📥 Sending request to update notification...");
+  
+    try {
+      const response = await updateNotificationAPI(recipient_uid, selectedReportId);
+      console.log("✅ API Response:", response);
+  
+      if (response && response.message) {
+        // ✅ เพิ่ม report_id ลงใน updatedReports เพื่อเปลี่ยนสีปุ่มทันที
+        setUpdatedReports((prev) => [...prev, selectedReportId]);
+      }
+  
+      // ✅ รีเฟรชข้อมูลแจ้งเตือนจาก API เพื่อให้แน่ใจว่าปุ่มเปลี่ยนสีหลัง Refresh
+      const readReports = await fetchReadNotifications(recipient_uid);
+      if (readReports && Array.isArray(readReports)) {
+        const reportIds = readReports.map(item => item.report_id);
+        setUpdatedReports(reportIds); // ✅ อัปเดต State
+      }
+    } catch (error) {
+      console.error("❌ Error updating notification:", error);
+    }
+  };
+  
+
+  
+
+
 useEffect(() => {
   console.log("Reports state:", reports); // ตรวจสอบว่า reports state ถูกอัพเดตหรือไม่
 }, [reports]); // ตรวจสอบทุกครั้งที่ state เปลี่ยน
-
-
-
-
-  // // ฟังก์ชันรีเซ็ต Error และข้อมูล
-  // const resetState = () => {
-  //   console.log("Resetting form state...");
-  //   setErrors({}); // รีเซ็ต Error ให้เป็นค่าว่าง
-  //   setNewReport({ report_name: "", report_detail: "", report_date: "" }); // รีเซ็ตข้อมูลใหม่
-  //   console.log("Form state reset.");
-  // };
-  const resetState = (defaultState = { report_uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_date: getCurrentDate() }) => {
-    console.log("Resetting form state...");
-    setErrors({});
-    setNewReport(defaultState);
-    console.log("Form state reset.");
-  };
-  
-
-  // ฟังก์ชัน Validate ข้อมูลก่อนบันทึก
-  const validateFields = () => {
-    const newErrors = {};
-    if (!newReport.report_name) newErrors.report_name = "Report Name is required";
-    if (!newReport.report_detail) newErrors.report_detail = "Detail is required";
-    if (!newReport.report_date) newErrors.report_date = "Report Date is required"; // ตรวจสอบ report_date
-    setErrors(newErrors);
-    const result = Object.keys(newErrors).length === 0 ? true : false
-    return result;
-  };
-  
-
-  // ฟังก์ชันบันทึกข้อมูล
-  // const handleSave = async () => {
-  //   console.log("Data to send to API:", newReport);
-    // fetchReports(); // ดึงข้อมูลใหม่หลังจากเพิ่ม
-    // setIsAddReportOpen(false); // ปิด Modal
-    // resetState(); // รีเซ็ตข้อมูล
-   
-
-  //   if (validateFields()) {
-     
-  //     try {
-       
-  //       const response = await axios.post(`http://localhost:5000/api/addreport`,newReport);
-  //       if (response.status == 200) {
-  //         Swal.fire({
-  //           title: "Added!",
-  //           text: `${newReport.report_name} has been added.`,
-  //           icon: "success",
-  //           confirmButtonText: "OK",
-  //           customClass: {
-  //             confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-  //           },
-  //         });
-  //         // fetchReports(); // ดึงข้อมูลใหม่
-  //         resetState(); // รีเซ็ตข้อมูลในฟอร์ม
-  //       }
-  //     } catch (err) {
-  //       Swal.fire({
-  //         title: "Added!",
-  //         text: `Can not add ${newReport.report_name}`,
-  //         icon: "error",
-  //         confirmButtonText: "OK",
-  //         customClass: {
-  //           confirmButton: "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-  //         },
-  //       });
-  //     }
-      
-  //   }
-  //   setIsAddReportOpen(false); // ปิด Modalv
-  // };
 
 
   console.log("Data =>>", newReport);
@@ -230,10 +217,6 @@ useEffect(() => {
   };
   
   
-  const handleClose = () => {
-    resetState(); // รีเซ็ตสถานะ Error
-    setIsAddReportOpen(false);
-  };
   
 
   if (loading) return <p>Loading...</p>;
@@ -258,13 +241,6 @@ useEffect(() => {
         <CardBody className="overflow-x-auto pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
-              {/* <tr>
-                <th className="border-b border-blue-gray-50 px-5 py-2">No.</th>
-                <th className="border-b border-blue-gray-50 px-5 py-2">Name</th>
-                <th className="border-b border-blue-gray-50 px-5 py-2">User</th>
-                <th className="border-b border-blue-gray-50 px-5 py-2">Create Date</th>
-                <th className="border-b border-blue-gray-50 px-5 py-2">Detail</th>
-              </tr> */}
               <tr>
             {["No.", "Name", "User", "Create Date", "Detail"].map((header) => (
               <th
@@ -314,10 +290,13 @@ useEffect(() => {
 
                 <td className={`${rowClassName} text-center`}>
                   <button
-                    onClick={() => handleDialogOpen(report.report_detail)}
-                    className="text-red-500 hover:text-  -700"
+                    onClick={() => handleDialogOpen(report.report_detail, report.report_id)}
+                    className={`${
+                      updatedReports.includes(report.report_id)
+                        ? "text-green-500 hover:text-green-700" // ✅ ถ้า `is_read = 1` เป็นสีเขียว
+                        : "text-red-500 hover:text-green-700"   // ✅ ปกติเป็นสีแดง
+                    }`}
                   >
-                    {/* <PencilSquareIcon className="h-5 w-5" /> */}
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
@@ -327,7 +306,6 @@ useEffect(() => {
                       <path d="M5.625 1.5c-1.036 0-1.875.84-1.875 1.875v17.25c0 1.035.84 1.875 1.875 1.875h12.75c1.035 0 1.875-.84 1.875-1.875V12.75A3.75 3.75 0 0 0 16.5 9h-1.875a1.875 1.875 0 0 1-1.875-1.875V5.25A3.75 3.75 0 0 0 9 1.5H5.625Z" />
                       <path d="M12.971 1.816A5.23 5.23 0 0 1 14.25 5.25v1.875c0 .207.168.375.375.375H16.5a5.23 5.23 0 0 1 3.434 1.279 9.768 9.768 0 0 0-6.963-6.963Z" />
                     </svg>
-
                   </button>
                 </td>
 
@@ -350,9 +328,10 @@ useEffect(() => {
           <Button
             variant="gradient"
             color="blue"
-            onClick={() => setDialogDetailOpen(false)}
+            // onClick={() => setDialogDetailOpen(false)}
+            onClick={handleClose}
           >
-            Close
+            READ
           </Button>
         </DialogFooter>
       </Dialog>
