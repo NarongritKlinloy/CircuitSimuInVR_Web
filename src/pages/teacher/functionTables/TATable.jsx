@@ -3,54 +3,45 @@ import { useParams } from "react-router-dom";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button, select } from "@material-tailwind/react";
 import Swal from "sweetalert2";
-import { deleteStudentAPI } from "@/data/delete-student-classroom";
-import { editStudentAPI } from "@/data/edit-student-classroom";
-import { ClassroomSecAPI } from "@/data/classroom_sec";
+import { deleteTAAPI } from "@/data/delete-TA-classroom";
 import { string } from "prop-types";
 
-function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
+function TATable({ TAs, checkStatus }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
-    const [selectedStudent, setSelectedStudent] = useState(null);
-    const [ selectSec, setSelectSec ] = useState([]);
-    
-    const getSec = async () => {
-        const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
-        setSelectSec(data.data);
-        console.log(selectSec);
-    };
-
-    useEffect(() =>{
-        getSec();
-    },[]);
+    const [selectedTA, setSelectedTA] = useState(null);
     
     // handle data change
     const inputHandle = (event) => {
-        setSelectedStudent((prev) => ({
+        setSelectedTA((prev) => ({
             ...prev, [event.target.name]: event.target.value
         }))
     }
 
     // เปิด Modal และโหลดข้อมูล
-    const openEditModal = (student) => {
-        setSelectedStudent(student);
+    const openEditModal = (TA) => {
+        setSelectedTA(TA);
         setIsEditOpen(true);
     };
 
     // ปิด Modal 
     const closeEditModal = () => {
         setIsEditOpen(false);
-        setSelectedStudent(null);
+        setSelectedTA(null);
     };
 
     // ฟังก์ชันยืนยันการแก้ไข
-    const handleSaveEdit = async () => {
-        try {
-            await editStudentAPI(selectedStudent.uid, sessionStorage.getItem("class_id"));
-            checkStatus();
-        } catch (error) {
-            console.error("Error updating student : ", error)
-        }
+    const handleSaveEdit = () => {
+        console.log(`Updated ${selectedTA.name}`);
+        Swal.fire({
+            title: "Updated!",
+            text: `${selectedTA.name} has been updated`,
+            icon: "success",
+            confirmButtonText: "OK",
+            customClass: {
+                confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+            },
+        });
         closeEditModal();
     };
 
@@ -68,10 +59,23 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
             cancelButtonText: "Cancel",
         }).then(async (result) => {
             if (result.isConfirmed) {
-                await deleteStudentAPI(uid, sessionStorage.getItem("class_id"));
-                console.log(`Deleted : ${uid}`);
+                await deleteTAAPI(uid, sessionStorage.getItem("class_id"));
                 checkStatus();
             }
+        // .then((result) => {
+        //     if (result.isConfirmed) {
+        //         console.log(sessionStorage.getItem("class_id"));
+        //         deleteTAAPI(uid, sessionStorage.getItem("class_id"));
+        //         console.log(`Deleted : ${uid}`);
+        //         Swal.fire({
+        //             title: "Deleted!",
+        //             text: `${uid} has been deleted.`,
+        //             icon: "success", confirmButtonText: "OK",
+        //             customClass: {
+        //                 confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+        //             }
+        //         });
+        //     }
         });
     };
 
@@ -80,7 +84,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
             <Card>
                 <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
                     <Typography variant="h6" color="white">
-                        Student Table : { classname }
+                        Teacher Assistant Table : { classname }
                     </Typography>
                 </CardHeader>
 
@@ -89,7 +93,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["no.", "uid", "name", "last active","edit", "delete"].map((header) => (
+                                {["no.", "uid", "edit", "delete"].map((header) => (
                                     <th
                                         key={header}
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${header === "name" ? "text-left" : "text-center"}`}
@@ -105,8 +109,8 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                             </tr>
                         </thead>
                         <tbody>
-                            {students.map(({ uid, name, last_active ,sec}, key) => {
-                                const isLast = key === students.length - 1;
+                            {TAs.map(({ uid }, key) => {
+                                const isLast = key === TAs.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
                                 return (
@@ -121,20 +125,10 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                                 {uid}
                                             </Typography>
                                         </td>
-                                        <td className={`${rowClassName} text-left`}>
-                                            <Typography className="text-s font-normal text-blue-gray-500">
-                                                {name}
-                                            </Typography>
-                                        </td>
-                                        <td className={`${rowClassName} text-left`}>
-                                            <Typography className="text-s font-normal text-blue-gray-500">
-                                                {last_active}
-                                            </Typography>
-                                        </td>
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ uid, name , sec})}
+                                                onClick={() => openEditModal({ uid })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
@@ -167,44 +161,13 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                     </Typography>
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-4">
-                            <div className="w-1/2">
-                                <Input 
-                                    readOnly
-                                    label="student id"
-                                    name="stdid"
-                                    value={selectedStudent?.uid}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                            <div className="w-1/2">
-                                <Input  
-                                    readOnly
-                                    label="name"
-                                    name="name"
-                                    value={selectedStudent?.name}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                        </div>
-                        
-                        <div>
-                            
-                            <Select 
-                                label="Select Sec"
-                                name="sec"
-                                value={selectedStudent?.sec ? String(selectedStudent.sec) : ""}
-                                onChange={(e)=>{
-                                    setSelectedStudent((prev) => ({
-                                        ...prev, "sec" : e
-                                    }))
-                                }}                        
-                            >
-                                {selectSec.map(({ sec }, key) => {
-                                    (
-                                        <Option value="" key={key}>{sec}</Option>
-                                    )
-                                })},
-                            </Select>
+                            <Input 
+                                readOnly
+                                label="student id"
+                                name="stdid"
+                                value={selectedTA?.uid}
+                                onChange={inputHandle}
+                            />
                         </div>
                     </div>
                 </DialogBody>
@@ -221,4 +184,4 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
     );
 }
 
-export default StudentTable;
+export default TATable;

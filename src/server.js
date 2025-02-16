@@ -20,8 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "root",
-  database: "circuit_project",
+  password: "Dream241244",
+  // password: "123456789",
+  database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -31,18 +32,18 @@ const db = mysql.createPool({
 (async function testDB() {
   try {
     const conn = await db.getConnection();
-    console.log("✅ Connected to MySQL (Connection Pool)");
+    console.log("Connected to MySQL (Connection Pool)");
     conn.release();
   } catch (error) {
-    console.error("❌ Cannot connect to MySQL:", error);
+    console.error("Cannot connect to MySQL:", error);
   }
 })();
 
 // 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
 const wss = new WebSocketServer({ port: 8080 });
 wss.on("connection", (ws) => {
-  console.log("✅ Unity Connected via WebSocket");
-  ws.send("🔹 Connected to WebSocket Server");
+  console.log("Unity Connected via WebSocket");
+  ws.send("Connected to WebSocket Server");
 });
 
 // ฟังก์ชันแจ้งเตือน Unity
@@ -72,7 +73,7 @@ app.get("/callback", (req, res) => {
           })
           .then(response => response.json())
           .then(data => {
-              console.log("✅ Login Success:", data);
+              console.log("Login Success:", data);
 
               // แจ้งเตือน Unity ผ่าน WebSocket (หากต้องการให้ไปเรียกผ่าน REST อีกที อาจต้องทำ endpoint ให้ตรง)
               fetch("http://localhost:8080/notify", {
@@ -88,7 +89,7 @@ app.get("/callback", (req, res) => {
               setTimeout(() => { window.open('', '_self', ''); window.close(); }, 1000);
           })
           .catch(error => {
-              console.error("❌ Error:", error);
+              console.error("Error:", error);
               window.location.href = "http://localhost:5000/error";
           });
       } else {
@@ -115,17 +116,17 @@ app.post("/register", async (req, res) => {
   const { accessToken } = req.body;
 
   if (!accessToken) {
-    console.error("❌ No accessToken received!");
-    return res.status(400).json({ error: "❌ No accessToken provided" });
+    console.error("No accessToken received!");
+    return res.status(400).json({ error: "No accessToken provided" });
   }
 
   try {
-    console.log("📡 Verifying Google Token...");
+    console.log("Verifying Google Token...");
     const googleResponse = await axios.get(`https://www.googleapis.com/oauth2/v3/userinfo`, {
       headers: { Authorization: `Bearer ${accessToken}` },
     });
 
-    console.log("✅ Google Response:", googleResponse.data);
+    console.log("Google Response:", googleResponse.data);
     const { email, name } = googleResponse.data;
     const now = new Date();
     now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
@@ -142,22 +143,22 @@ app.post("/register", async (req, res) => {
         role_id,
         email,
       ]);
-      console.log(`✅ User ${email} updated successfully`);
+      console.log(`User ${email} updated successfully`);
       notifyUnity(accessToken);
-      return res.json({ message: "✅ User updated successfully" });
+      return res.json({ message: "User updated successfully" });
     } else {
       // ยังไม่มี -> สร้างใหม่
       await db.query(
         "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, ?)",
         [email, name, role_id, last_active]
       );
-      console.log(`✅ User ${email} registered successfully`);
+      console.log(`User ${email} registered successfully`);
       notifyUnity(accessToken);
-      return res.json({ message: "✅ User registered successfully" });
+      return res.json({ message: "User registered successfully" });
     }
   } catch (error) {
-    console.error("❌ Google Token Verification Failed:", error);
-    return res.status(400).json({ error: "❌ Invalid Google Token" });
+    console.error("Google Token Verification Failed:", error);
+    return res.status(400).json({ error: "Invalid Google Token" });
   }
 });
 
@@ -193,7 +194,7 @@ async function getUsersByRole(roleId) {
   return rows;
 }
 
-// 📚 ดึงข้อมูลนักเรียน (role_id = 3)
+// ดึงข้อมูลนักเรียน (role_id = 3)
 app.get("/api/student", async (req, res) => {
   try {
     const students = await getUsersByRole(3);
@@ -204,7 +205,7 @@ app.get("/api/student", async (req, res) => {
   }
 });
 
-// 👨‍🏫 ดึงข้อมูลครู (role_id = 1)
+// ดึงข้อมูลครู (role_id = 1)
 app.get("/api/teacher", async (req, res) => {
   try {
     const teachers = await getUsersByRole(1);
@@ -429,7 +430,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 app.get("/api/classroom/student/count/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
-
+  
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
     return res.status(200).json(rows.length);
@@ -442,7 +443,11 @@ app.get("/api/classroom/student/count/:class_id", async (req, res) => {
 // ดึงข้อมูล student ที่อยู่ใน classroom
 app.get("/api/classroom/student/:class_id", async (req, res) => {
   const { class_id } = req.params;
-  const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  // const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
+  const sql_enroll = `select enrollment.uid, user.name, enrollment.class_id, user.last_active, classroom.sec from enrollment
+                      left join classroom on enrollment.class_id = classroom.class_id
+                      left join user on enrollment.uid = user.uid
+                      where enrollment.class_id = ?`
 
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
@@ -450,10 +455,11 @@ app.get("/api/classroom/student/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    const uids = rows.map((r) => r.uid);
-    const sql_user = "SELECT * FROM user WHERE uid IN (?)";
-    const [userRows] = await db.query(sql_user, [uids]);
-    return res.status(200).json(userRows);
+    // const uids = rows.map((r) => r.uid);
+    // const sql_user = "SELECT * FROM user WHERE uid IN (?)";
+    // const [userRows] = await db.query(sql_user, [uids]);
+    // return res.status(200).json(userRows);
+    return res.status(200).json(rows);
   } catch (err) {
     console.error("Error select user student:", err);
     return res.status(500).json({ error: "Select user student failed" });
@@ -489,9 +495,32 @@ app.post("/api/classroom/student", async (req, res) => {
     }
 
     // ถ้ายัง -> เพิ่ม
-    const now = new Date();
-    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
-    const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
+    // const enrollDate = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", 
+    //   year: "numeric", 
+    //   month: "2-digit", 
+    //   day: "2-digit", 
+    //   hour: "2-digit", 
+    //   minute: "2-digit", 
+    //   second: "2-digit",
+    //   hour12: false
+    // })
+    //   .replace(/\//g, "-")
+    //   .replace(",", "");
+    const options = { 
+      timeZone: "Asia/Bangkok", 
+      year: "numeric", 
+      month: "2-digit", 
+      day: "2-digit", 
+      hour: "2-digit", 
+      minute: "2-digit", 
+      second: "2-digit", 
+      hour12: false 
+  };
+  
+  const formatter = new Intl.DateTimeFormat("en-GB", options);
+  const parts = formatter.formatToParts(new Date());
+  const enrollDate = `${parts[4].value}-${parts[2].value}-${parts[0].value} ${parts[6].value}:${parts[8].value}:${parts[10].value}`;
+
     const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
     await db.query(sql_enroll, [processedUid, class_id, enrollDate]);
     res.status(200).send({ message: "Added student to classroom successfully" });
@@ -516,6 +545,9 @@ app.delete("/api/classroom/student/:uid/:class_id", async (req, res) => {
     res.status(500).json({ error: "Delete enrollment failed" });
   }
 });
+
+
+// ------------ Teacher Assistant (TA) ------------ // 
 
 // เพิ่ม teacher assistant ใน classroom
 app.post("/api/classroom/assistant", async (req, res) => {
@@ -572,6 +604,8 @@ app.delete("/api/classroom/assistant/:uid/:class_id", async (req, res) => {
   }
 });
 
+// ------------ End Teacher Assistant ------------ // 
+
 //ดึง sec ของ classroom ที่ name, year, semester ตรงกัน
 app.get("/api/classroom/sec/:class_id", async (req, res) => {
   try {
@@ -582,7 +616,7 @@ app.get("/api/classroom/sec/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    const name = rows[0].name;
+    const name = rows[0].class_name;
     const semester = rows[0].semester;
     const year = rows[0].year;
 
@@ -606,6 +640,7 @@ app.put("/api/classroom/sec/:uid", async (req, res) => {
     const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
     const sql_enroll = ("UPDATE enrollment SET class_id = ?, enroll_date = ? WHERE uid = ?");
     const [updateResult] = await db.query(sql_enroll, [class_id, enrollDate, uid])
+    console.log(enrollDate);
     if (!updateResult) {
       return res.status(400).json({ error: "Sec failed to update!" });
     }
@@ -657,39 +692,129 @@ app.get("/api/report", async (req, res) => {
   }
 });
 
-// เพิ่มข้อมูล report
+
+/**** */
+// ✅ API: เพิ่ม Report + Notification
 app.post("/api/addreport", async (req, res) => {
   const { report_uid, report_name, report_detail, report_date } = req.body;
+
   if (!report_uid || !report_name || !report_detail || !report_date) {
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
   }
-  const parsedDate = new Date(report_date);
-  if (isNaN(parsedDate.getTime())) {
-    return res.status(400).json({ error: "รูปแบบวันที่ไม่ถูกต้อง" });
-  }
-  console.log("Request body:", req.body);
-  const sql = `
-    INSERT INTO report (report_uid, report_name, report_detail, report_date)
-    VALUES (?, ?, ?, ?)
-  `;
+
+  const connection = await db.getConnection();
+  await connection.beginTransaction();
+
   try {
-    const [result] = await db.query(sql, [report_uid, report_name, report_detail, parsedDate]);
-    return res.status(200).json({
-      message: "เพิ่มรายงานสำเร็จ",
-      report_id: result.insertId,
+    // ✅ เพิ่ม Report
+    const [reportResult] = await connection.execute(
+      `INSERT INTO report (report_uid, report_name, report_detail, report_date) 
+      VALUES (?, ?, ?, ?)`,
+      [report_uid, report_name, report_detail, report_date]
+    );
+
+    const reportId = reportResult.insertId;
+
+      // ✅ เพิ่ม Notification (แก้ไขค่าที่ผิด)
+  const message = `มีรายงานใหม่: ${report_name}`;
+  await connection.execute(
+    `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
+    VALUES (?, ?, ?, ?, ?)`, 
+    [reportId, "admin", message, "report", 0]  // ✅ "admin" เป็นผู้รับแจ้งเตือน
+  );
+
+    await connection.commit();
+    connection.release();
+
+    res.status(200).json({
+      message: "✅ เพิ่มรายงานและแจ้งเตือนสำเร็จ",
+      report_id: reportId,
     });
+
+  } catch (error) {
+    await connection.rollback();
+    connection.release();
+    console.error("❌ Error:", error);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการเพิ่มข้อมูล" });
+  }
+});
+
+
+/*******✅ ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)***********/
+
+app.get('/api/adminreport', async (req, res) => {
+  try {
+      const sql = "SELECT * FROM report";
+      const [result] = await db.query(sql); // ใช้ await รอให้ Query เสร็จ
+
+      res.status(200).json(result);
+  } catch (error) {
+      console.error("Error fetching admin reports:", error);
+      res.status(500).json({ error: "Query data Report failed" });
+  }
+});
+
+/****** ✅ API: ดึงจำนวนแจ้งเตือนที่ยังไม่ได้อ่านหรืออ่านแล้ว********* */
+
+app.get('/api/countnotifications/:is_read', async (req, res) => {
+  try {
+      let { is_read } = req.params;
+
+      // ✅ ตรวจสอบค่าของ is_read ต้องเป็น 0 หรือ 1
+      if (is_read !== "0" && is_read !== "1") {
+          return res.status(400).json({ error: "ค่าพารามิเตอร์ is_read ต้องเป็น 0 หรือ 1 เท่านั้น" });
+      }
+
+      // ✅ Query ดึงจำนวนแจ้งเตือน
+      const sql = "SELECT COUNT(*) AS unread_count FROM `notifications` WHERE is_read = ?";
+      const [result] = await db.query(sql, [is_read]);
+
+      res.status(200).json({ unread_count: result[0].unread_count });
+      // console.log("noti--->>"+result)
+
+  } catch (error) {
+      console.error("❌ Error fetching notifications count:", error);
+      res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือน" });
+  }
+});
+
+// เปลี่ยน update-notification
+app.put("/api/update-notification", async (req, res) => {
+  const { recipient_uid, report_id } = req.body;
+  const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
+  try {
+    await db.query(sql, [recipient_uid, report_id]);
+    res.status(200).send({ message: "notification updated successfully" });
   } catch (err) {
-    console.error("Error adding report:", err.message);
-    return res.status(500).json({
-      error: "ไม่สามารถเพิ่มข้อมูลรายงานได้",
-      details: err.message,
-    });
+    console.error("Error updating notification:", err);
+    res.status(500).send("Error updating notification");
+  }
+});
+
+//อ่านค่า read = 1 ในการเปลี่ยนสีปุ่ม
+app.get("/api/get-read-notifications", async (req, res) => {
+  const { recipient_uid } = req.query;
+
+  if (!recipient_uid) {
+    return res.status(400).json({ error: "recipient_uid is required" });
+  }
+
+  try {
+    const sql = "SELECT report_id FROM notifications WHERE recipient_uid = ? AND is_read = 1";
+    const [result] = await db.query(sql, [recipient_uid]);
+
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("❌ Error fetching read notifications:", error);
+    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือนที่อ่านแล้ว" });
   }
 });
 
 // -----------------------------------------------------------
+
+
 // 9) เริ่มต้น Server
 // -----------------------------------------------------------
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 });

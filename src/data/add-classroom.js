@@ -15,8 +15,9 @@ export const addClassroomAPI = async (data) => {
       });
     }
   } catch (err) {
+    console.error("Error adding classroom:", err);
     Swal.fire({
-      title: "Added!",
+      title: "Failed!",
       text: `Can not add ${data.class_name}`,
       icon: "error",
       confirmButtonText: "OK",
