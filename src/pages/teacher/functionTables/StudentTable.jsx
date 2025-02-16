@@ -14,15 +14,15 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [ selectSec, setSelectSec ] = useState([]);
     
-    const getSec = async () => {
-        const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
-        setSelectSec(data.data);
-        console.log(selectSec);
-    };
+    // const getSec = async () => {
+    //     const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
+    //     setSelectSec(data.data);
+    //     console.log(selectSec);
+    // };
 
-    useEffect(() =>{
-        getSec();
-    },[]);
+    // useEffect(() =>{
+    //     getSec();
+    // },[]);
     
     // handle data change
     const inputHandle = (event) => {
@@ -199,11 +199,15 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                     }))
                                 }}                        
                             >
-                                {selectSec.map(({ sec }, key) => {
+                                <Option value="101">101</Option>
+                                <Option value="102">102</Option>
+                                <Option value="103">103</Option>
+                                <Option value="111">111</Option>
+                                {/* {selectSec.map(({ sec }, key) => {
                                     (
                                         <Option value="" key={key}>{sec}</Option>
                                     )
-                                })},
+                                })}, */}
                             </Select>
                         </div>
                     </div>
