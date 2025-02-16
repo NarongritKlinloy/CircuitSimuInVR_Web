@@ -42,6 +42,7 @@ export function DashboardNavbar() {
 
   const userRole = sessionStorage.getItem("role"); // ใช้ sessionStorage ให้ตรงกัน
   const activeRoutes = userRole === "admin" ? adminRoutes : teacherRoutes;
+console.log("User -- "+userRole)
 
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
@@ -88,7 +89,7 @@ export function DashboardNavbar() {
 
     fetchNotifications(); // เรียกใช้งานครั้งแรกทันที
 
-    const interval = setInterval(fetchNotifications, 10000); // อัปเดตทุก 10 วินาที
+    const interval = setInterval(fetchNotifications, 8000); // อัปเดตทุก 8 วินาที
     console.log(interval)
     return () => clearInterval(interval); // เคลียร์ Interval เมื่อ Component ถูก Unmount
   }, []);
@@ -196,17 +197,13 @@ export function DashboardNavbar() {
       </span> */}
 
     {/* Badge สำหรับแสดงจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน */}
-    {notificationCount > 0 && (
+    {userRole === "admin" && notificationCount > 0 && (
       <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
         {notificationCount}
       </span>
     )}
 
-    {/* {notificationCount == 0 && (
-      <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
-        {""}
-      </span>
-    )} */}
+    
 
   </div>
 </MenuHandler>
