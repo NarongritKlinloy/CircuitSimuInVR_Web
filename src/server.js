@@ -20,9 +20,9 @@ app.use(express.urlencoded({ extended: true }));
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
+  password: "root",
   // password: "123456789",
-  database: "project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -411,6 +411,12 @@ app.put("/api/classroom/:id", async (req, res) => {
       throw { status: 404, message: "Classroom not found!" };
     }
 
+    const sql_check_classroom = "SELECT * FROM classroom WHERE class_name = ? AND sec = ? AND semester = ? AND year = ?";
+    const [checkAnotherClass] = await db.query(sql_check_classroom, [class_name, sec, semester, year]);
+    if (checkAnotherClass.length > 0){
+      throw { status: 400, message: "Classroom failed to update!" };
+    }
+
     const sql = "UPDATE classroom SET ? WHERE class_id = ?";
     const class_data = { class_name, semester, sec, year };
     const [updateResult] = await db.query(sql, [class_data, id]);
@@ -493,33 +499,9 @@ app.post("/api/classroom/student", async (req, res) => {
     if (enrollRows.length > 0) {
       return res.status(400).json({ message: "Student already has a classroom" });
     }
-
-    // ถ้ายัง -> เพิ่ม
-    // const enrollDate = new Date().toLocaleString("en-GB", { timeZone: "Asia/Bangkok", 
-    //   year: "numeric", 
-    //   month: "2-digit", 
-    //   day: "2-digit", 
-    //   hour: "2-digit", 
-    //   minute: "2-digit", 
-    //   second: "2-digit",
-    //   hour12: false
-    // })
-    //   .replace(/\//g, "-")
-    //   .replace(",", "");
-    const options = { 
-      timeZone: "Asia/Bangkok", 
-      year: "numeric", 
-      month: "2-digit", 
-      day: "2-digit", 
-      hour: "2-digit", 
-      minute: "2-digit", 
-      second: "2-digit", 
-      hour12: false 
-  };
-  
-  const formatter = new Intl.DateTimeFormat("en-GB", options);
-  const parts = formatter.formatToParts(new Date());
-  const enrollDate = `${parts[4].value}-${parts[2].value}-${parts[0].value} ${parts[6].value}:${parts[8].value}:${parts[10].value}`;
+    const now = new Date();
+    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
 
     const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
     await db.query(sql_enroll, [processedUid, class_id, enrollDate]);
@@ -620,9 +602,11 @@ app.get("/api/classroom/sec/:class_id", async (req, res) => {
     const semester = rows[0].semester;
     const year = rows[0].year;
 
-    const sql_sec_classroom = "SELECT sec FROM classroom WHERE name = ? AND semester = ? AND year = ?";
+    const sql_sec_classroom = "SELECT class_id, sec FROM classroom WHERE class_name = ? AND semester = ? AND year = ?";
     const [rows_sec] = await db.query(sql_sec_classroom, [name, semester, year]);
-    return res.status(200).json(rows_sec);
+
+    const secArray = rows_sec.map(row => ({ class_id: row.class_id, sec: row.sec }));
+    return res.status(200).json(secArray);
 
   } catch (err) {
     console.error("Error select sec:", err);

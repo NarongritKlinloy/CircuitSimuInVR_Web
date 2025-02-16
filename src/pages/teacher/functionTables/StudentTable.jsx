@@ -12,18 +12,20 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedStudent, setSelectedStudent] = useState(null);
-    const [ selectSec, setSelectSec ] = useState([]);
-    
-    const getSec = async () => {
-        const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
-        setSelectSec(data.data);
-        console.log(selectSec);
-    };
 
-    useEffect(() =>{
+    const [sec, setSec] = useState([]); 
+    useEffect(() => {
+        const getSec = async () => {
+        const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
+        setSec(data);
+        };
         getSec();
-    },[]);
-    
+    }, []);
+
+    const [newClassroom, setNewClassroom] = useState({
+        class_id: sessionStorage.getItem("class_id"),
+      });
+
     // handle data change
     const inputHandle = (event) => {
         setSelectedStudent((prev) => ({
@@ -46,7 +48,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = async () => {
         try {
-            await editStudentAPI(selectedStudent.uid, sessionStorage.getItem("class_id"));
+            await editStudentAPI(selectedStudent.uid, newClassroom);
             checkStatus();
         } catch (error) {
             console.error("Error updating student : ", error)
@@ -105,7 +107,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                             </tr>
                         </thead>
                         <tbody>
-                            {students.map(({ uid, name, last_active ,sec}, key) => {
+                            {students.map(({ uid, name, last_active ,sec, class_id}, key) => {
                                 const isLast = key === students.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -134,7 +136,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ uid, name , sec})}
+                                                onClick={() => openEditModal({ uid, name , sec, class_id})}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
@@ -188,22 +190,20 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                         </div>
                         
                         <div>
-                            
                             <Select 
                                 label="Select Sec"
                                 name="sec"
-                                value={selectedStudent?.sec ? String(selectedStudent.sec) : ""}
-                                onChange={(e)=>{
+                                value={selectedStudent?.class_id ? String(selectedStudent.class_id) : (sec?.length > 0 ? String(sec[0].class_id) : "")}
+                                onChange={(e) => {
                                     setSelectedStudent((prev) => ({
-                                        ...prev, "sec" : e
-                                    }))
-                                }}                        
+                                        ...prev, class_id: e,
+                                    }));
+                                    setNewClassroom({class_id : e});
+                                }}                       
                             >
-                                {selectSec.map(({ sec }, key) => {
-                                    (
-                                        <Option value="" key={key}>{sec}</Option>
-                                    )
-                                })},
+                                {sec?.map((item, index) => (
+                                    <Option key={index} value={String(item.class_id)}>{item.sec}</Option>
+                                ))}
                             </Select>
                         </div>
                     </div>
