@@ -12,7 +12,7 @@ export const fetchReadNotifications = async (recipient_uid) => {
     try {
         const response = await axios.get(`http://localhost:5000/api/get-read-notifications?recipient_uid=${recipient_uid}`);
         
-        console.log("✅ API Response:", response.data); // ✅ ตรวจสอบค่าที่ได้รับจาก API
+        // console.log("✅ API Response:", response.data); // ✅ ตรวจสอบค่าที่ได้รับจาก API
         return response.data; // ✅ คืนค่าเป็นอาร์เรย์ของ report_id
     } catch (error) {
         console.error(

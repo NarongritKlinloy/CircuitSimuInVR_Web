@@ -26,7 +26,7 @@ export function TeacherReports() {
   const [reports, setReports] = useState([]); // สถานะสำหรับเก็บข้อมูล API
   const [loading, setLoading] = useState(true); // สถานะโหลดข้อมูล
   const [error, setError] = useState(null); // สถานะข้อผิดพลาด
-
+  const [searchTerm, setSearchTerm] = useState(""); // ✅ ใช้เก็บค่าการค้นหา
   const [isAddReportOpen, setIsAddReportOpen] = useState(false); // สำหรับเปิด/ปิด Modal Add New Report
 
 // ฟังก์ชันเปิด/ปิด modal สำหรับ Add New Report
@@ -34,20 +34,37 @@ const toggleAddModal = () => {
   setIsAddReportOpen((prev) => !prev);
 };
 
-  // ฟังก์ชันแปลงวันที่ให้เป็นรูปแบบ YYYY-MM-DD
-const getCurrentDate = () => {
+/** ✅ ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
+const filteredReports = reports.filter((report) => {
+  const reportDate = new Date(report.report_date).toLocaleDateString("en-GB"); // แปลงวันที่เป็น DD/MM/YYYY
+  const lowerSearchTerm = searchTerm.toLowerCase(); // แปลงเป็นตัวพิมพ์เล็กเพื่อให้ค้นหาแบบ case-insensitive
+
+  return (
+    report.report_name.toLowerCase().includes(lowerSearchTerm) || // ✅ ค้นหาจากชื่อ
+    report.report_uid.toLowerCase().includes(lowerSearchTerm) || // ✅ ค้นหาจากผู้ใช้
+    reportDate.includes(lowerSearchTerm) // ✅ ค้นหาจากวันที่
+  );
+});
+
+
+// ฟังก์ชันแปลงวันที่ให้เป็นรูปแบบ YYYY-MM-DD HH:mm:ss
+const getCurrentDateTime = () => {
   const today = new Date();
   const year = today.getFullYear();
   const month = String(today.getMonth() + 1).padStart(2, "0"); // เติม 0 ข้างหน้าเดือน
   const day = String(today.getDate()).padStart(2, "0"); // เติม 0 ข้างหน้าวัน
-  return `${year}-${month}-${day}`;
+  const hours = String(today.getHours()).padStart(2, "0"); // เติม 0 ข้างหน้าชั่วโมง
+  const minutes = String(today.getMinutes()).padStart(2, "0"); // เติม 0 ข้างหน้าหลักนาที
+  const seconds = String(today.getSeconds()).padStart(2, "0"); // เติม 0 ข้างหน้าหลักวินาที
+
+  return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
 const [newReport, setNewReport] = useState({
     report_uid:sessionStorage.getItem("email"),
     report_name: "",
     report_detail: "",
-    report_date: getCurrentDate(), // เพิ่มฟิลด์สำหรับวันที่
+    report_date: getCurrentDateTime(), // เพิ่มฟิลด์สำหรับวันที่
   }); // สำหรับเก็บข้อมูลใหม่ของ report
 
   const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
@@ -120,7 +137,7 @@ useEffect(() => {
   //   setNewReport({ report_name: "", report_detail: "", report_date: "" }); // รีเซ็ตข้อมูลใหม่
   //   console.log("Form state reset.");
   // };
-  const resetState = (defaultState = { report_uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_date: getCurrentDate() }) => {
+  const resetState = (defaultState = { report_uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_date: getCurrentDateTime() }) => {
     console.log("Resetting form state...");
     setErrors({});
     setNewReport(defaultState);
@@ -140,55 +157,15 @@ useEffect(() => {
   };
   
 
-  // ฟังก์ชันบันทึกข้อมูล
-  // const handleSave = async () => {
-  //   console.log("Data to send to API:", newReport);
-    // fetchReports(); // ดึงข้อมูลใหม่หลังจากเพิ่ม
-    // setIsAddReportOpen(false); // ปิด Modal
-    // resetState(); // รีเซ็ตข้อมูล
-   
-
-  //   if (validateFields()) {
-     
-  //     try {
-       
-  //       const response = await axios.post(`http://localhost:5000/api/addreport`,newReport);
-  //       if (response.status == 200) {
-  //         Swal.fire({
-  //           title: "Added!",
-  //           text: `${newReport.report_name} has been added.`,
-  //           icon: "success",
-  //           confirmButtonText: "OK",
-  //           customClass: {
-  //             confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-  //           },
-  //         });
-  //         // fetchReports(); // ดึงข้อมูลใหม่
-  //         resetState(); // รีเซ็ตข้อมูลในฟอร์ม
-  //       }
-  //     } catch (err) {
-  //       Swal.fire({
-  //         title: "Added!",
-  //         text: `Can not add ${newReport.report_name}`,
-  //         icon: "error",
-  //         confirmButtonText: "OK",
-  //         customClass: {
-  //           confirmButton: "bg-red-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-  //         },
-  //       });
-  //     }
-      
-  //   }
-  //   setIsAddReportOpen(false); // ปิด Modalv
-  // };
+  
 
 
-  console.log("Data =>>", newReport);
+  // console.log("Data =>>", newReport);
 
   
 
   const handleSave = async () => {
-    console.log("Data to send to API:", newReport);
+    // console.log("Data to send to API:", newReport);
     
 
     // ตรวจสอบว่า report_uid มีค่าหรือไม่
@@ -254,6 +231,8 @@ useEffect(() => {
     <div className="mt-12 mb-8 flex flex-col gap-12">
        {/* Section การค้นหาและปุ่ม Add */}
        <SearchAndAddReport 
+        searchTerm={searchTerm} 
+        setSearchTerm={setSearchTerm}
         toggleAddModal={toggleAddModal} 
       />
 
@@ -266,7 +245,7 @@ useEffect(() => {
             New Report
           </Button> */}
         </CardHeader>
-        <CardBody className="overflow-x-auto pt-0 pb-2">
+        <CardBody className="overflow-x-auto overflow-y-auto max-h-96 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
               {/* <tr>
@@ -293,7 +272,7 @@ useEffect(() => {
           </tr>
             </thead>
             <tbody>
-          {reports.map((report, index) => {
+          {filteredReports.map((report, index) => {
             const isLast = index === reports.length - 1;
             const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -326,7 +305,7 @@ useEffect(() => {
                 <td className={`${rowClassName} text-center`}>
                   <button
                     onClick={() => handleDialogOpen(report.report_detail)}
-                    className="text-blue-500 hover:text-blue-700"
+                    className="text-blue-500 hover:text-blue-900"
                   >
                     {/* <PencilSquareIcon className="h-5 w-5" /> */}
                     <svg
