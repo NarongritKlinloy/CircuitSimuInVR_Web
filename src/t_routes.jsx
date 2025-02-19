@@ -5,7 +5,14 @@ import {
   FolderIcon,
   UserGroupIcon
 } from "@heroicons/react/24/solid";
-import { HomeTeacher, StudentMgn, PracticeMgn, ClassroomMgn, TeacherReports, TAManagement } from "@/pages/teacher";
+import { HomeTeacher, 
+  StudentMgn, 
+  PracticeMgn, 
+  ClassroomMgn, 
+  TeacherReports, 
+  TAManagement, 
+  PracticeManagement,
+  PracticeClassroom } from "@/pages/teacher";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -28,6 +35,13 @@ export const routes = [
         label: "Student Management",
         path: "/student/:classname",
         element: <StudentMgn />,
+      },
+      {
+        icon: <FolderIcon {...icon} />,
+        name: "Practice New",
+        label: "Practice Management",
+        path: "/practice_management",
+        element: <PracticeManagement />,
       },
       {
         icon: <FolderIcon {...icon} />,
@@ -57,6 +71,14 @@ export const routes = [
         path: "/TA_mgn/:classname",
         element: <TAManagement />,
       },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Practice Classroom",
+        label: "Practice Classroom",
+        path: "/practice_classroom/:classname",
+        element: <PracticeClassroom />,
+      },
+      
     ]
   },
 ];

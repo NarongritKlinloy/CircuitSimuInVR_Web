@@ -47,7 +47,6 @@ export function DashboardNavbar() {
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
   
-  // show name label
   // หาหน้า label ที่ตรง
   const pageLabel = activeRoutes
     .flatMap(route => route.pages)
@@ -56,11 +55,6 @@ export function DashboardNavbar() {
       (path.startsWith("/student") && pathname.startsWith("/teacher/student"))  ||
       (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn"))
     );
-  // const pageLabel = routes[0].pages.find(({ path }) => {
-  //   return path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student"));
-  // });
-  // const checkPage = "/"+page; 
-  // const pageLabel = routes[0].pages.filter(({path})=> (path == checkPage));
 
   // เก็บชื่อผู้ใช้จาก sessionStorage
   const [userName, setUserName] = useState("");
@@ -76,7 +70,7 @@ export function DashboardNavbar() {
 const [notificationCount, setNotificationCount] = useState(0); // เก็บจำนวนแจ้งเตือน
 let pollingInterval = null;
 
- /** ✅ ฟังก์ชันดึงข้อมูลแจ้งเตือนจาก API */
+ /** ฟังก์ชันดึงข้อมูลแจ้งเตือนจาก API */
  const fetchNotifications = async () => {
   try {
     const response = await axios.get("http://localhost:5000/api/countnotifications");

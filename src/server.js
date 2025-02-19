@@ -321,6 +321,39 @@ app.put("/api/practice/update-status", async (req, res) => {
   }
 });
 
+// ดึงข้อมูล Classroom ทั้งหมดในระบบ
+app.get("/api/classroom", async (req, res) => {
+  const sql = "SELECT * FROM classroom";
+  try {
+    const [rows] = await db.query(sql);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error filtering data (classroom):", err);
+    res.status(500).json({ error: "Query data classroom failed" });
+  }
+});
+
+// ดึงข้อมูล practice ทั้งหมดของ classroom นั้น ๆ
+app.get("/api/classroom/practice/:class_id", async (req, res) => {
+  const { class_id } = req.params;
+  const sql_practice = `SELECT p.practice_name, p.practice_detail, cp.practice_status, c.class_id, c.class_name, c.sec
+                      FROM classroom_practice cp
+                      JOIN practice p ON p.practice_id = cp.practice_id
+                      JOIN classroom c ON c.class_id = cp.class_id
+                      WHERE cp.class_id = ?`;
+  try {
+    const [rows] = await db.query(sql_practice, [class_id]);
+    if (rows.length === 0) {
+      return res.status(200).json([]);
+    }
+    return res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error select practice data :", err);
+    return res.status(500).json({ error: "Select practice failed" });
+  }
+});
+
+
 // ดึงข้อมูล classroom ทั้งหมดของครู
 app.get("/api/classroom/:uid", async (req, res) => {
   const { uid } = req.params;
@@ -468,10 +501,6 @@ app.get("/api/classroom/student/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    // const uids = rows.map((r) => r.uid);
-    // const sql_user = "SELECT * FROM user WHERE uid IN (?)";
-    // const [userRows] = await db.query(sql_user, [uids]);
-    // return res.status(200).json(userRows);
     return res.status(200).json(rows);
   } catch (err) {
     console.error("Error select user student:", err);
