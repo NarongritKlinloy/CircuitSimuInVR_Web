@@ -309,11 +309,25 @@ app.get("/api/practice", async (req, res) => {
 });
 
 // เปลี่ยน status practice
+// app.put("/api/practice/update-status", async (req, res) => {
+//   const { practice_id, new_status } = req.body;
+//   const sql = "UPDATE practice SET practice_status = ? WHERE practice_id = ?";
+//   try {
+//     await db.query(sql, [new_status, practice_id]);
+//     res.status(200).send({ message: "Status updated successfully" });
+//   } catch (err) {
+//     console.error("Error updating status:", err);
+//     res.status(500).send("Error updating status");
+//   }
+// });
+
+// เปลี่ยน status practice 
 app.put("/api/practice/update-status", async (req, res) => {
-  const { practice_id, new_status } = req.body;
-  const sql = "UPDATE practice SET practice_status = ? WHERE practice_id = ?";
+  const { class_id, practice_id, new_status } = req.body;
+  const sql_toggle = `update classroom_practice set practice_status = ? 
+                      where class_id = ? and practice_id = ?`;
   try {
-    await db.query(sql, [new_status, practice_id]);
+    await db.query(sql_toggle, [new_status, class_id, practice_id]);
     res.status(200).send({ message: "Status updated successfully" });
   } catch (err) {
     console.error("Error updating status:", err);
@@ -336,7 +350,8 @@ app.get("/api/classroom", async (req, res) => {
 // ดึงข้อมูล practice ทั้งหมดของ classroom นั้น ๆ
 app.get("/api/classroom/practice/:class_id", async (req, res) => {
   const { class_id } = req.params;
-  const sql_practice = `SELECT p.practice_name, p.practice_detail, cp.practice_status, c.class_id, c.class_name, c.sec
+  const sql_practice = `SELECT p.practice_id, p.practice_name, p.practice_detail, 
+                      cp.practice_status, c.class_id, c.class_name, c.sec
                       FROM classroom_practice cp
                       JOIN practice p ON p.practice_id = cp.practice_id
                       JOIN classroom c ON c.class_id = cp.class_id

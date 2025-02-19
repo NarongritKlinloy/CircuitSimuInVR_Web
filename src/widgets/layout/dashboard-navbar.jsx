@@ -53,7 +53,8 @@ export function DashboardNavbar() {
     .find(({ path }) => 
       path === `/${page}` || 
       (path.startsWith("/student") && pathname.startsWith("/teacher/student"))  ||
-      (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn"))
+      (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn")) ||
+      (path.startsWith("/practice") && pathname.startsWith("/teacher/practice"))
     );
 
   // เก็บชื่อผู้ใช้จาก sessionStorage

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SearchAndAddSection from "./functionTables/searchpractice";
+import SearchSection from "./functionTables/SearchSection";
 import PracticeTable from "./functionTables/PracticeTable";
 import { practiceTableData } from "@/data/practice-table-data";
 import { useNavigate } from "react-router-dom";
@@ -50,7 +50,7 @@ export function PracticeMgn() {
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       {/* Section การค้นหา */}
-      <SearchAndAddSection
+      <SearchSection
         search={search}
         setSearch={setSearch}
         toggleAddModal={() => setIsAddPracticeOpen(true)}

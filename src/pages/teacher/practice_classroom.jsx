@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
-import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
-import StudentTable from "./functionTables/StudentTable";
+import SearchSection from "./functionTables/SearchSection";
 import ClassroomPracticeTable from "./functionTables/ClassroomPracticeTable";
 import { useNavigate } from "react-router-dom";
 import { ClassroomPractice } from "@/data/classroom-practice";
@@ -52,7 +50,7 @@ export function PracticeClassroom() {
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       
-      <SearchAndAddStudent
+      <SearchSection
         search={search}
         setSearch={setSearch}
         toggleAddModal={() => setIsAddStudentOpen(true)}
