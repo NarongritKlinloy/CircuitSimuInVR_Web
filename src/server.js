@@ -308,19 +308,6 @@ app.get("/api/practice", async (req, res) => {
   }
 });
 
-// เปลี่ยน status practice
-// app.put("/api/practice/update-status", async (req, res) => {
-//   const { practice_id, new_status } = req.body;
-//   const sql = "UPDATE practice SET practice_status = ? WHERE practice_id = ?";
-//   try {
-//     await db.query(sql, [new_status, practice_id]);
-//     res.status(200).send({ message: "Status updated successfully" });
-//   } catch (err) {
-//     console.error("Error updating status:", err);
-//     res.status(500).send("Error updating status");
-//   }
-// });
-
 // เปลี่ยน status practice 
 app.put("/api/practice/update-status", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
@@ -337,7 +324,13 @@ app.put("/api/practice/update-status", async (req, res) => {
 
 // ดึงข้อมูล Classroom ทั้งหมดในระบบ
 app.get("/api/classroom", async (req, res) => {
-  const sql = "SELECT * FROM classroom";
+  const sql = `SELECT c.*, 
+                COUNT(cp.practice_id) AS total_practice,
+                SUM(CASE WHEN cp.practice_status = 0 THEN 1 ELSE 0 END) AS deactive_practice,
+                SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
+                FROM classroom c
+                LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
+                GROUP BY c.class_id`;
   try {
     const [rows] = await db.query(sql);
     res.status(200).json(rows);
@@ -711,7 +704,7 @@ app.post("/api/user/:uid/:name/:role_id/:last_active", async (req, res) => {
 
 // --------------------------- Report (Champ) ---------------------------
 
-// ✅ API: ดึงข้อมูล report
+// API: ดึงข้อมูล report
 app.get("/api/report", async (req, res) => {
   const { email } = req.query; // รับค่าผ่าน Query Parameters
   if (!email) {
