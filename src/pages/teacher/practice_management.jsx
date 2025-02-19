@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from "react";
 import SearchSection from "./functionTables/SearchSection";
-import PracticeTable from "./functionTables/PracticeTable";
-import { practiceTableData } from "@/data/practice-table-data";
+import ClassroomList from "./functionTables/ClassroomList";
+import { ClassroomData } from "@/data/classroom-list";
 import { useNavigate } from "react-router-dom";
 
-
-export function PracticeMgn() {
+export function PracticeManagement() {
   const navigate = useNavigate();
   useEffect(() => {
     try {
@@ -21,12 +20,12 @@ export function PracticeMgn() {
     }
   }, [navigate]);
   const [search, setSearch] = useState(""); // คำค้นหา
-  const [practice, setPractice] = useState([]);
+  const [classrooms, setClassroom] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
-  const getPractice = async () => {
-    const data = await practiceTableData();
-    setPractice(data);
+  const getClassroom = async () => {
+    const data = await ClassroomData();
+    setClassroom(data);
   };
 
   // toggle refresh status
@@ -36,13 +35,13 @@ export function PracticeMgn() {
 
   // auto refresh page after data change
   useEffect(() => {
-    getPractice();
+    getClassroom();
   }, [refresh]);
 
-  // ฟังก์ชันกรองข้อมูล Practice Table
-  const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
-    [practice_name, practice_detail].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
+  // ฟังก์ชันกรองข้อมูล Classroom Table
+  const filteredClassroom = classrooms.filter(({ class_name, sec, semester, year }) =>
+    [ class_name, sec, semester, year].some((field) =>
+      String(field).toLowerCase().includes(search.toLowerCase())
       // console.log(field)
     ) 
   );
@@ -53,20 +52,15 @@ export function PracticeMgn() {
       <SearchSection
         search={search}
         setSearch={setSearch}
-        toggleAddModal={() => setIsAddPracticeOpen(true)}
       />
 
-      <PracticeTable
-        practice={filteredPractice}
-        onEditClick={(practice) => {
-          setEditingPractice(practice);
-          setIsEditPracticeOpen(true);
-        }}
-        checkStatus={handleRefresh}
+      <ClassroomList
+        classrooms={filteredClassroom}
+        // checkStatus={handleRefresh}
       />
 
     </div>
   );
 }
 
-export default PracticeMgn;
+export default PracticeManagement;

@@ -1,4 +1,4 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
 import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button, select } from "@material-tailwind/react";
@@ -10,7 +10,7 @@ function TATable({ TAs, checkStatus }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedTA, setSelectedTA] = useState(null);
-    
+
     // handle data change
     const inputHandle = (event) => {
         setSelectedTA((prev) => ({
@@ -45,7 +45,7 @@ function TATable({ TAs, checkStatus }) {
         closeEditModal();
     };
 
-   
+
     // ฟังก์ชันยืนยันการลบ
     const confirmDelete = (uid) => {
         Swal.fire({
@@ -62,20 +62,20 @@ function TATable({ TAs, checkStatus }) {
                 await deleteTAAPI(uid, sessionStorage.getItem("class_id"));
                 checkStatus();
             }
-        // .then((result) => {
-        //     if (result.isConfirmed) {
-        //         console.log(sessionStorage.getItem("class_id"));
-        //         deleteTAAPI(uid, sessionStorage.getItem("class_id"));
-        //         console.log(`Deleted : ${uid}`);
-        //         Swal.fire({
-        //             title: "Deleted!",
-        //             text: `${uid} has been deleted.`,
-        //             icon: "success", confirmButtonText: "OK",
-        //             customClass: {
-        //                 confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-        //             }
-        //         });
-        //     }
+            // .then((result) => {
+            //     if (result.isConfirmed) {
+            //         console.log(sessionStorage.getItem("class_id"));
+            //         deleteTAAPI(uid, sessionStorage.getItem("class_id"));
+            //         console.log(`Deleted : ${uid}`);
+            //         Swal.fire({
+            //             title: "Deleted!",
+            //             text: `${uid} has been deleted.`,
+            //             icon: "success", confirmButtonText: "OK",
+            //             customClass: {
+            //                 confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
+            //             }
+            //         });
+            //     }
         });
     };
 
@@ -84,7 +84,7 @@ function TATable({ TAs, checkStatus }) {
             <Card>
                 <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
                     <Typography variant="h6" color="white">
-                        Teacher Assistant Table : { classname }
+                        Teacher Assistant Table : {classname}
                     </Typography>
                 </CardHeader>
 
@@ -93,10 +93,11 @@ function TATable({ TAs, checkStatus }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["no.", "uid", "edit", "delete"].map((header) => (
+                                {["no.", "uid", "name", "last active", "delete"].map((header) => (
                                     <th
                                         key={header}
-                                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "name" ? "text-left" : "text-center"}`}
+                                        // className={`border-b border-blue-gray-50 px-5 py-2 ${header === "name" ? "text-left" : "text-center"}`}
+                                        className={`border-b border-blue-gray-50 px-5 py-2 text-center}`}
                                     >
                                         <Typography
                                             variant="small"
@@ -109,7 +110,7 @@ function TATable({ TAs, checkStatus }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {TAs.map(({ uid }, key) => {
+                            {TAs.map(({ uid, name, last_active }, key) => {
                                 const isLast = key === TAs.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -117,7 +118,7 @@ function TATable({ TAs, checkStatus }) {
                                     <tr key={uid}>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal font-semibold">
-                                                {key+1}
+                                                {key + 1}
                                             </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
@@ -125,15 +126,34 @@ function TATable({ TAs, checkStatus }) {
                                                 {uid}
                                             </Typography>
                                         </td>
-                                        {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
+                                                {name}
+                                            </Typography>
+                                        </td>
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
+                                                {new Date(last_active).toLocaleString("en-GB", { 
+                                                    day: '2-digit', 
+                                                    month: '2-digit', 
+                                                    year: 'numeric', 
+                                                    hour: '2-digit', 
+                                                    minute: '2-digit', 
+                                                    second: '2-digit', 
+                                                    hour12: false 
+                                                }).replace(',', '')}
+                                            </Typography>
+                                        </td>
+
+                                        {/* Edit Button */}
+                                        {/* <td className={`${rowClassName} text-center`}>
                                             <button
                                                 onClick={() => openEditModal({ uid })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
                                             </button>
-                                        </td>
+                                        </td> */}
 
                                         {/* Delete Button */}
                                         <td className={`${rowClassName} text-center`}>
@@ -161,7 +181,7 @@ function TATable({ TAs, checkStatus }) {
                     </Typography>
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-4">
-                            <Input 
+                            <Input
                                 readOnly
                                 label="student id"
                                 name="stdid"

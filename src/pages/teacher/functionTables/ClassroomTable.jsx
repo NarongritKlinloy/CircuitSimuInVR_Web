@@ -230,11 +230,6 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                                     onClick={() => {
                                                         sessionStorage.setItem("class_id", class_id);
                                                     }}
-                                                    // onClick={() =>
-                                                    //     openAddTAModal({
-                                                    //         class_id
-                                                    //     })
-                                                    // }
                                                     className="text-blue-500 hover:text-blue-700"
                                                 >
                                                     <UsersIcon className="h-5 w-5 mx-auto" />

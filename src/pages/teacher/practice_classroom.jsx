@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from "react";
 import SearchSection from "./functionTables/SearchSection";
-import PracticeTable from "./functionTables/PracticeTable";
-import { practiceTableData } from "@/data/practice-table-data";
+import ClassroomPracticeTable from "./functionTables/ClassroomPracticeTable";
 import { useNavigate } from "react-router-dom";
+import { ClassroomPractice } from "@/data/classroom-practice";
 
 
-export function PracticeMgn() {
+export function PracticeClassroom() {
   const navigate = useNavigate();
   useEffect(() => {
     try {
@@ -20,12 +20,13 @@ export function PracticeMgn() {
       navigate("/auth/sign-in");
     }
   }, [navigate]);
-  const [search, setSearch] = useState(""); // คำค้นหา
-  const [practice, setPractice] = useState([]);
+
+  const [search, setSearch] = useState("");
+  const [practices, setPractice] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
   const getPractice = async () => {
-    const data = await practiceTableData();
+    const data = await ClassroomPractice(sessionStorage.getItem("class_id"));
     setPractice(data);
   };
 
@@ -39,29 +40,24 @@ export function PracticeMgn() {
     getPractice();
   }, [refresh]);
 
-  // ฟังก์ชันกรองข้อมูล Practice Table
-  const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
-    [practice_name, practice_detail].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
-      // console.log(field)
-    ) 
+  // search 
+  const filteredPractice = practices.filter(({ practice_name , practice_detail }) =>
+    [ practice_name , practice_detail ].some((field) =>
+      String(field).toLowerCase().includes(search.toLowerCase())
+    )
   );
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-      {/* Section การค้นหา */}
+      
       <SearchSection
         search={search}
         setSearch={setSearch}
-        toggleAddModal={() => setIsAddPracticeOpen(true)}
+        toggleAddModal={() => setIsAddStudentOpen(true)}
       />
 
-      <PracticeTable
-        practice={filteredPractice}
-        onEditClick={(practice) => {
-          setEditingPractice(practice);
-          setIsEditPracticeOpen(true);
-        }}
+      <ClassroomPracticeTable
+        practices={filteredPractice}
         checkStatus={handleRefresh}
       />
 
@@ -69,4 +65,4 @@ export function PracticeMgn() {
   );
 }
 
-export default PracticeMgn;
+export default PracticeClassroom;
