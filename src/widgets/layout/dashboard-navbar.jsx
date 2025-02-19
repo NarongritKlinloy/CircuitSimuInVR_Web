@@ -42,7 +42,7 @@ export function DashboardNavbar() {
 
   const userRole = sessionStorage.getItem("role"); // ใช้ sessionStorage ให้ตรงกัน
   const activeRoutes = userRole === "admin" ? adminRoutes : teacherRoutes;
-console.log("User -- "+userRole)
+// console.log("User -- "+userRole)
 
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
@@ -51,12 +51,7 @@ console.log("User -- "+userRole)
   // หาหน้า label ที่ตรง
   const pageLabel = activeRoutes
     .flatMap(route => route.pages)
-    .find(({ path }) => 
-      path === `/${page}` || 
-      (path.startsWith("/student") && pathname.startsWith("/teacher/student")) ||
-      (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn"))
-    );
-  
+    .find(({ path }) => path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student")));
   // const pageLabel = routes[0].pages.find(({ path }) => {
   //   return path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student"));
   // });
@@ -72,28 +67,75 @@ console.log("User -- "+userRole)
   }, []);
 
 
-  const [notificationCount, setNotificationCount] = useState(0); // ✅ กำหนด state
-  console.log("Nav -- "+notificationCount)
 
-  useEffect(() => {
-    const fetchNotifications = async () => {
-      try {
-        const count = await NotificationReportData(); // ✅ ดึงข้อมูลจาก API
-        if (count !== null && count !== undefined) {
-          setNotificationCount(count); // ✅ อัปเดต State
-        }
-      } catch (error) {
-        console.error("❌ Error fetching notifications:", error);
+/****************************************************************************************************** */
+const [notificationCount, setNotificationCount] = useState(0); // เก็บจำนวนแจ้งเตือน
+let pollingInterval = null;
+
+ /** ✅ ฟังก์ชันดึงข้อมูลแจ้งเตือนจาก API */
+ const fetchNotifications = async () => {
+  try {
+    const response = await axios.get("http://localhost:5000/api/countnotifications");
+    if (typeof response.data.unread_count === "number") {
+      setNotificationCount(response.data.unread_count);
+    }
+  } catch (error) {
+    console.error("❌ Error fetching notifications:", error);
+  }
+};
+
+useEffect(() => {
+  /** ✅ ฟังก์ชันเริ่ม WebSocket */
+  const connectWebSocket = () => {
+    const ws = new WebSocket("ws://localhost:5050");
+
+    ws.onopen = () => {
+      console.log("✅ WebSocket Connected to 5050");
+
+      // ❌ **ถ้า WebSocket กลับมา → หยุด API Polling**
+      if (pollingInterval) {
+        clearInterval(pollingInterval);
+        pollingInterval = null;
       }
     };
 
-    fetchNotifications(); // เรียกใช้งานครั้งแรกทันที
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.unread_count !== undefined) {
+          setNotificationCount(data.unread_count);
+        }
+      } catch (error) {
+        console.error("❌ Error parsing WebSocket message:", error);
+      }
+    };
 
-    const interval = setInterval(fetchNotifications, 8000); // อัปเดตทุก 8 วินาที
-    console.log(interval)
-    return () => clearInterval(interval); // เคลียร์ Interval เมื่อ Component ถูก Unmount
-  }, []);
+    ws.onclose = () => {
+      console.warn("⚠️ WebSocket Disconnected, switching to API polling...");
 
+      // ✅ **ใช้ API Polling แทน WebSocket**
+      if (!pollingInterval) {
+        pollingInterval = setInterval(fetchNotifications, 10000);
+      }
+
+      // ✅ **พยายามเชื่อมต่อ WebSocket ใหม่หลังจาก 5 วินาที**
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    return ws;
+  };
+
+  fetchNotifications(); // ✅ ดึงข้อมูล API ครั้งแรก
+  const ws = connectWebSocket(); // ✅ เรียกใช้ WebSocket
+
+  return () => {
+    ws.close();
+    if (pollingInterval) {
+      clearInterval(pollingInterval);
+    }
+  };
+}, []);
+  
   
 
 

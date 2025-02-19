@@ -13,7 +13,7 @@ export const updateNotificationAPI = async (recipient_uid, report_id) => {
         report_id: report_id,
       });
 
-        console.log("✅ API Response:", response.data.message);
+        // console.log("✅ API Response:", response.data.message);
         return response.data; // ✅ ส่งค่ากลับไปให้ใช้งาน
     } catch (error) {
         console.error(

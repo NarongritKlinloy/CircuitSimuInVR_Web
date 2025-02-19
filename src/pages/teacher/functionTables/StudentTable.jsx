@@ -128,11 +128,28 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                                 {name}
                                             </Typography>
                                         </td>
-                                        <td className={`${rowClassName} text-left`}>
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
+                                                {(() => {
+                                                    let date = new Date(last_active);
+                                                    date.setHours(date.getHours() + 7);
+                                                    return date.toLocaleString("th-TH", {
+                                                        year: "numeric",
+                                                        month: "long",
+                                                        day: "numeric",
+                                                        hour: "2-digit",
+                                                        minute: "2-digit",
+                                                        second: "2-digit",
+                                                        hour12: false
+                                                    });
+                                                })()}
+                                            </Typography>
+                                        </td>
+                                        {/* <td className={`${rowClassName} text-left`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
                                                 {last_active}
                                             </Typography>
-                                        </td>
+                                        </td> */}
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
