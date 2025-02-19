@@ -130,19 +130,15 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
-                                                {(() => {
-                                                    let date = new Date(last_active);
-                                                    date.setHours(date.getHours() + 7);
-                                                    return date.toLocaleString("th-TH", {
-                                                        year: "numeric",
-                                                        month: "long",
-                                                        day: "numeric",
-                                                        hour: "2-digit",
-                                                        minute: "2-digit",
-                                                        second: "2-digit",
-                                                        hour12: false
-                                                    });
-                                                })()}
+                                                {new Date(last_active).toLocaleString("en-GB", { 
+                                                    day: '2-digit', 
+                                                    month: '2-digit', 
+                                                    year: 'numeric', 
+                                                    hour: '2-digit', 
+                                                    minute: '2-digit', 
+                                                    second: '2-digit', 
+                                                    hour12: false 
+                                                }).replace(',', '')}
                                             </Typography>
                                         </td>
                                         {/* <td className={`${rowClassName} text-left`}>
