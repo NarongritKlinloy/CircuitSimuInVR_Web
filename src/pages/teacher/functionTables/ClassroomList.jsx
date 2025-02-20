@@ -6,7 +6,7 @@ import {
 } from "@material-tailwind/react";
 
 import {
-    PencilSquareIcon
+    MagnifyingGlassCircleIcon
 } from "@heroicons/react/24/solid";
 
 import React, { useState, useEffect } from "react";
@@ -118,12 +118,12 @@ function ClassroomList({ classrooms }) {
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
                                                     to={`/teacher/practice_classroom/${class_name} (${sec})`}
-                                                    className="text-green-500 hover:text-green-700"
+                                                    className="text-blue-500 hover:text-blue-700"
                                                     onClick={() => {
                                                         sessionStorage.setItem("class_id", class_id);
                                                     }}
                                                 >
-                                                    <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                                                    <MagnifyingGlassCircleIcon className="h-6 w-6 mx-auto" />
                                                 </Link>
                                             </td>
                                         </tr>
