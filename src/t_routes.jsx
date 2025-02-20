@@ -12,7 +12,9 @@ import { HomeTeacher,
   TeacherReports, 
   TAManagement, 
   PracticeManagement,
-  PracticeClassroom } from "@/pages/teacher";
+  PracticeClassroom,
+  PracticeScore
+ } from "@/pages/teacher";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -38,17 +40,24 @@ export const routes = [
       },
       {
         icon: <FolderIcon {...icon} />,
-        name: "Practice New",
+        name: "Practice",
         label: "Practice Management",
         path: "/practice_management",
         element: <PracticeManagement />,
       },
       {
-        icon: <FolderIcon {...icon} />,
-        name: "Practice",
-        label: "Practice Management",
-        path: "/practice",
-        element: <PracticeMgn />,
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Practice Classroom",
+        label: "Practice Classroom",
+        path: "/practice_classroom/:classname",
+        element: <PracticeClassroom />,
+      },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Practice Score",
+        label: "Practice Score",
+        path: "/practice_score/:class_id/:practice_id",
+        element: <PracticeScore />,
       },
       {
         icon: <UserGroupIcon {...icon} />,
@@ -70,13 +79,6 @@ export const routes = [
         label: "Teacher Assistant",
         path: "/TA_mgn/:classname",
         element: <TAManagement />,
-      },
-      {
-        icon: <DocumentTextIcon {...icon} />,
-        name: "Practice Classroom",
-        label: "Practice Classroom",
-        path: "/practice_classroom/:classname",
-        element: <PracticeClassroom />,
       },
       
     ]

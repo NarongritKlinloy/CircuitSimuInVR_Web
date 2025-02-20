@@ -308,19 +308,6 @@ app.get("/api/practice", async (req, res) => {
   }
 });
 
-// เปลี่ยน status practice
-// app.put("/api/practice/update-status", async (req, res) => {
-//   const { practice_id, new_status } = req.body;
-//   const sql = "UPDATE practice SET practice_status = ? WHERE practice_id = ?";
-//   try {
-//     await db.query(sql, [new_status, practice_id]);
-//     res.status(200).send({ message: "Status updated successfully" });
-//   } catch (err) {
-//     console.error("Error updating status:", err);
-//     res.status(500).send("Error updating status");
-//   }
-// });
-
 // เปลี่ยน status practice 
 app.put("/api/practice/update-status", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
@@ -337,7 +324,13 @@ app.put("/api/practice/update-status", async (req, res) => {
 
 // ดึงข้อมูล Classroom ทั้งหมดในระบบ
 app.get("/api/classroom", async (req, res) => {
-  const sql = "SELECT * FROM classroom";
+  const sql = `SELECT c.*, 
+                COUNT(cp.practice_id) AS total_practice,
+                SUM(CASE WHEN cp.practice_status = 0 THEN 1 ELSE 0 END) AS deactive_practice,
+                SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
+                FROM classroom c
+                LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
+                GROUP BY c.class_id`;
   try {
     const [rows] = await db.query(sql);
     res.status(200).json(rows);
@@ -350,12 +343,34 @@ app.get("/api/classroom", async (req, res) => {
 // ดึงข้อมูล practice ทั้งหมดของ classroom นั้น ๆ
 app.get("/api/classroom/practice/:class_id", async (req, res) => {
   const { class_id } = req.params;
-  const sql_practice = `SELECT p.practice_id, p.practice_name, p.practice_detail, 
-                      cp.practice_status, c.class_id, c.class_name, c.sec
-                      FROM classroom_practice cp
-                      JOIN practice p ON p.practice_id = cp.practice_id
-                      JOIN classroom c ON c.class_id = cp.class_id
-                      WHERE cp.class_id = ?`;
+  const sql_practice = `SELECT 
+                            p.practice_id, 
+                            p.practice_name, 
+                            p.practice_detail, 
+                            cp.practice_status, 
+                            c.class_id, 
+                            c.class_name, 
+                            c.sec,
+                            COUNT(DISTINCT e.uid) AS enrolled_count,
+                            COUNT(DISTINCT CASE WHEN ps.score IS NOT NULL THEN e.uid END) AS submit_total
+                        FROM classroom_practice cp
+                        JOIN practice p 
+                            ON p.practice_id = cp.practice_id
+                        JOIN classroom c 
+                            ON c.class_id = cp.class_id
+                        LEFT JOIN enrollment e 
+                            ON e.class_id = cp.class_id
+                        LEFT JOIN practice_save ps
+                            ON ps.practice_id = cp.practice_id 
+                            AND ps.uid = e.uid
+                        WHERE cp.class_id = ?
+                        GROUP BY p.practice_id, 
+                                p.practice_name, 
+                                p.practice_detail, 
+                                cp.practice_status, 
+                                c.class_id, 
+                                c.class_name, 
+                                c.sec`;
   try {
     const [rows] = await db.query(sql_practice, [class_id]);
     if (rows.length === 0) {
@@ -368,6 +383,34 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
   }
 });
 
+// ดึงข้อมูล practice save และ score
+app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
+  const { class_id, practice_id  } = req.params;
+  const sql_practice_score = `SELECT 
+                            u.uid,
+                            u.name,
+                            ps.score,
+                            ps.submit_date
+                        FROM classroom_practice cp
+                        JOIN classroom c 
+                            ON cp.class_id = c.class_id
+                        JOIN practice_save ps 
+                            ON cp.practice_id = ps.practice_id
+                        JOIN user u
+                            ON ps.uid = u.uid
+                        WHERE cp.class_id = ?
+                          AND cp.practice_id = ?`;
+  try {
+    const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
+    if (rows.length === 0) {
+      return res.status(200).json([]);
+    }
+    return res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error select practice score :", err);
+    return res.status(500).json({ error: "Select practice failed" });
+  }
+});
 
 // ดึงข้อมูล classroom ทั้งหมดของครู
 app.get("/api/classroom/:uid", async (req, res) => {
@@ -504,7 +547,6 @@ app.get("/api/classroom/student/count/:class_id", async (req, res) => {
 // ดึงข้อมูล student ที่อยู่ใน classroom
 app.get("/api/classroom/student/:class_id", async (req, res) => {
   const { class_id } = req.params;
-  // const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
   const sql_enroll = `select enrollment.uid, user.name, enrollment.class_id, user.last_active, classroom.sec from enrollment
                       left join classroom on enrollment.class_id = classroom.class_id
                       left join user on enrollment.uid = user.uid
@@ -711,7 +753,7 @@ app.post("/api/user/:uid/:name/:role_id/:last_active", async (req, res) => {
 
 // --------------------------- Report (Champ) ---------------------------
 
-// ✅ API: ดึงข้อมูล report
+// API: ดึงข้อมูล report
 app.get("/api/report", async (req, res) => {
   const { email } = req.query; // รับค่าผ่าน Query Parameters
   if (!email) {

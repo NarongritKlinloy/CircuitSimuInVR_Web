@@ -1,45 +1,18 @@
 import {
     Card,
-    Input,
     CardHeader,
     CardBody,
-    Typography,
-    Dialog,
-    DialogHeader,
-    DialogBody,
-    DialogFooter,
-    Button,
+    Typography
 } from "@material-tailwind/react";
 
 import {
-    PencilSquareIcon,
-    UsersIcon,
-    TrashIcon,
-    UserPlusIcon,
-    PlusCircleIcon,
+    PencilSquareIcon
 } from "@heroicons/react/24/solid";
 
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { countStudentAPI } from "@/data/student-count";
+import { Link,  } from "react-router-dom";
 
 function ClassroomList({ classrooms }) {
-
-    //นับจำนวน student
-    // const [studentCount, setStudentCount] = useState({});
-    // useEffect(() => {
-    //     const fetchStudentCounts = async () => {
-    //         const countPromises = classrooms.map(async (classroom) => {
-    //             const count = await countStudentAPI(classroom.class_id);
-    //             return { [classroom.class_id]: count };
-    //         });
-
-    //         const counts = await Promise.all(countPromises);
-    //         setStudentCount(Object.assign({}, ...counts));
-    //     };
-
-    //     fetchStudentCounts();
-    // }, [classrooms]);
 
     return (
         <div className="flex flex-col gap-8">
@@ -85,7 +58,7 @@ function ClassroomList({ classrooms }) {
                         </thead>
                         <tbody>
                             {classrooms.map(
-                                ({ class_id, class_name, sec, semester, year }, key) => {
+                                ({ class_id, class_name, sec, semester, year, total_practice, deactive_practice, active_practice }, key) => {
                                     const isLast = key === classrooms.length - 1;
                                     const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"
                                         }`;
@@ -127,20 +100,17 @@ function ClassroomList({ classrooms }) {
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
                                                 <Typography className="text-s font-normal text-blue-gray-500">
-                                                    {/* {studentCount[class_id]} */}
-                                                    -
+                                                    {total_practice}
                                                 </Typography>
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
                                                 <Typography className="text-s font-normal text-blue-gray-500">
-                                                    {/* {studentCount[class_id]} */}
-                                                    -
+                                                    {active_practice}
                                                 </Typography>
                                             </td>
                                             <td className={`${rowClassName} text-center`}>
                                                 <Typography className="text-s font-normal text-blue-gray-500">
-                                                    {/* {studentCount[class_id]} */}
-                                                    -
+                                                    {deactive_practice}
                                                 </Typography>
                                             </td>
 
