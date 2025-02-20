@@ -4,7 +4,6 @@ import ClassroomPracticeTable from "./functionTables/ClassroomPracticeTable";
 import { useNavigate } from "react-router-dom";
 import { ClassroomPractice } from "@/data/classroom-practice";
 
-
 export function PracticeClassroom() {
   const navigate = useNavigate();
   useEffect(() => {

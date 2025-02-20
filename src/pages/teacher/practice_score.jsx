@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import SearchSection from "./functionTables/SearchSection";
-import ClassroomPracticeTable from "./functionTables/ClassroomPracticeTable";
-import { useNavigate } from "react-router-dom";
-import { ClassroomPractice } from "@/data/classroom-practice";
+import ClassroomPracticeScore from "./functionTables/ClassroomPracticeScore";
+import { ClassroomScore } from "@/data/classroom-practice-score";
+
 
 
 export function PracticeScore() {
   const navigate = useNavigate();
+  const {class_id, practice_id} = useParams();
+
   useEffect(() => {
     try {
       const role = sessionStorage.getItem("role");
@@ -25,8 +28,9 @@ export function PracticeScore() {
   const [practices, setPractice] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
+
   const getPractice = async () => {
-    const data = await ClassroomPractice(sessionStorage.getItem("class_id"));
+    const data = await ClassroomScore(class_id, practice_id);
     setPractice(data);
   };
 
@@ -41,8 +45,8 @@ export function PracticeScore() {
   }, [refresh]);
 
   // search 
-  const filteredPractice = practices.filter(({ practice_name , practice_detail }) =>
-    [ practice_name , practice_detail ].some((field) =>
+  const filteredPractice = practices.filter(({ uid , name }) =>
+    [ uid , name ].some((field) =>
       String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
@@ -56,7 +60,7 @@ export function PracticeScore() {
         toggleAddModal={() => setIsAddStudentOpen(true)}
       />
 
-      <ClassroomPracticeTable
+      <ClassroomPracticeScore
         practices={filteredPractice}
         checkStatus={handleRefresh}
       />

@@ -1,6 +1,6 @@
 import React, { useState , useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon } from "@heroicons/react/24/solid";
 import { Card, CardHeader, CardBody, Typography, Switch} from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
@@ -106,18 +106,19 @@ function ClassroomPracticeTable({ practices, checkStatus}) {
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
-                                                -
+                                                {data.enrolled_count}
                                             </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
-                                                -
+                                                {data.submit_total}
                                             </Typography>
                                         </td>
                                         {/* link to score page */}
                                         <td className={`${rowClassName} text-left`}>
                                             <Link
-                                                to={`/teacher/practice_score/${data.class_name} (${data.sec, data.practice_name})`}
+                                                // to={`/teacher/practice_score/${data.class_name}/${data.practice_name} (${data.sec, data.practice_name})`}
+                                                to={`/teacher/practice_score/${data.class_id}/${data.practice_id}`}
                                                 className="text-green-500 hover:text-green-700"
                                                 onClick={() => {
                                                     sessionStorage.setItem("class_id", data.class_id);

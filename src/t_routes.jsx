@@ -77,7 +77,7 @@ export const routes = [
         icon: <DocumentTextIcon {...icon} />,
         name: "Practice Score",
         label: "Practice Score",
-        path: "/practice_score/:classname",
+        path: "/practice_score/:class_id/:practice_id",
         element: <PracticeScore />,
       },
       
