@@ -40,10 +40,24 @@ export const routes = [
       },
       {
         icon: <FolderIcon {...icon} />,
-        name: "Practice New",
+        name: "Practice",
         label: "Practice Management",
         path: "/practice_management",
         element: <PracticeManagement />,
+      },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Practice Classroom",
+        label: "Practice Classroom",
+        path: "/practice_classroom/:classname",
+        element: <PracticeClassroom />,
+      },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Practice Score",
+        label: "Practice Score",
+        path: "/practice_score/:class_id/:practice_id",
+        element: <PracticeScore />,
       },
       {
         icon: <UserGroupIcon {...icon} />,
@@ -65,20 +79,6 @@ export const routes = [
         label: "Teacher Assistant",
         path: "/TA_mgn/:classname",
         element: <TAManagement />,
-      },
-      {
-        icon: <DocumentTextIcon {...icon} />,
-        name: "Practice Classroom",
-        label: "Practice Classroom",
-        path: "/practice_classroom/:classname",
-        element: <PracticeClassroom />,
-      },
-      {
-        icon: <DocumentTextIcon {...icon} />,
-        name: "Practice Score",
-        label: "Practice Score",
-        path: "/practice_score/:class_id/:practice_id",
-        element: <PracticeScore />,
       },
       
     ]
