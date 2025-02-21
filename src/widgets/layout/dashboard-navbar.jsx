@@ -23,7 +23,6 @@ import {
   Bars3Icon,
 } from "@heroicons/react/24/solid";
 import { useState, useEffect } from "react";
-// import routes from "@/t_routes";
 
 import adminRoutes from "@/routes";
 import teacherRoutes from "@/t_routes";
@@ -52,11 +51,11 @@ export function DashboardNavbar() {
     .flatMap(route => route.pages)
     .find(({ path }) => 
       path === `/${page}` || 
-      (path.startsWith("/student") && pathname.startsWith("/teacher/student"))  ||
+      (path.startsWith("/student") && pathname.startsWith("/teacher/student")) ||
       (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn")) ||
-      (path.startsWith("/practice") && pathname.startsWith("/teacher/practice"))
+      (path.startsWith("/practice_") && pathname.startsWith("/teacher/practice_"))
     );
-
+  
   // เก็บชื่อผู้ใช้จาก sessionStorage
   const [userName, setUserName] = useState("");
 
@@ -176,7 +175,6 @@ useEffect(() => {
           </Breadcrumbs>
 
           <Typography variant="h3" color="blue-gray">
-            {/* {pageLabel[0].label} */}
             {pageLabel ? pageLabel.label : "Unknown Page"}
           </Typography>
 

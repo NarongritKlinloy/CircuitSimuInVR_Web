@@ -308,6 +308,80 @@ app.get("/api/practice", async (req, res) => {
   }
 });
 
+// เพิ่ม practice
+app.post("/api/practice", async (req, res) => {
+  const { practice_name, practice_detail, practice_score } = req.body;
+  
+  if (!practice_name || !practice_detail || !practice_score) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const now = new Date();
+  now.setHours(now.getHours() + 7);
+  const createDate = now.toISOString().slice(0, 19).replace("T", " ");
+
+  const sql_insert_practice = `INSERT INTO practice (practice_name, practice_detail, practice_score, create_date)
+    VALUES (?, ?, ?, ?)`;
+
+  try {
+    const [insertResult] = await db.query(sql_insert_practice, [
+      practice_name,
+      practice_detail,
+      practice_score,
+      createDate,
+    ]);
+    res.status(200).json({ 
+      message: "Added practice successfully", 
+      practice_id: insertResult.insertId 
+    });
+  } catch (err) {
+    console.error("Error adding practice:", err);
+    res.status(500).json({ error: "Query practice failed" });
+  }
+});
+
+// ลบ practice
+app.delete("/api/practice/:practice_id", async (req, res) => {
+  const { practice_id } = req.params;
+  const sql = "DELETE FROM practice WHERE practice_id = ?";
+  try {
+    const [result] = await db.query(sql, [practice_id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Practice not found" });
+    }
+    res.status(200).json({ message: "Practice deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting practice:", err);
+    return res.status(500).json({ error: "Delete failed" });
+  }
+});
+
+// edit practice
+app.put("/api/practice/:practice_id", async (req, res) => {
+  try {
+    const { practice_id } = req.params;
+    const { practice_name, practice_detail, practice_score } = req.body;
+
+    const updateSql = `
+      UPDATE practice 
+      SET practice_name = ?, practice_detail = ?, practice_score = ? 
+      WHERE practice_id = ?
+    `;
+
+    const [updateResult] = await db.query(updateSql, [practice_name, practice_detail, practice_score, practice_id]);
+
+    if (updateResult.affectedRows === 0) {
+      return res.status(404).json({ error: "Practice not found or failed to update!" });
+    }
+
+    return res.status(200).json({ message: "Practice updated successfully" });
+  } catch (err) {
+    console.error("Error updating practice:", err);
+    return res.status(500).json({ error: "Update practice failed" });
+  }
+});
+
+
 // เปลี่ยน status practice 
 app.put("/api/practice/update-status", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
@@ -810,7 +884,7 @@ app.post("/api/addreport", async (req, res) => {
       report_id: reportId,
     });
 
-     // ✅ แจ้งเตือน WebSocket Clients
+     // แจ้งเตือน WebSocket Clients
      broadcastData();
 
   } catch (error) {
@@ -965,131 +1039,6 @@ app.get("/api/get-read-notifications", async (req, res) => {
 // -----------------------------------------------------------
 
 /************************** END ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)   WebSocket ******************************/
-
-// API: เพิ่ม Report + Notification
-// app.post("/api/addreport", async (req, res) => {
-//   const { report_uid, report_name, report_detail, report_date } = req.body;
-
-//   if (!report_uid || !report_name || !report_detail || !report_date) {
-//     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
-//   }
-
-//   const connection = await db.getConnection();
-//   await connection.beginTransaction();
-
-//   try {
-//     // เพิ่ม Report
-//     const [reportResult] = await connection.execute(
-//       `INSERT INTO report (report_uid, report_name, report_detail, report_date) 
-//       VALUES (?, ?, ?, ?)`,
-//       [report_uid, report_name, report_detail, report_date]
-//     );
-
-//     const reportId = reportResult.insertId;
-
-//       // เพิ่ม Notification (แก้ไขค่าที่ผิด)
-//   const message = `มีรายงานใหม่: ${report_name}`;
-//   await connection.execute(
-//     `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
-//     VALUES (?, ?, ?, ?, ?)`, 
-//     [reportId, "admin", message, "report", 0]  // "admin" เป็นผู้รับแจ้งเตือน
-//   );
-
-//     await connection.commit();
-//     connection.release();
-
-//     res.status(200).json({
-//       message: "เพิ่มรายงานและแจ้งเตือนสำเร็จ",
-//       report_id: reportId,
-//     });
-
-//   } catch (error) {
-//     await connection.rollback();
-//     connection.release();
-//     console.error("Error:", error);
-//     res.status(500).json({ error: "เกิดข้อผิดพลาดในการเพิ่มข้อมูล" });
-//   }
-// });
-
-
-// /******* ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)***********/
-
-// app.get('/api/adminreport', async (req, res) => {
-//   try {
-//       const sql = "SELECT * FROM report";
-//       const [result] = await db.query(sql); // ใช้ await รอให้ Query เสร็จ
-
-//       res.status(200).json(result);
-//   } catch (error) {
-//       console.error("Error fetching admin reports:", error);
-//       res.status(500).json({ error: "Query data Report failed" });
-//   }
-// });
-
-// /****** API: ดึงจำนวนแจ้งเตือนที่ยังไม่ได้อ่านหรืออ่านแล้ว********* */
-
-// app.get('/api/countnotifications/:is_read', async (req, res) => {
-//   try {
-//       let { is_read } = req.params;
-
-//       // ตรวจสอบค่าของ is_read ต้องเป็น 0 หรือ 1
-//       if (is_read !== "0" && is_read !== "1") {
-//           return res.status(400).json({ error: "ค่าพารามิเตอร์ is_read ต้องเป็น 0 หรือ 1 เท่านั้น" });
-//       }
-
-//       // Query ดึงจำนวนแจ้งเตือน
-//       const sql = "SELECT COUNT(*) AS unread_count FROM `notifications` WHERE is_read = ?";
-//       const [result] = await db.query(sql, [is_read]);
-
-//       res.status(200).json({ unread_count: result[0].unread_count });
-//       // console.log("noti--->>"+result)
-
-//   } catch (error) {
-//       console.error("Error fetching notifications count:", error);
-//       res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือน" });
-//   }
-// });
-
-// // เปลี่ยน update-notification
-// app.put("/api/update-notification", async (req, res) => {
-//   const { recipient_uid, report_id } = req.body;
-//   const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
-//   try {
-//     await db.query(sql, [recipient_uid, report_id]);
-//     res.status(200).send({ message: "notification updated successfully" });
-//   } catch (err) {
-//     console.error("Error updating notification:", err);
-//     res.status(500).send("Error updating notification");
-//   }
-// });
-
-// //อ่านค่า read = 1 ในการเปลี่ยนสีปุ่ม
-// app.get("/api/get-read-notifications", async (req, res) => {
-//   const { recipient_uid } = req.query;
-
-//   if (!recipient_uid) {
-//     return res.status(400).json({ error: "recipient_uid is required" });
-//   }
-
-//   try {
-//     const sql = "SELECT report_id FROM notifications WHERE recipient_uid = ? AND is_read = 1";
-//     const [result] = await db.query(sql, [recipient_uid]);
-
-//     res.status(200).json(result);
-//   } catch (error) {
-//     console.error("Error fetching read notifications:", error);
-//     res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือนที่อ่านแล้ว" });
-//   }
-// });
-
-// -----------------------------------------------------------
-
-
-// 9) เริ่มต้น Server
-// // -----------------------------------------------------------
-// app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
-// });
 
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import SearchAndAddSection from "./functionTables/searchandaddsection";
+import SearchSection from "./functionTables/SearchSection";
 import AuthorsTable from "./functionTables/authorstable";
 import AuthorModal from "./functionTables/authormodal";
 import TeacherTable from "./functionTables/teachertable";
@@ -108,7 +108,7 @@ export function Tables() {
     <div className="mt-12 mb-8 flex flex-col gap-12">
 
       {/* Section การค้นหาและปุ่ม Add */}
-      <SearchAndAddSection
+      <SearchSection
         search={search}
         setSearch={setSearch}
         toggleAddModal={() => setIsAddAuthorOpen(true)} // เริ่มต้นที่ Authors
