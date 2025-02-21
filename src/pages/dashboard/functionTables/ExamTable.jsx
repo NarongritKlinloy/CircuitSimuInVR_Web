@@ -1,17 +1,19 @@
 import React, { useState, useEffect } from "react";
-import { Card, 
-  CardHeader, 
-  CardBody, 
-  Typography, 
-  Switch, 
+import {
+  Card,
+  CardHeader,
+  CardBody,
+  Typography,
+  Switch,
   Dialog,
   DialogHeader,
   DialogBody,
   DialogFooter,
   Button,
-Input } from "@material-tailwind/react";
+  Textarea,
+  Input
+} from "@material-tailwind/react";
 import Swal from "sweetalert2";
-import { updatePracticeStatusAPI } from "@/data/change-status-practice";
 import {
   PencilSquareIcon,
   TrashIcon,
@@ -25,28 +27,13 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
   const [selectedPractice, setSelectedPractice] = useState(null);
 
   // handle data change
-  // const inputHandle = (event) => {
-  //   setSelectedPractice((prev) => ({
-  //     ...prev,
-  //     [event.target.name]: event.target.value,
-  //   }));
-  // };
-
-  // const inputHandle = (event) => {
-  //   const { name, value } = event.target;
-  //   setSelectedPractice((prev) => ({
-  //     ...prev,
-  //     [name]: value,
-  //   }));
-  // };
-
   const inputHandle = (event) => {
     setSelectedPractice((prev) => ({
-        ...prev,
-        [event.target.name]: event.target.value,
+      ...prev,
+      [event.target.name]: event.target.value,
     }));
-};
-  
+  };
+
   // เปิด Modal Edit และโหลดข้อมูล
   const openEditModal = (practice) => {
     setSelectedPractice(practice);
@@ -55,23 +42,21 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
 
   // ปิด Modal Edit
   const closeEditModal = () => {
-    
-    setSelectedPractice(null);setIsEditOpen(false);
+    setIsEditOpen(false);
+    setSelectedPractice(null);
   };
   
 
   // ฟังก์ชันยืนยันการแก้ไข
   const handleSaveEdit = async () => {
     try {
-      await editPracticeAPI(selectedPractice);
       closeEditModal();
+      await editPracticeAPI(selectedPractice);
       checkStatus();
-      console.log('1');
     } catch (error) {
-      console.error("Error updating practice: ",error)
+      console.error("Error updating practice: ", error)
     }
   };
-
 
   // ฟังก์ชันยืนยันการลบ
   const confirmDelete = (practice) => {
@@ -92,7 +77,7 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
       }
     });
   };
-  
+
   return (
     <div className="flex flex-col gap-8">
       <Card>
@@ -225,50 +210,50 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
 
       {/* Edit Modal */}
       <Dialog open={isEditOpen} handler={closeEditModal}>
-                <DialogHeader>Edit practice</DialogHeader>
-                <DialogBody>
-                    <Typography className="mb-4">
-                        Update practice information
-                    </Typography>
-                    <div className="flex flex-col gap-4">
-                        <div>
-                            <Input
-                                label="Name"
-                                name="practice_name"
-                                value={selectedPractice?.practice_name || ""}
-                                onChange={inputHandle}
-                            />
-                        </div>
+        <DialogHeader>Edit practice</DialogHeader>
+        <DialogBody>
+          <Typography className="mb-4">
+            Update practice information
+          </Typography>
+          <div className="flex flex-col gap-4">
+            <div>
+              <Input
+                label="Name"
+                name="practice_name"
+                value={selectedPractice?.practice_name || ""}
+                onChange={inputHandle}
+              />
+            </div>
 
-                        <div className="flex gap-4">
-                            <div className="w-1/2">
-                                <Input
-                                    label="detail"
-                                    name="practice_detail"
-                                    value={selectedPractice?.practice_detail || ""}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                            <div className="w-1/2">
-                                <Input
-                                    label="score"
-                                    name="practice_score"
-                                    value={selectedPractice?.practice_score || ""}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </DialogBody>
-                <DialogFooter>
-                    <Button variant="text" color="red" onClick={closeEditModal}>
-                        Cancel
-                    </Button>
-                    <Button variant="gradient" color="green" onClick={handleSaveEdit}>
-                        Save
-                    </Button>
-                </DialogFooter>
-            </Dialog>
+            <div className="flex gap-4">
+              <div className="w-1/2">
+                <Input
+                  label="detail"
+                  name="practice_detail"
+                  value={selectedPractice?.practice_detail || ""}
+                  onChange={inputHandle}
+                />
+              </div>
+              <div className="w-1/2">
+                <Input
+                  label="score"
+                  name="practice_score"
+                  value={selectedPractice?.practice_score || ""}
+                  onChange={inputHandle}
+                />
+              </div>
+            </div>
+          </div>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="red" onClick={closeEditModal}>
+            Cancel
+          </Button>
+          <Button variant="gradient" color="green" onClick={handleSaveEdit}>
+            Save
+          </Button>
+        </DialogFooter>
+      </Dialog>
     </div>
   );
 }
