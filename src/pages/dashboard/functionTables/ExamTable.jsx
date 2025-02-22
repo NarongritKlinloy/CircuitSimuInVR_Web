@@ -21,6 +21,7 @@ import {
 } from "@heroicons/react/24/solid";
 import { deletePracticeAPI } from "@/data/delete-practice";
 import { editPracticeAPI } from "@/data/edit-practice";
+import { Link, useNavigate } from "react-router-dom";
 
 function ExamTable({ practice, checkStatus, toggleModal }) {
   const [isEditOpen, setIsEditOpen] = useState(false);
@@ -164,17 +165,16 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
 
                     {/* Add classroom Button */}
                     <td className={`${rowClassName} text-center`}>
-                      {/* <button
-                        onClick={() =>
-                          openEditModal(
-                            data.practice_id,
-                            data.practice_name,
-                          )
-                        }
+                    <Link
+                        // to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                        to={`/dashboard/assign/$(practice_name)`}
+                        onClick={() => {
+                            sessionStorage.setItem("practice_id", data.practice_id);
+                        }}
                         className="text-green-500 hover:text-green-700"
-                      >
-                        <FolderIcon className="h-5 w-5" />
-                      </button> */}
+                    >
+                        <FolderIcon className="h-5 w-5 mx-auto" />
+                    </Link>
                     </td>
 
                     {/* Edit Button */}
@@ -238,6 +238,7 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
                 <Input
                   label="score"
                   name="practice_score"
+                  maxLength={2}
                   value={selectedPractice?.practice_score || ""}
                   onChange={inputHandle}
                 />

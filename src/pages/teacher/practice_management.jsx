@@ -24,7 +24,7 @@ export function PracticeManagement() {
   const [refresh, setRefresh] = useState(false);
 
   const getClassroom = async () => {
-    const data = await ClassroomData();
+    const data = await ClassroomData(sessionStorage.getItem("email"));
     setClassroom(data);
   };
 

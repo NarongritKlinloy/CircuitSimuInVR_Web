@@ -5,7 +5,7 @@ export const ClassroomSecAPI = async (class_id) => {
         //console.log(result.data);
         return result.data;
     } catch (err) {
-        console.error('Error fetching user', error);
+        console.error('Error fetching user', err);
         return [];
     }
 };

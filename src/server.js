@@ -296,6 +296,7 @@ app.get("/api/report/count", async(req, res) => {
   }
 });
 
+// -------------------------- Begin จัดการข้อมูล Practice (Admin) -------------------------- //
 // ดึงข้อมูล practice (ทั้งหมด)
 app.get("/api/practice", async (req, res) => {
   const sql = "SELECT * FROM practice";
@@ -381,6 +382,32 @@ app.put("/api/practice/:practice_id", async (req, res) => {
   }
 });
 
+// API ดึงข้อมูลทั้งหมดในระบบ
+app.get("/api/classroom", async (req, res) => {
+  const sql = "SELECT * FROM classroom";
+  try {
+    const [rows] = await db.query(sql);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error filtering data (classroom):", err);
+    res.status(500).json({ error: "Query data classroom failed" });
+  }
+});
+
+// API เพิ่ม classroom practice
+app.post("/api/classroom/practice", async (req, res) => {
+  const { class_id, practice_id } = req.body;
+  const sql_insert = `INSERT INTO classroom_practice VALUES (?, ?, '0')`;
+  try {
+    await db.query(sql_insert, [class_id, practice_id ]);
+    res.status(200).json({ message: "Insert classroom practice successfully" });
+  } catch (err) {
+    console.error("Error inserting classroom practice:", err);
+    res.status(500).json({ error: "Insert classroom practice failed" });
+  }
+});
+
+// -------------------------- END จัดการข้อมูล Practice (Admin) -------------------------- //
 
 // เปลี่ยน status practice 
 app.put("/api/practice/update-status", async (req, res) => {
@@ -396,17 +423,20 @@ app.put("/api/practice/update-status", async (req, res) => {
   }
 });
 
-// ดึงข้อมูล Classroom ทั้งหมดในระบบ
-app.get("/api/classroom", async (req, res) => {
-  const sql = `SELECT c.*, 
-                COUNT(cp.practice_id) AS total_practice,
+// -------------------------- Begin จัดการ practice สำหรับอาจารย์ -------------------------- // 
+// ดึงข้อมูล Classroom ของอาจารย์ และจำนวนแบบฝึกหัดในคลาสนั้น ๆ 
+app.get("/api/classroom/:uid", async (req, res) => {
+  const { uid } = req.params;
+  const sql = `SELECT c.*, COUNT(cp.practice_id) AS total_practice,
                 SUM(CASE WHEN cp.practice_status = 0 THEN 1 ELSE 0 END) AS deactive_practice,
                 SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
                 FROM classroom c
+                JOIN teach t ON c.class_id = t.class_id
                 LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
+                WHERE t.uid = ?
                 GROUP BY c.class_id`;
-  try {
-    const [rows] = await db.query(sql);
+  try {    
+    const [rows] = await db.query(sql, [uid]);
     res.status(200).json(rows);
   } catch (err) {
     console.error("Error filtering data (classroom):", err);
@@ -485,25 +515,27 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
     return res.status(500).json({ error: "Select practice failed" });
   }
 });
+// -------------------------- END จัดการ practice สำหรับอาจารย์ -------------------------- // 
+
 
 // ดึงข้อมูล classroom ทั้งหมดของครู
-app.get("/api/classroom/:uid", async (req, res) => {
-  const { uid } = req.params;
-  const sql_teach = "SELECT class_id FROM teach WHERE uid = ?";
-  try {
-    const [teachRows] = await db.query(sql_teach, [uid]);
-    if (teachRows.length === 0) {
-      return res.status(404).json({ message: "No classrooms found for this user" });
-    }
-    const classIds = teachRows.map((row) => row.class_id);
-    const sql_classroom = "SELECT * FROM classroom WHERE class_id IN (?)";
-    const [classRows] = await db.query(sql_classroom, [classIds]);
-    res.status(200).json(classRows);
-  } catch (err) {
-    console.error("Error filtering data (classroom):", err);
-    res.status(500).json({ error: "Query data teach/classroom failed" });
-  }
-});
+// app.get("/api/classroom/:uid", async (req, res) => {
+//   const { uid } = req.params;
+//   const sql_teach = "SELECT class_id FROM teach WHERE uid = ?";
+//   try {
+//     const [teachRows] = await db.query(sql_teach, [uid]);
+//     if (teachRows.length === 0) {
+//       return res.status(404).json({ message: "No classrooms found for this user" });
+//     }
+//     const classIds = teachRows.map((row) => row.class_id);
+//     const sql_classroom = "SELECT * FROM classroom WHERE class_id IN (?)";
+//     const [classRows] = await db.query(sql_classroom, [classIds]);
+//     res.status(200).json(classRows);
+//   } catch (err) {
+//     console.error("Error filtering data (classroom):", err);
+//     res.status(500).json({ error: "Query data teach/classroom failed" });
+//   }
+// });
 
 // เพิ่มข้อมูล classroom
 app.post("/api/classroom", async (req, res) => {
