@@ -284,7 +284,7 @@ app.get("/api/admin/count", async (req, res) => {
 });
 
 // นับจำนวน report
-app.get("/api/report/count", async(req, res) => {
+app.get("/api/report/count", async (req, res) => {
   try {
     const sql = "SELECT COUNT(*) AS reportCount FROM report";
     const [rows] = await db.query(sql);
@@ -309,10 +309,33 @@ app.get("/api/practice", async (req, res) => {
   }
 });
 
+// ดึงข้อมูล practice จาก classroom_table แบบแยกว่าคลาสที่เรียกมาได้ใช้มั้ย
+app.get("/api/practice/classroom/:class_id", async (req, res) => {
+  const { class_id } = req.params;
+  const sql = `SELECT p.*, 
+                    CASE 
+                      WHEN cp.practice_id IS NOT NULL THEN 1 
+                      ELSE 0 
+                    END AS is_assigned
+              FROM practice p
+              LEFT JOIN classroom_practice cp 
+                  ON p.practice_id = cp.practice_id 
+                  AND cp.class_id = ?`;
+  try {
+    const [rows] = await db.query(sql, [class_id]);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error filtering data (practice):", err);
+    res.status(500).json({ error: "Query data practice failed" });
+  }
+});
+
+
+
 // เพิ่ม practice
 app.post("/api/practice", async (req, res) => {
   const { practice_name, practice_detail, practice_score } = req.body;
-  
+
   if (!practice_name || !practice_detail || !practice_score) {
     return res.status(400).json({ error: "Missing required fields" });
   }
@@ -331,9 +354,9 @@ app.post("/api/practice", async (req, res) => {
       practice_score,
       createDate,
     ]);
-    res.status(200).json({ 
-      message: "Added practice successfully", 
-      practice_id: insertResult.insertId 
+    res.status(200).json({
+      message: "Added practice successfully",
+      practice_id: insertResult.insertId
     });
   } catch (err) {
     console.error("Error adding practice:", err);
@@ -394,22 +417,11 @@ app.get("/api/classroom", async (req, res) => {
   }
 });
 
-// API เพิ่ม classroom practice (add-classroom-practice)
-// app.post("/api/classroom/practice", async (req, res) => {
-//   const { class_id, practice_id } = req.body;
-//   const sql_insert = `INSERT INTO classroom_practice VALUES (?, ?, '0')`;
-//   try {
-//     await db.query(sql_insert, [class_id, practice_id ]);
-//     res.status(200).json({ message: "Insert classroom practice successfully" });
-//   } catch (err) {
-//     console.error("Error inserting classroom practice:", err);
-//     res.status(500).json({ error: "Insert classroom practice failed" });
-//   }
-// });
+// API เพิ่มและลบ classroom practice (add-classroom-practice) 
+
 app.post("/api/classroom/practice", async (req, res) => {
   const { class_id, practice_ids } = req.body;
   try {
-    // Loop insert สำหรับแต่ละ practice_id
     for (const pid of practice_ids) {
       const sql_insert = `INSERT INTO classroom_practice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
       await db.query(sql_insert, [class_id, pid]);
@@ -418,6 +430,23 @@ app.post("/api/classroom/practice", async (req, res) => {
   } catch (err) {
     console.error("Error inserting classroom practice:", err);
     res.status(500).json({ error: "Insert classroom practices failed" });
+  }
+});
+
+app.delete("/api/classroom/practice", async (req, res) => {
+  const { class_id, practice_ids } = req.body;
+  if (!class_id || !practice_ids || !practice_ids.length) {
+    return res.status(400).json({ error: "Missing class_id or practice_ids" });
+  }
+  try {
+    for (const pid of practice_ids) {
+      const sql_delete = "DELETE FROM classroom_practice WHERE class_id = ? AND practice_id = ?";
+      await db.query(sql_delete, [class_id, pid]);
+    }
+    res.status(200).json({ message: "Classroom practices removed successfully" });
+  } catch (err) {
+    console.error("Error removing classroom practices:", err);
+    res.status(500).json({ error: "Remove classroom practices failed" });
   }
 });
 
@@ -449,7 +478,7 @@ app.get("/api/classroom/:uid", async (req, res) => {
                 LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
                 WHERE t.uid = ?
                 GROUP BY c.class_id`;
-  try {    
+  try {
     const [rows] = await db.query(sql, [uid]);
     res.status(200).json(rows);
   } catch (err) {
@@ -503,7 +532,7 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 
 // ดึงข้อมูล practice save และ score
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
-  const { class_id, practice_id  } = req.params;
+  const { class_id, practice_id } = req.params;
   const sql_practice_score = `SELECT 
                             u.uid,
                             u.name,
@@ -631,7 +660,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 
     const sql_check_classroom = "SELECT * FROM classroom WHERE class_name = ? AND sec = ? AND semester = ? AND year = ?";
     const [checkAnotherClass] = await db.query(sql_check_classroom, [class_name, sec, semester, year]);
-    if (checkAnotherClass.length > 0){
+    if (checkAnotherClass.length > 0) {
       throw { status: 400, message: "Classroom failed to update!" };
     }
 
@@ -654,7 +683,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 app.get("/api/classroom/student/count/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
-  
+
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
     return res.status(200).json(rows.length);
@@ -750,11 +779,11 @@ app.post("/api/classroom/assistant", async (req, res) => {
   const sql_user = "SELECT uid FROM user WHERE uid = ?";
   try {
     const [rows] = await db.query(sql_user, [uid]);
-    if(rows.length > 0){
+    if (rows.length > 0) {
       const sql_teach_assistant = "INSERT INTO teach (uid, class_id, role) VALUES (?, ?, 2)";
       await db.query(sql_teach_assistant, [uid, class_id]);
       return res.status(200).json({ message: "Add assistant successfully" });
-    }else{
+    } else {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
@@ -914,13 +943,13 @@ app.post("/api/addreport", async (req, res) => {
     const reportId = reportResult.insertId;
 
 
-  // เพิ่ม Notification (แก้ไขค่าที่ผิด)
-  const message = `มีรายงานใหม่: ${report_name}`;
-  await connection.execute(
-    `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
-    VALUES (?, ?, ?, ?, ?)`, 
-    [reportId, "admin", message, "report", 0]  // "admin" เป็นผู้รับแจ้งเตือน
-  );
+    // เพิ่ม Notification (แก้ไขค่าที่ผิด)
+    const message = `มีรายงานใหม่: ${report_name}`;
+    await connection.execute(
+      `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
+    VALUES (?, ?, ?, ?, ?)`,
+      [reportId, "admin", message, "report", 0]  // "admin" เป็นผู้รับแจ้งเตือน
+    );
 
     await connection.commit();
     connection.release();
@@ -930,8 +959,8 @@ app.post("/api/addreport", async (req, res) => {
       report_id: reportId,
     });
 
-     // แจ้งเตือน WebSocket Clients
-     broadcastData();
+    // แจ้งเตือน WebSocket Clients
+    broadcastData();
 
   } catch (error) {
     await connection.rollback();
@@ -946,13 +975,13 @@ app.post("/api/addreport", async (req, res) => {
 
 app.get('/api/adminreport', async (req, res) => {
   try {
-      const sql = "SELECT * FROM report";
-      const [result] = await db.query(sql); // ใช้ await รอให้ Query เสร็จ
+    const sql = "SELECT * FROM report";
+    const [result] = await db.query(sql); // ใช้ await รอให้ Query เสร็จ
 
-      res.status(200).json(result);
+    res.status(200).json(result);
   } catch (error) {
-      console.error("Error fetching admin reports:", error);
-      res.status(500).json({ error: "Query data Report failed" });
+    console.error("Error fetching admin reports:", error);
+    res.status(500).json({ error: "Query data Report failed" });
   }
 });
 
@@ -1056,7 +1085,7 @@ app.put("/api/update-notification", async (req, res) => {
 
     // แจ้งเตือน WebSocket Clients
     broadcastData();
-    
+
   } catch (err) {
     console.error("Error updating notification:", err);
     res.status(500).send("Error updating notification");
