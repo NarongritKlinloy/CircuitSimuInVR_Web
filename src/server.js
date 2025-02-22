@@ -417,22 +417,11 @@ app.get("/api/classroom", async (req, res) => {
   }
 });
 
-// API เพิ่ม classroom practice (add-classroom-practice)
-// app.post("/api/classroom/practice", async (req, res) => {
-//   const { class_id, practice_id } = req.body;
-//   const sql_insert = `INSERT INTO classroom_practice VALUES (?, ?, '0')`;
-//   try {
-//     await db.query(sql_insert, [class_id, practice_id ]);
-//     res.status(200).json({ message: "Insert classroom practice successfully" });
-//   } catch (err) {
-//     console.error("Error inserting classroom practice:", err);
-//     res.status(500).json({ error: "Insert classroom practice failed" });
-//   }
-// });
+// API เพิ่มและลบ classroom practice (add-classroom-practice) 
+
 app.post("/api/classroom/practice", async (req, res) => {
   const { class_id, practice_ids } = req.body;
   try {
-    // Loop insert สำหรับแต่ละ practice_id
     for (const pid of practice_ids) {
       const sql_insert = `INSERT INTO classroom_practice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
       await db.query(sql_insert, [class_id, pid]);
@@ -450,7 +439,6 @@ app.delete("/api/classroom/practice", async (req, res) => {
     return res.status(400).json({ error: "Missing class_id or practice_ids" });
   }
   try {
-    // ลูปผ่านแต่ละ practice_id เพื่อลบออกจาก classroom_practice
     for (const pid of practice_ids) {
       const sql_delete = "DELETE FROM classroom_practice WHERE class_id = ? AND practice_id = ?";
       await db.query(sql_delete, [class_id, pid]);
