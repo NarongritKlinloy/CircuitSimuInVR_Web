@@ -93,10 +93,10 @@ export function ExamManagement() {
 
       <ExamTable
         practice={filteredPractice}
-        onEditClick={(practice) => {
-          setEditingPractice(practice);
-          setIsEditPracticeOpen(true);
-        }}
+        // onEditClick={(practice) => {
+        //   setEditingPractice(practice);
+        //   setIsEditPracticeOpen(true);
+        // }}
         checkStatus={handleRefresh}
       />
 

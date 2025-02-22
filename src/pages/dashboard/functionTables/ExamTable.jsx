@@ -51,8 +51,8 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
   // ฟังก์ชันยืนยันการแก้ไข
   const handleSaveEdit = async () => {
     try {
-      closeEditModal();
       await editPracticeAPI(selectedPractice);
+      closeEditModal();
       checkStatus();
     } catch (error) {
       console.error("Error updating practice: ", error)

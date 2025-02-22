@@ -382,7 +382,7 @@ app.put("/api/practice/:practice_id", async (req, res) => {
   }
 });
 
-// API ดึงข้อมูลทั้งหมดในระบบ
+// API ดึงข้อมูลทั้งหมดในระบบ (classroom-table-data)
 app.get("/api/classroom", async (req, res) => {
   const sql = "SELECT * FROM classroom";
   try {
@@ -394,16 +394,30 @@ app.get("/api/classroom", async (req, res) => {
   }
 });
 
-// API เพิ่ม classroom practice
+// API เพิ่ม classroom practice (add-classroom-practice)
+// app.post("/api/classroom/practice", async (req, res) => {
+//   const { class_id, practice_id } = req.body;
+//   const sql_insert = `INSERT INTO classroom_practice VALUES (?, ?, '0')`;
+//   try {
+//     await db.query(sql_insert, [class_id, practice_id ]);
+//     res.status(200).json({ message: "Insert classroom practice successfully" });
+//   } catch (err) {
+//     console.error("Error inserting classroom practice:", err);
+//     res.status(500).json({ error: "Insert classroom practice failed" });
+//   }
+// });
 app.post("/api/classroom/practice", async (req, res) => {
-  const { class_id, practice_id } = req.body;
-  const sql_insert = `INSERT INTO classroom_practice VALUES (?, ?, '0')`;
+  const { class_id, practice_ids } = req.body;
   try {
-    await db.query(sql_insert, [class_id, practice_id ]);
-    res.status(200).json({ message: "Insert classroom practice successfully" });
+    // Loop insert สำหรับแต่ละ practice_id
+    for (const pid of practice_ids) {
+      const sql_insert = `INSERT INTO classroom_practice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
+      await db.query(sql_insert, [class_id, pid]);
+    }
+    res.status(200).json({ message: "Insert classroom practices successfully" });
   } catch (err) {
     console.error("Error inserting classroom practice:", err);
-    res.status(500).json({ error: "Insert classroom practice failed" });
+    res.status(500).json({ error: "Insert classroom practices failed" });
   }
 });
 

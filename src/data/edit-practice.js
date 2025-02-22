@@ -6,7 +6,7 @@ export const editPracticeAPI = async (practiceData) => {
       const { practice_id, practice_name } = practiceData;
       const result = await axios.put(`http://localhost:5000/api/practice/${practice_id}`,practiceData );
       if (result.status === 200) {
-        await Swal.fire({
+        Swal.fire({
           title: "Updated!",
           text: `${practice_name} has been updated.`,
           icon: "success",
@@ -17,7 +17,7 @@ export const editPracticeAPI = async (practiceData) => {
         });
       }
     } catch (err) {
-      await Swal.fire({
+      Swal.fire({
         title: "Failed!",
         text: `Can't update ${practiceData.practice_name}`,
         icon: "error",

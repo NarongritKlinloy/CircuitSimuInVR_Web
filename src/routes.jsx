@@ -4,9 +4,10 @@ import {
   ServerStackIcon,
   RectangleStackIcon,
   UsersIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  FolderIcon
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, ExamManagement } from "@/pages/dashboard";
+import { Home, Profile, Tables, Notifications, ExamManagement, ClassroomPractice } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 
 const icon = {
@@ -30,6 +31,13 @@ export const routes = [
         label: "Practice Management",
         path: "/exam",
         element: <ExamManagement />,
+      },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "Class Practice",
+        label: "Class Practice Management",
+        path: "/classroom_practice",
+        element: <ClassroomPractice />,
       },
       {
         icon: <UsersIcon {...icon} />,
