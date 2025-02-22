@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import SearchSection from "./functionTables/SearchSection";
 import ClassroomList from "./functionTables/ClassroomList";
-import { ClassroomData } from "@/data/classroom-list";
+import { ClassroomData } from "@/data/classroom-list-teacher";
 import { useNavigate } from "react-router-dom";
 
 export function PracticeManagement() {
@@ -24,7 +24,7 @@ export function PracticeManagement() {
   const [refresh, setRefresh] = useState(false);
 
   const getClassroom = async () => {
-    const data = await ClassroomData();
+    const data = await ClassroomData(sessionStorage.getItem("email"));
     setClassroom(data);
   };
 

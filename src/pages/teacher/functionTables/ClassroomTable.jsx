@@ -15,8 +15,7 @@ import {
     PencilSquareIcon,
     UsersIcon,
     TrashIcon,
-    UserPlusIcon,
-    PlusCircleIcon,
+    UserPlusIcon
 } from "@heroicons/react/24/solid";
 
 import React, { useState, useEffect } from "react";
@@ -333,7 +332,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
             </Dialog>
 
             {/* Add TA Modal */}
-            <Dialog open={isAddTAOpen} handler={closeAddTAModal}>
+            {/* <Dialog open={isAddTAOpen} handler={closeAddTAModal}>
                 <DialogHeader>Add Teacher Assistant</DialogHeader>
                 <DialogBody>
                     <Typography className="mb-4">
@@ -357,7 +356,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                         Add
                     </Button>
                 </DialogFooter>
-            </Dialog>
+            </Dialog> */}
         </div>
     );
 }

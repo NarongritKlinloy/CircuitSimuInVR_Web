@@ -1,6 +1,6 @@
 import React, { useState , useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { PencilSquareIcon } from "@heroicons/react/24/solid";
+import { PencilSquareIcon,PaperClipIcon,DocumentMagnifyingGlassIcon } from "@heroicons/react/24/solid";
 import { Card, CardHeader, CardBody, Typography, Switch} from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import { Link } from "react-router-dom";
@@ -119,12 +119,12 @@ function ClassroomPracticeTable({ practices, checkStatus}) {
                                             <Link
                                                 // to={`/teacher/practice_score/${data.class_name}/${data.practice_name} (${data.sec, data.practice_name})`}
                                                 to={`/teacher/practice_score/${data.class_id}/${data.practice_id}`}
-                                                className="text-green-500 hover:text-green-700"
+                                                className="text-blue-500 hover:text-blue-700"
                                                 onClick={() => {
                                                     sessionStorage.setItem("class_id", data.class_id);
                                                 }}
                                             >
-                                                <PencilSquareIcon className="h-5 w-5 mx-auto" />
+                                                <DocumentMagnifyingGlassIcon className="h-5 w-5 mx-auto" />
                                             </Link>
                                         </td>
                                         <td className={`${rowClassName}`}>
