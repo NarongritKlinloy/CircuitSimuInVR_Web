@@ -365,20 +365,40 @@ app.post("/api/practice", async (req, res) => {
 });
 
 // ลบ practice
+// app.delete("/api/practice/:practice_id", async (req, res) => {
+//   const { practice_id } = req.params;
+//   const sql = "DELETE FROM practice WHERE practice_id = ?";
+//   try {
+//     const [result] = await db.query(sql, [practice_id]);
+//     if (result.affectedRows === 0) {
+//       return res.status(404).json({ error: "Practice not found" });
+//     }
+//     res.status(200).json({ message: "Practice deleted successfully" });
+//   } catch (err) {
+//     console.error("Error deleting practice:", err);
+//     return res.status(500).json({ error: "Delete failed" });
+//   }
+// });
+
 app.delete("/api/practice/:practice_id", async (req, res) => {
   const { practice_id } = req.params;
-  const sql = "DELETE FROM practice WHERE practice_id = ?";
+  const sql = `
+    DELETE FROM practice 
+    WHERE practice_id = ? 
+      AND practice_id NOT IN (SELECT practice_id FROM classroom_practice)
+  `;
   try {
     const [result] = await db.query(sql, [practice_id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Practice not found" });
+      return res.status(404).json({ error: "Practice not found or is assigned in classroom_practice" });
     }
     res.status(200).json({ message: "Practice deleted successfully" });
   } catch (err) {
     console.error("Error deleting practice:", err);
-    return res.status(500).json({ error: "Delete failed" });
+    res.status(500).json({ error: "Delete practice failed" });
   }
 });
+
 
 // edit practice
 app.put("/api/practice/:practice_id", async (req, res) => {

@@ -92,7 +92,7 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
           <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
               <tr>
-                {["No.", "Name", "Detail", "Create Date", "classroom", "Edit", "Delete"].map((el) => (
+                {["No.", "Name", "Detail", "Create Date", "Edit", "Delete"].map((el) => (
                   <th
                     key={el}
                     className={`border-b border-blue-gray-50 px-5 py-2 ${el === "Name" || el === "Detail"
@@ -162,20 +162,6 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
                         />
                       </div>
                     </td> */}
-
-                    {/* Add classroom Button */}
-                    <td className={`${rowClassName} text-center`}>
-                    <Link
-                        // to={`/teacher/TA_mgn/${class_name} (${sec})`}
-                        to={`/dashboard/assign/$(practice_name)`}
-                        onClick={() => {
-                            sessionStorage.setItem("practice_id", data.practice_id);
-                        }}
-                        className="text-green-500 hover:text-green-700"
-                    >
-                        <FolderIcon className="h-5 w-5 mx-auto" />
-                    </Link>
-                    </td>
 
                     {/* Edit Button */}
                     <td className={`${rowClassName} text-center`}>
