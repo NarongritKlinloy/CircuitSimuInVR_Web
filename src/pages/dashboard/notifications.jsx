@@ -135,7 +135,7 @@ const filteredReports = reports.filter((report) => {
      
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
-          <Typography variant="h6" color="white">Recommendation</Typography>
+          <Typography variant="h6" color="white">Feedback</Typography>
         </CardHeader>
         <CardBody className="overflow-x-auto overflow-y-auto max-h-96 pt-0 pb-2">
           <table className="w-full min-w-[640px] table-auto border-collapse">
