@@ -239,7 +239,7 @@ useEffect(() => {
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
           <Typography variant="h6" color="white">
-            Reports
+            Feedback
           </Typography>
           {/* <Button variant="gradient" color="green" onClick={toggleAddModal}>
             New Report
@@ -256,7 +256,7 @@ useEffect(() => {
                 <th className="border-b border-blue-gray-50 px-5 py-2">Detail</th>
               </tr> */}
               <tr>
-            {["No.", "Name", "User", "Create Date", "Detail"].map((header) => (
+            {["No.", "Name", "Detail", "Create Date", "Info."].map((header) => (
               <th
                 key={header}
                 className={`border-b border-blue-gray-50 px-5 py-2 ${header === "Name" ? "text-left" : "text-center"}`}
@@ -292,13 +292,23 @@ useEffect(() => {
 
                 <td className={`${rowClassName} text-center`}>
                   <Typography className="text-s font-normal text-blue-gray-500">
-                    {report.report_uid}
+                  {report.report_detail.length > 5 
+                        ? report.report_detail.slice(0, 5) + "..." 
+                        : report.report_detail}
                   </Typography>
                 </td>
 
                  <td className={`${rowClassName} text-center`}>
                   <Typography className="text-s font-normal text-blue-gray-500">
-                    {new Date(report.report_date).toLocaleDateString("en-GB")}
+                  {new Date(report.report_date).toLocaleString("en-GB", {
+                              year: "numeric",
+                              month: "2-digit",
+                              day: "2-digit",
+                              hour: "2-digit",
+                              minute: "2-digit",
+                              second: "2-digit",
+                              hour12: false,
+                            }).replace(",", "")}
                   </Typography>
                 </td> 
 
