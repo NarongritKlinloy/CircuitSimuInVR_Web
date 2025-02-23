@@ -42,9 +42,9 @@ export const routes = [
       
       {
         icon: <DocumentTextIcon {...icon} />,
-        name: "Report",
-        label: "Report",
-        path: "/report",
+        name: "Feedback",
+        label: "Feedback",
+        path: "/feedback",
         element: <Notifications />,
       },
     ],

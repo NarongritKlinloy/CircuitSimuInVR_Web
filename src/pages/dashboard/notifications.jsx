@@ -16,30 +16,30 @@ import { updateNotificationAPI } from "@/data/updateNotification";
 import { fetchReadNotifications } from "@/data/fetchReadNoti";
 
 export function Notifications() {
-  const [reports, setReports] = useState([]); // ✅ เก็บข้อมูล Reports
-  const [updatedReports, setUpdatedReports] = useState([]); // ✅ รายการที่อ่านแล้ว
-  const [selectedReport, setSelectedReport] = useState(null); // ✅ รายการที่ถูกเลือก
-  const [dialogOpen, setDialogOpen] = useState(false); // ✅ สถานะเปิดปิด Modal
-  const [searchTerm, setSearchTerm] = useState(""); // ✅ ใช้เก็บค่าการค้นหา
+  const [reports, setReports] = useState([]); //  เก็บข้อมูล Reports
+  const [updatedReports, setUpdatedReports] = useState([]); //  รายการที่อ่านแล้ว
+  const [selectedReport, setSelectedReport] = useState(null); //  รายการที่ถูกเลือก
+  const [dialogOpen, setDialogOpen] = useState(false); //  สถานะเปิดปิด Modal
+  const [searchTerm, setSearchTerm] = useState(""); //  ใช้เก็บค่าการค้นหา
   let pollingInterval = null;
 
-  /** ✅ ฟังก์ชันดึงข้อมูล `Reports` */
+  /**  ฟังก์ชันดึงข้อมูล `Reports` */
   const fetchReports = async () => {
     try {
       const response = await axios.get("http://localhost:5000/api/adminreport");
       setReports(response.data);
     } catch (error) {
-      console.error("❌ Error fetching reports:", error);
+      console.error(" Error fetching reports:", error);
     }
   };
 
-  /** ✅ เริ่มต้น WebSocket และ API Polling สำรอง */
+  /**  เริ่มต้น WebSocket และ API Polling สำรอง */
   useEffect(() => {
     const connectWebSocket = () => {
       const ws = new WebSocket("ws://localhost:5050");
 
       ws.onopen = () => {
-        console.log("✅ WebSocket Connected to 5050");
+        // console.log(" WebSocket Connected to 5050");
         if (pollingInterval) {
           clearInterval(pollingInterval);
           pollingInterval = null;
@@ -53,15 +53,15 @@ export function Notifications() {
             setReports(data.reports);
           }
           if (data.unread_count !== undefined) {
-            console.log("🔔 Unread Notifications:", data.unread_count);
+            console.log(" Unread Notifications:", data.unread_count);
           }
         } catch (error) {
-          console.error("❌ Error parsing WebSocket message:", error);
+          console.error(" Error parsing WebSocket message:", error);
         }
       };
 
       ws.onclose = () => {
-        console.warn("⚠️ WebSocket Disconnected, switching to API polling...");
+        console.warn(" WebSocket Disconnected, switching to API polling...");
         if (!pollingInterval) {
           pollingInterval = setInterval(fetchReports, 10000);
         }
@@ -82,7 +82,7 @@ export function Notifications() {
     };
   }, []);
 
-  /** ✅ โหลด `is_read = 1` จาก API */
+  /** โหลด `is_read = 1` จาก API */
   const loadReadNotifications = async () => {
     const email = sessionStorage.getItem("email");
     const readReports = await fetchReadNotifications(email);
@@ -97,40 +97,40 @@ export function Notifications() {
     loadReadNotifications();
   }, []);
 
-/** ✅ ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
+/**  ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
 const filteredReports = reports.filter((report) => {
   const reportDate = new Date(report.report_date).toLocaleDateString("en-GB"); // แปลงวันที่เป็น DD/MM/YYYY
   const lowerSearchTerm = searchTerm.toLowerCase(); // แปลงเป็นตัวพิมพ์เล็กเพื่อให้ค้นหาแบบ case-insensitive
 
   return (
-    report.report_name.toLowerCase().includes(lowerSearchTerm) || // ✅ ค้นหาจากชื่อ
-    report.report_uid.toLowerCase().includes(lowerSearchTerm) || // ✅ ค้นหาจากผู้ใช้
-    reportDate.includes(lowerSearchTerm) // ✅ ค้นหาจากวันที่
+    report.report_name.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากชื่อ
+    report.report_uid.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากผู้ใช้
+    reportDate.includes(lowerSearchTerm) //  ค้นหาจากวันที่
   );
 });
 
 
 
 
-  /** ✅ กดปุ่ม `VIEW` → เปิด Modal + อัปเดต `is_read` */
+  /**  กดปุ่ม `VIEW` → เปิด Modal + อัปเดต `is_read` */
   const handleReadReport = async (report) => {
     setSelectedReport(report);
     setDialogOpen(true);
 
     try {
       const response = await updateNotificationAPI(sessionStorage.getItem("email"), report.report_id);
-      // console.log("✅ API Response:", response);
+      // console.log(" API Response:", response);
 
       setUpdatedReports((prev) => [...prev, report.report_id]);
       fetchReports();
     } catch (error) {
-      console.error("❌ Error updating notification:", error);
+      console.error(" Error updating notification:", error);
     }
   };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-     {/* ✅ เพิ่มช่องค้นหา */}
+     {/*  เพิ่มช่องค้นหา */}
      <SearchAdmin searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
      
       <Card>
@@ -141,7 +141,7 @@ const filteredReports = reports.filter((report) => {
           <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
               <tr>
-                {["No.", "Name", "User", "Create Date", "Detail"].map((header) => (
+                {["No.", "Name", "Detail", "Create Date", "Info."].map((header) => (
                   <th key={header} 
                   className={`border-b border-blue-gray-50 px-5 py-2 ${header === "Name" ? "text-left" : "text-center"}`}>
                     <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
@@ -172,7 +172,9 @@ const filteredReports = reports.filter((report) => {
 
                     <td className={`${rowClassName} text-center`}>
                       <Typography className="text-s font-normal text-blue-gray-500">
-                        {report.report_uid}
+                      {report.report_detail.length > 5 
+                        ? report.report_detail.slice(0, 5) + "..." 
+                        : report.report_detail}
                       </Typography>
                     </td>
 
@@ -212,7 +214,7 @@ const filteredReports = reports.filter((report) => {
         </CardBody>
       </Card>
 
-      {/* ✅ Modal รายละเอียด */}
+      {/*  Modal รายละเอียด */}
       <Dialog open={dialogOpen} handler={() => setDialogOpen(false)}>
         <DialogHeader>Detail</DialogHeader>
         <DialogBody>{selectedReport?.report_detail}</DialogBody>
