@@ -26,7 +26,7 @@ export function TeacherReports() {
   const [reports, setReports] = useState([]); // สถานะสำหรับเก็บข้อมูล API
   const [loading, setLoading] = useState(true); // สถานะโหลดข้อมูล
   const [error, setError] = useState(null); // สถานะข้อผิดพลาด
-  const [searchTerm, setSearchTerm] = useState(""); // ✅ ใช้เก็บค่าการค้นหา
+  const [searchTerm, setSearchTerm] = useState(""); // ใช้เก็บค่าการค้นหา
   const [isAddReportOpen, setIsAddReportOpen] = useState(false); // สำหรับเปิด/ปิด Modal Add New Report
 
 // ฟังก์ชันเปิด/ปิด modal สำหรับ Add New Report
@@ -34,15 +34,15 @@ const toggleAddModal = () => {
   setIsAddReportOpen((prev) => !prev);
 };
 
-/** ✅ ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
+/** ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
 const filteredReports = reports.filter((report) => {
   const reportDate = new Date(report.report_date).toLocaleDateString("en-GB"); // แปลงวันที่เป็น DD/MM/YYYY
   const lowerSearchTerm = searchTerm.toLowerCase(); // แปลงเป็นตัวพิมพ์เล็กเพื่อให้ค้นหาแบบ case-insensitive
 
   return (
-    report.report_name.toLowerCase().includes(lowerSearchTerm) || // ✅ ค้นหาจากชื่อ
-    report.report_uid.toLowerCase().includes(lowerSearchTerm) || // ✅ ค้นหาจากผู้ใช้
-    reportDate.includes(lowerSearchTerm) // ✅ ค้นหาจากวันที่
+    report.report_name.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากชื่อ
+    report.report_uid.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากผู้ใช้
+    reportDate.includes(lowerSearchTerm) // ค้นหาจากวันที่
   );
 });
 

@@ -22,8 +22,10 @@ import {
   CreditCardIcon,
   Bars3Icon,
 } from "@heroicons/react/24/solid";
+
 import { useState, useEffect, useRef } from "react";
 // import routes from "@/t_routes";
+
 
 import adminRoutes from "@/routes";
 import teacherRoutes from "@/t_routes";
@@ -48,17 +50,16 @@ export function DashboardNavbar() {
   const { pathname } = useLocation();
   const [layout, page] = pathname.split("/").filter((el) => el !== "");
   
-  // show name label
   // หาหน้า label ที่ตรง
   const pageLabel = activeRoutes
     .flatMap(route => route.pages)
-    .find(({ path }) => path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student")));
-  // const pageLabel = routes[0].pages.find(({ path }) => {
-  //   return path === `/${page}` || (path.startsWith("/student") && pathname.startsWith("/teacher/student"));
-  // });
-  // const checkPage = "/"+page; 
-  // const pageLabel = routes[0].pages.filter(({path})=> (path == checkPage));
-
+    .find(({ path }) => 
+      path === `/${page}` || 
+      (path.startsWith("/student") && pathname.startsWith("/teacher/student")) ||
+      (path.startsWith("/TA_mgn") && pathname.startsWith("/teacher/TA_mgn")) ||
+      (path.startsWith("/practice_") && pathname.startsWith("/teacher/practice_"))
+    );
+  
   // เก็บชื่อผู้ใช้จาก sessionStorage
   const [userName, setUserName] = useState("");
 
@@ -76,7 +77,9 @@ console.log("isMenuOpen -- "+isMenuOpen)
 const menuRef = useRef(null); // ใช้ ref เพื่อตรวจจับการคลิกนอกเมนู
 let pollingInterval = null;
 
+
  /**  ฟังก์ชันดึงข้อมูลแจ้งเตือนจาก API */
+
  const fetchNotifications = async () => {
   try {
     const response = await axios.get("http://localhost:5000/api/countnotifications");
@@ -84,19 +87,22 @@ let pollingInterval = null;
       setNotificationCount(response.data.unread_count);
     }
   } catch (error) {
-    console.error("❌ Error fetching notifications:", error);
+    console.error("Error fetching notifications:", error);
   }
 };
 
 useEffect(() => {
+
   /**  ฟังก์ชันเริ่ม WebSocket */
+
   const connectWebSocket = () => {
     const ws = new WebSocket("ws://localhost:5050");
 
     ws.onopen = () => {
-      console.log(" WebSocket Connected to 5050");
 
-      // ❌ **ถ้า WebSocket กลับมา → หยุด API Polling**
+      console.log("WebSocket Connected to 5050");
+
+      // **ถ้า WebSocket กลับมา → หยุด API Polling**
       if (pollingInterval) {
         clearInterval(pollingInterval);
         pollingInterval = null;
@@ -110,27 +116,27 @@ useEffect(() => {
           setNotificationCount(data.unread_count);
         }
       } catch (error) {
-        console.error(" Error parsing WebSocket message:", error);
+        console.error("Error parsing WebSocket message:", error);
+
       }
     };
 
     ws.onclose = () => {
-      console.warn(" WebSocket Disconnected, switching to API polling...");
 
-      //  **ใช้ API Polling แทน WebSocket**
+      console.warn("WebSocket Disconnected, switching to API polling...");
+
+      // **ใช้ API Polling แทน WebSocket**
       if (!pollingInterval) {
         pollingInterval = setInterval(fetchNotifications, 10000);
       }
 
-      //  **พยายามเชื่อมต่อ WebSocket ใหม่หลังจาก 5 วินาที**
+      // **พยายามเชื่อมต่อ WebSocket ใหม่หลังจาก 5 วินาที**
       setTimeout(connectWebSocket, 5000);
     };
 
     return ws;
   };
   
-
-
   fetchNotifications(); //  ดึงข้อมูล API ครั้งแรก
   const ws = connectWebSocket(); //  เรียกใช้ WebSocket
 
@@ -143,7 +149,7 @@ useEffect(() => {
 }, []);
   
   
-  /** ✅ Toggle เปิด/ปิดเมนูแจ้งเตือน */
+  /** Toggle เปิด/ปิดเมนูแจ้งเตือน */
   const toggleMenu = (event) => {
     event.stopPropagation(); // ป้องกันการปิดเมนูโดยไม่ได้ตั้งใจ
     setIsMenuOpen(!isMenuOpen);
@@ -206,7 +212,6 @@ useEffect(() => {
           </Breadcrumbs>
 
           <Typography variant="h3" color="blue-gray">
-            {/* {pageLabel[0].label} */}
             {pageLabel ? pageLabel.label : "Unknown Page"}
           </Typography>
 
@@ -411,7 +416,7 @@ useEffect(() => {
   //       </div>
 
   //       <div className="flex items-center">
-  //         {/* ✅ ปุ่มเปิด/ปิด Sidebar */}
+  //         {/* ปุ่มเปิด/ปิด Sidebar */}
   //         <IconButton
   //           variant="text"
   //           color="blue-gray"
@@ -421,7 +426,7 @@ useEffect(() => {
   //           <Bars3Icon strokeWidth={3} className="h-6 w-6 text-blue-gray-500" />
   //         </IconButton>
 
-  //         {/* ✅ แสดงชื่อผู้ใช้ */}
+  //         {/* แสดงชื่อผู้ใช้ */}
   //         <Button
   //           variant="text"
   //           color="blue-gray"
@@ -432,10 +437,10 @@ useEffect(() => {
   //           {userName}
   //         </Button>
 
-  //         {/* ✅ **ใช้ `NotificationBell` แทน BellIcon และ MenuList** */}
+  //         {/* **ใช้ `NotificationBell` แทน BellIcon และ MenuList** */}
   //         <NotificationBell />
 
-  //         {/* ✅ ปุ่มตั้งค่า */}
+  //         {/* ปุ่มตั้งค่า */}
   //         <IconButton
   //           variant="text"
   //           color="blue-gray"

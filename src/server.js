@@ -17,19 +17,18 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ✅ สร้าง HTTP Server สำหรับ Express API
+// สร้าง HTTP Server สำหรับ Express API
 const server = createServer(app);
 
-// ✅ สร้าง Port WebSocket Server ที่พอร์ต 5050
+// สร้าง Port WebSocket Server ที่พอร์ต 5050
 const WS_PORT = 5050;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  // password: "root",
-  password: "123456789",
-  // database: "circuit_project",
+  password: "Dream241244",
+  // password: "123456789",
   database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
@@ -285,7 +284,7 @@ app.get("/api/admin/count", async (req, res) => {
 });
 
 // นับจำนวน report
-app.get("/api/report/count", async(req, res) => {
+app.get("/api/report/count", async (req, res) => {
   try {
     const sql = "SELECT COUNT(*) AS reportCount FROM report";
     const [rows] = await db.query(sql);
@@ -297,6 +296,7 @@ app.get("/api/report/count", async(req, res) => {
   }
 });
 
+// -------------------------- Begin จัดการข้อมูล Practice (Admin) -------------------------- //
 // ดึงข้อมูล practice (ทั้งหมด)
 app.get("/api/practice", async (req, res) => {
   const sql = "SELECT * FROM practice";
@@ -309,12 +309,176 @@ app.get("/api/practice", async (req, res) => {
   }
 });
 
-// เปลี่ยน status practice
-app.put("/api/practice/update-status", async (req, res) => {
-  const { practice_id, new_status } = req.body;
-  const sql = "UPDATE practice SET practice_status = ? WHERE practice_id = ?";
+// ดึงข้อมูล practice จาก classroom_table แบบแยกว่าคลาสที่เรียกมาได้ใช้มั้ย
+app.get("/api/practice/classroom/:class_id", async (req, res) => {
+  const { class_id } = req.params;
+  const sql = `SELECT p.*, 
+                    CASE 
+                      WHEN cp.practice_id IS NOT NULL THEN 1 
+                      ELSE 0 
+                    END AS is_assigned
+              FROM practice p
+              LEFT JOIN classroom_practice cp 
+                  ON p.practice_id = cp.practice_id 
+                  AND cp.class_id = ?`;
   try {
-    await db.query(sql, [new_status, practice_id]);
+    const [rows] = await db.query(sql, [class_id]);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error filtering data (practice):", err);
+    res.status(500).json({ error: "Query data practice failed" });
+  }
+});
+
+
+
+// เพิ่ม practice
+app.post("/api/practice", async (req, res) => {
+  const { practice_name, practice_detail, practice_score } = req.body;
+
+  if (!practice_name || !practice_detail || !practice_score) {
+    return res.status(400).json({ error: "Missing required fields" });
+  }
+
+  const now = new Date();
+  now.setHours(now.getHours() + 7);
+  const createDate = now.toISOString().slice(0, 19).replace("T", " ");
+
+  const sql_insert_practice = `INSERT INTO practice (practice_name, practice_detail, practice_score, create_date)
+    VALUES (?, ?, ?, ?)`;
+
+  try {
+    const [insertResult] = await db.query(sql_insert_practice, [
+      practice_name,
+      practice_detail,
+      practice_score,
+      createDate,
+    ]);
+    res.status(200).json({
+      message: "Added practice successfully",
+      practice_id: insertResult.insertId
+    });
+  } catch (err) {
+    console.error("Error adding practice:", err);
+    res.status(500).json({ error: "Query practice failed" });
+  }
+});
+
+// ลบ practice
+// app.delete("/api/practice/:practice_id", async (req, res) => {
+//   const { practice_id } = req.params;
+//   const sql = "DELETE FROM practice WHERE practice_id = ?";
+//   try {
+//     const [result] = await db.query(sql, [practice_id]);
+//     if (result.affectedRows === 0) {
+//       return res.status(404).json({ error: "Practice not found" });
+//     }
+//     res.status(200).json({ message: "Practice deleted successfully" });
+//   } catch (err) {
+//     console.error("Error deleting practice:", err);
+//     return res.status(500).json({ error: "Delete failed" });
+//   }
+// });
+
+app.delete("/api/practice/:practice_id", async (req, res) => {
+  const { practice_id } = req.params;
+  const sql = `
+    DELETE FROM practice 
+    WHERE practice_id = ? 
+      AND practice_id NOT IN (SELECT practice_id FROM classroom_practice)
+  `;
+  try {
+    const [result] = await db.query(sql, [practice_id]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Practice not found or is assigned in classroom_practice" });
+    }
+    res.status(200).json({ message: "Practice deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting practice:", err);
+    res.status(500).json({ error: "Delete practice failed" });
+  }
+});
+
+
+// edit practice
+app.put("/api/practice/:practice_id", async (req, res) => {
+  try {
+    const { practice_id } = req.params;
+    const { practice_name, practice_detail, practice_score } = req.body;
+
+    const updateSql = `
+      UPDATE practice 
+      SET practice_name = ?, practice_detail = ?, practice_score = ? 
+      WHERE practice_id = ?
+    `;
+
+    const [updateResult] = await db.query(updateSql, [practice_name, practice_detail, practice_score, practice_id]);
+
+    if (updateResult.affectedRows === 0) {
+      return res.status(404).json({ error: "Practice not found or failed to update!" });
+    }
+
+    return res.status(200).json({ message: "Practice updated successfully" });
+  } catch (err) {
+    console.error("Error updating practice:", err);
+    return res.status(500).json({ error: "Update practice failed" });
+  }
+});
+
+// API ดึงข้อมูลทั้งหมดในระบบ (classroom-table-data)
+app.get("/api/classroom", async (req, res) => {
+  const sql = "SELECT * FROM classroom";
+  try {
+    const [rows] = await db.query(sql);
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error filtering data (classroom):", err);
+    res.status(500).json({ error: "Query data classroom failed" });
+  }
+});
+
+// API เพิ่มและลบ classroom practice (add-classroom-practice) 
+
+app.post("/api/classroom/practice", async (req, res) => {
+  const { class_id, practice_ids } = req.body;
+  try {
+    for (const pid of practice_ids) {
+      const sql_insert = `INSERT INTO classroom_practice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
+      await db.query(sql_insert, [class_id, pid]);
+    }
+    res.status(200).json({ message: "Insert classroom practices successfully" });
+  } catch (err) {
+    console.error("Error inserting classroom practice:", err);
+    res.status(500).json({ error: "Insert classroom practices failed" });
+  }
+});
+
+app.delete("/api/classroom/practice", async (req, res) => {
+  const { class_id, practice_ids } = req.body;
+  if (!class_id || !practice_ids || !practice_ids.length) {
+    return res.status(400).json({ error: "Missing class_id or practice_ids" });
+  }
+  try {
+    for (const pid of practice_ids) {
+      const sql_delete = "DELETE FROM classroom_practice WHERE class_id = ? AND practice_id = ?";
+      await db.query(sql_delete, [class_id, pid]);
+    }
+    res.status(200).json({ message: "Classroom practices removed successfully" });
+  } catch (err) {
+    console.error("Error removing classroom practices:", err);
+    res.status(500).json({ error: "Remove classroom practices failed" });
+  }
+});
+
+// -------------------------- END จัดการข้อมูล Practice (Admin) -------------------------- //
+
+// เปลี่ยน status practice 
+app.put("/api/practice/update-status", async (req, res) => {
+  const { class_id, practice_id, new_status } = req.body;
+  const sql_toggle = `update classroom_practice set practice_status = ? 
+                      where class_id = ? and practice_id = ?`;
+  try {
+    await db.query(sql_toggle, [new_status, class_id, practice_id]);
     res.status(200).send({ message: "Status updated successfully" });
   } catch (err) {
     console.error("Error updating status:", err);
@@ -322,24 +486,119 @@ app.put("/api/practice/update-status", async (req, res) => {
   }
 });
 
-// ดึงข้อมูล classroom ทั้งหมดของครู
+// -------------------------- Begin จัดการ practice สำหรับอาจารย์ -------------------------- // 
+// ดึงข้อมูล Classroom ของอาจารย์ และจำนวนแบบฝึกหัดในคลาสนั้น ๆ 
 app.get("/api/classroom/:uid", async (req, res) => {
   const { uid } = req.params;
-  const sql_teach = "SELECT class_id FROM teach WHERE uid = ?";
+  const sql = `SELECT c.*, COUNT(cp.practice_id) AS total_practice,
+                SUM(CASE WHEN cp.practice_status = 0 THEN 1 ELSE 0 END) AS deactive_practice,
+                SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
+                FROM classroom c
+                JOIN teach t ON c.class_id = t.class_id
+                LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
+                WHERE t.uid = ?
+                GROUP BY c.class_id`;
   try {
-    const [teachRows] = await db.query(sql_teach, [uid]);
-    if (teachRows.length === 0) {
-      return res.status(404).json({ message: "No classrooms found for this user" });
-    }
-    const classIds = teachRows.map((row) => row.class_id);
-    const sql_classroom = "SELECT * FROM classroom WHERE class_id IN (?)";
-    const [classRows] = await db.query(sql_classroom, [classIds]);
-    res.status(200).json(classRows);
+    const [rows] = await db.query(sql, [uid]);
+    res.status(200).json(rows);
   } catch (err) {
     console.error("Error filtering data (classroom):", err);
-    res.status(500).json({ error: "Query data teach/classroom failed" });
+    res.status(500).json({ error: "Query data classroom failed" });
   }
 });
+
+// ดึงข้อมูล practice ทั้งหมดของ classroom นั้น ๆ
+app.get("/api/classroom/practice/:class_id", async (req, res) => {
+  const { class_id } = req.params;
+  const sql_practice = `SELECT 
+                            p.practice_id, 
+                            p.practice_name, 
+                            p.practice_detail, 
+                            cp.practice_status, 
+                            c.class_id, 
+                            c.class_name, 
+                            c.sec,
+                            COUNT(DISTINCT e.uid) AS enrolled_count,
+                            COUNT(DISTINCT CASE WHEN ps.score IS NOT NULL THEN e.uid END) AS submit_total
+                        FROM classroom_practice cp
+                        JOIN practice p 
+                            ON p.practice_id = cp.practice_id
+                        JOIN classroom c 
+                            ON c.class_id = cp.class_id
+                        LEFT JOIN enrollment e 
+                            ON e.class_id = cp.class_id
+                        LEFT JOIN practice_save ps
+                            ON ps.practice_id = cp.practice_id 
+                            AND ps.uid = e.uid
+                        WHERE cp.class_id = ?
+                        GROUP BY p.practice_id, 
+                                p.practice_name, 
+                                p.practice_detail, 
+                                cp.practice_status, 
+                                c.class_id, 
+                                c.class_name, 
+                                c.sec`;
+  try {
+    const [rows] = await db.query(sql_practice, [class_id]);
+    if (rows.length === 0) {
+      return res.status(200).json([]);
+    }
+    return res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error select practice data :", err);
+    return res.status(500).json({ error: "Select practice failed" });
+  }
+});
+
+// ดึงข้อมูล practice save และ score
+app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
+  const { class_id, practice_id } = req.params;
+  const sql_practice_score = `SELECT 
+                            u.uid,
+                            u.name,
+                            ps.score,
+                            ps.submit_date
+                        FROM classroom_practice cp
+                        JOIN classroom c 
+                            ON cp.class_id = c.class_id
+                        JOIN practice_save ps 
+                            ON cp.practice_id = ps.practice_id
+                        JOIN user u
+                            ON ps.uid = u.uid
+                        WHERE cp.class_id = ?
+                          AND cp.practice_id = ?`;
+  try {
+    const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
+    if (rows.length === 0) {
+      return res.status(200).json([]);
+    }
+    return res.status(200).json(rows);
+  } catch (err) {
+    console.error("Error select practice score :", err);
+    return res.status(500).json({ error: "Select practice failed" });
+  }
+});
+// -------------------------- END จัดการ practice สำหรับอาจารย์ -------------------------- // 
+
+
+// ดึงข้อมูล classroom ทั้งหมดของครู
+// app.get("/api/classroom/:uid", async (req, res) => {
+//   const { uid } = req.params;
+//   const sql_teach = "SELECT class_id FROM teach WHERE uid = ?";
+//   try {
+//     const [teachRows] = await db.query(sql_teach, [uid]);
+//     if (teachRows.length === 0) {
+//       return res.status(404).json({ message: "No classrooms found for this user" });
+//     }
+//     const classIds = teachRows.map((row) => row.class_id);
+//     const sql_classroom = "SELECT * FROM classroom WHERE class_id IN (?)";
+//     const [classRows] = await db.query(sql_classroom, [classIds]);
+//     res.status(200).json(classRows);
+//   } catch (err) {
+//     console.error("Error filtering data (classroom):", err);
+//     res.status(500).json({ error: "Query data teach/classroom failed" });
+//   }
+// });
 
 // เพิ่มข้อมูล classroom
 app.post("/api/classroom", async (req, res) => {
@@ -421,7 +680,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 
     const sql_check_classroom = "SELECT * FROM classroom WHERE class_name = ? AND sec = ? AND semester = ? AND year = ?";
     const [checkAnotherClass] = await db.query(sql_check_classroom, [class_name, sec, semester, year]);
-    if (checkAnotherClass.length > 0){
+    if (checkAnotherClass.length > 0) {
       throw { status: 400, message: "Classroom failed to update!" };
     }
 
@@ -444,7 +703,7 @@ app.put("/api/classroom/:id", async (req, res) => {
 app.get("/api/classroom/student/count/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
-  
+
   try {
     const [rows] = await db.query(sql_enroll, [class_id]);
     return res.status(200).json(rows.length);
@@ -457,7 +716,6 @@ app.get("/api/classroom/student/count/:class_id", async (req, res) => {
 // ดึงข้อมูล student ที่อยู่ใน classroom
 app.get("/api/classroom/student/:class_id", async (req, res) => {
   const { class_id } = req.params;
-  // const sql_enroll = "SELECT uid FROM enrollment WHERE class_id = ?";
   const sql_enroll = `select enrollment.uid, user.name, enrollment.class_id, user.last_active, classroom.sec from enrollment
                       left join classroom on enrollment.class_id = classroom.class_id
                       left join user on enrollment.uid = user.uid
@@ -469,10 +727,6 @@ app.get("/api/classroom/student/:class_id", async (req, res) => {
       // ยังไม่มี student
       return res.status(200).json([]);
     }
-    // const uids = rows.map((r) => r.uid);
-    // const sql_user = "SELECT * FROM user WHERE uid IN (?)";
-    // const [userRows] = await db.query(sql_user, [uids]);
-    // return res.status(200).json(userRows);
     return res.status(200).json(rows);
   } catch (err) {
     console.error("Error select user student:", err);
@@ -545,11 +799,11 @@ app.post("/api/classroom/assistant", async (req, res) => {
   const sql_user = "SELECT uid FROM user WHERE uid = ?";
   try {
     const [rows] = await db.query(sql_user, [uid]);
-    if(rows.length > 0){
+    if (rows.length > 0) {
       const sql_teach_assistant = "INSERT INTO teach (uid, class_id, role) VALUES (?, ?, 2)";
       await db.query(sql_teach_assistant, [uid, class_id]);
       return res.status(200).json({ message: "Add assistant successfully" });
-    }else{
+    } else {
       return res.status(404).json({ message: "User not found" });
     }
   } catch (err) {
@@ -668,7 +922,9 @@ app.post("/api/user/:uid/:name/:role_id/:last_active", async (req, res) => {
 
 // --------------------------- Report (Champ) ---------------------------
 
-//  API: ดึงข้อมูล report
+
+// API: ดึงข้อมูล report
+
 app.get("/api/report", async (req, res) => {
   const { email } = req.query; // รับค่าผ่าน Query Parameters
   if (!email) {
@@ -691,6 +947,7 @@ app.get("/api/report", async (req, res) => {
 //       const sql = "SELECT * FROM report";
 //       const [result] = await db.query(sql); // ใช้ await รอให้ Query เสร็จ
 
+
 //       res.status(200).json(result);
 //   } catch (error) {
 //       console.error("Error fetching admin reports:", error);
@@ -711,7 +968,9 @@ app.post("/api/addreport", async (req, res) => {
   await connection.beginTransaction();
 
   try {
-    //  เพิ่ม Report
+
+    // เพิ่ม Report
+
     const [reportResult] = await connection.execute(
       `INSERT INTO report (report_uid, report_name, report_detail, report_date) 
       VALUES (?, ?, ?, ?)`,
@@ -719,6 +978,7 @@ app.post("/api/addreport", async (req, res) => {
     );
 
     const reportId = reportResult.insertId;
+
 
   // เพิ่ม Notification (แก้ไขค่าที่ผิด)
   const message = `${report_name}`;
@@ -728,24 +988,30 @@ app.post("/api/addreport", async (req, res) => {
     [reportId, "admin", message, "report", 0]  //  "admin" เป็นผู้รับแจ้งเตือน
   );
 
+
     await connection.commit();
     connection.release();
 
     res.status(200).json({
-      message: " เพิ่มรายงานและแจ้งเตือนสำเร็จ",
+
+      message: "เพิ่มรายงานและแจ้งเตือนสำเร็จ",
       report_id: reportId,
     });
 
-     //  แจ้งเตือน WebSocket Clients
-     broadcastData();
+    // แจ้งเตือน WebSocket Clients
+    broadcastData();
+
 
   } catch (error) {
     await connection.rollback();
     connection.release();
-    console.error(" Error:", error);
+
+    console.error("Error:", error);
+
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการเพิ่มข้อมูล" });
   }
 });
+
 
 /**** */
 
@@ -753,16 +1019,18 @@ app.post("/api/addreport", async (req, res) => {
 /************************** ดึงข้อมูล Report ฝั่ง Admin   WebSocket ******************************/
 const wssReact = new WebSocketServer({ port: WS_PORT });
 //  ฟังก์ชันดึงจำนวนแจ้งเตือนใหม่ (is_read = 0)
+
 const fetchUnreadNotifications = async () => {
   try {
     const sql = "SELECT COUNT(*) AS unread_count FROM notifications WHERE is_read = 0";
     const [result] = await db.query(sql);
     return result[0]?.unread_count ?? 0;
   } catch (error) {
-    console.error(" Database error:", error);
+    console.error("Database error:", error);
     return 0;
   }
 };
+
 
 //  ฟังก์ชันดึงรายการแจ้งเตือนทั้งหมด
 const fetchNotifications = async () => {
@@ -778,7 +1046,8 @@ const fetchNotifications = async () => {
   }
 };
 
-//  ฟังก์ชันดึงข้อมูล `Reports`
+// ฟังก์ชันดึงข้อมูล `Reports`
+
 const fetchReports = async () => {
   try {
     // ต้องการ ให้ is_read == 0 แสดงก่อน และเรียงวันที่จากน้อยไปมาก
@@ -786,15 +1055,18 @@ const fetchReports = async () => {
     const [result] = await db.query(sql);
     return result;
   } catch (error) {
-    console.error(" Database error fetching reports:", error);
+    console.error("Database error fetching reports:", error);
+
     return [];
   }
 };
 
-//  ฟังก์ชัน Broadcast ข้อมูลไปยัง WebSocket Clients
+
+// ฟังก์ชัน Broadcast ข้อมูลไปยัง WebSocket Clients
+
 const broadcastData = async () => {
   const unreadCount = await fetchUnreadNotifications();
-  const notifications = await fetchNotifications(); // ✅ ดึงรายการแจ้งเตือนทั้งหมด
+  const notifications = await fetchNotifications(); // ดึงรายการแจ้งเตือนทั้งหมด
   const reports = await fetchReports();
 
   const data = JSON.stringify({
@@ -809,20 +1081,25 @@ const broadcastData = async () => {
     }
   });
 
+
   // console.log(" Broadcast: ", { unread_count: unreadCount, notifications: notifications.length, reports: reports.length });
 };
 
 //  API ดึงจำนวนแจ้งเตือนใหม่
+
 app.get("/api/countnotifications", async (req, res) => {
   try {
     const unreadCount = await fetchUnreadNotifications();
     res.status(200).json({ unread_count: unreadCount });
     broadcastData();
   } catch (error) {
-    console.error("❌ Error fetching notifications count:", error);
+
+    console.error("Error fetching notifications count:", error);
+
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือน" });
   }
 });
+
 
 //  API ดึงรายการแจ้งเตือนทั้งหมด
 app.get("/api/all_notifications", async (req, res) => {
@@ -831,22 +1108,24 @@ app.get("/api/all_notifications", async (req, res) => {
     res.status(200).json(notifications);
     broadcastData();
   } catch (error) {
-    console.error("❌ Error fetching notifications:", error);
+    console.error("Error fetching notifications:", error);
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือน" });
   }
 });
 
 //  API ดึง `Reports` ทั้งหมด
+
 app.get("/api/adminreport", async (req, res) => {
   try {
     const reports = await fetchReports();
     res.status(200).json(reports);
     broadcastData();
   } catch (error) {
-    console.error("❌ Error fetching reports:", error);
+    console.error("Error fetching reports:", error);
     res.status(500).json({ error: "Query data Report failed" });
   }
 });
+
 
 //  WebSocket Connection
 wssReact.on("connection", (ws) => {
@@ -863,7 +1142,7 @@ wssReact.on("connection", (ws) => {
   sendInitialData();
 
   ws.on("close", () => {
-    // console.log("❌ Client disconnected");
+    // console.log("Client disconnected");
   });
 });
 
@@ -878,9 +1157,9 @@ app.put("/api/update-notification", async (req, res) => {
     await db.query(sql, [recipient_uid, report_id]);
     res.status(200).send({ message: "notification updated successfully" });
 
-    //  แจ้งเตือน WebSocket Clients
+    // แจ้งเตือน WebSocket Clients
     broadcastData();
-    
+
   } catch (err) {
     console.error("Error updating notification:", err);
     res.status(500).send("Error updating notification");
@@ -901,7 +1180,7 @@ app.get("/api/get-read-notifications", async (req, res) => {
 
     res.status(200).json(result);
   } catch (error) {
-    console.error("❌ Error fetching read notifications:", error);
+    console.error("Error fetching read notifications:", error);
     res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือนที่อ่านแล้ว" });
   }
 });
@@ -910,16 +1189,14 @@ app.get("/api/get-read-notifications", async (req, res) => {
 
 /************************** END ดึงข้อมูล Report ฝั่ง Admin (ใช้ Promise)   WebSocket ******************************/
 
-
-
 // -----------------------------------------------------------
-
 
 // 9) เริ่มต้น Server
 // // -----------------------------------------------------------
 // app.listen(PORT, () => {
 //   console.log(`Server running on http://localhost:${PORT}`);
 // });
+
 
 server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);

@@ -128,11 +128,24 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus}) {
                                                 {name}
                                             </Typography>
                                         </td>
-                                        <td className={`${rowClassName} text-left`}>
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
+                                                {new Date(last_active).toLocaleString("en-GB", { 
+                                                    day: '2-digit', 
+                                                    month: '2-digit', 
+                                                    year: 'numeric', 
+                                                    hour: '2-digit', 
+                                                    minute: '2-digit', 
+                                                    second: '2-digit', 
+                                                    hour12: false 
+                                                }).replace(',', '')}
+                                            </Typography>
+                                        </td>
+                                        {/* <td className={`${rowClassName} text-left`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
                                                 {last_active}
                                             </Typography>
-                                        </td>
+                                        </td> */}
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button

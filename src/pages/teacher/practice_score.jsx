@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 import SearchSection from "./functionTables/SearchSection";
-import PracticeTable from "./functionTables/PracticeTable";
-import { practiceTableData } from "@/data/practice-table-data";
-import { useNavigate } from "react-router-dom";
+import ClassroomPracticeScore from "./functionTables/ClassroomPracticeScore";
+import { ClassroomScore } from "@/data/classroom-practice-score";
 
 
-export function PracticeMgn() {
+
+export function PracticeScore() {
   const navigate = useNavigate();
+  const {class_id, practice_id} = useParams();
+
   useEffect(() => {
     try {
       const role = sessionStorage.getItem("role");
@@ -20,12 +23,14 @@ export function PracticeMgn() {
       navigate("/auth/sign-in");
     }
   }, [navigate]);
-  const [search, setSearch] = useState(""); // คำค้นหา
-  const [practice, setPractice] = useState([]);
+
+  const [search, setSearch] = useState("");
+  const [practices, setPractice] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
+
   const getPractice = async () => {
-    const data = await practiceTableData();
+    const data = await ClassroomScore(class_id, practice_id);
     setPractice(data);
   };
 
@@ -39,29 +44,24 @@ export function PracticeMgn() {
     getPractice();
   }, [refresh]);
 
-  // ฟังก์ชันกรองข้อมูล Practice Table
-  const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
-    [practice_name, practice_detail].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
-      // console.log(field)
-    ) 
+  // search 
+  const filteredPractice = practices.filter(({ uid , name }) =>
+    [ uid , name ].some((field) =>
+      String(field).toLowerCase().includes(search.toLowerCase())
+    )
   );
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-      {/* Section การค้นหา */}
+      
       <SearchSection
         search={search}
         setSearch={setSearch}
-        toggleAddModal={() => setIsAddPracticeOpen(true)}
+        toggleAddModal={() => setIsAddStudentOpen(true)}
       />
 
-      <PracticeTable
-        practice={filteredPractice}
-        onEditClick={(practice) => {
-          setEditingPractice(practice);
-          setIsEditPracticeOpen(true);
-        }}
+      <ClassroomPracticeScore
+        practices={filteredPractice}
         checkStatus={handleRefresh}
       />
 
@@ -69,4 +69,4 @@ export function PracticeMgn() {
   );
 }
 
-export default PracticeMgn;
+export default PracticeScore;

@@ -16,6 +16,7 @@ import { updateNotificationAPI } from "@/data/updateNotification";
 import { fetchReadNotifications } from "@/data/fetchReadNoti";
 
 export function Notifications() {
+
   const [reports, setReports] = useState([]); //  เก็บข้อมูล Reports
   const [updatedReports, setUpdatedReports] = useState([]); //  รายการที่อ่านแล้ว
   const [selectedReport, setSelectedReport] = useState(null); //  รายการที่ถูกเลือก
@@ -29,17 +30,21 @@ export function Notifications() {
       const response = await axios.get("http://localhost:5000/api/adminreport");
       setReports(response.data);
     } catch (error) {
+
       console.error(" Error fetching reports:", error);
     }
   };
 
   /**  เริ่มต้น WebSocket และ API Polling สำรอง */
+
   useEffect(() => {
     const connectWebSocket = () => {
       const ws = new WebSocket("ws://localhost:5050");
 
       ws.onopen = () => {
+
         // console.log(" WebSocket Connected to 5050");
+
         if (pollingInterval) {
           clearInterval(pollingInterval);
           pollingInterval = null;
@@ -57,11 +62,13 @@ export function Notifications() {
           }
         } catch (error) {
           console.error(" Error parsing WebSocket message:", error);
+
         }
       };
 
       ws.onclose = () => {
         console.warn(" WebSocket Disconnected, switching to API polling...");
+
         if (!pollingInterval) {
           pollingInterval = setInterval(fetchReports, 10000);
         }
@@ -97,12 +104,15 @@ export function Notifications() {
     loadReadNotifications();
   }, []);
 
+
 /**  ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
+
 const filteredReports = reports.filter((report) => {
   const reportDate = new Date(report.report_date).toLocaleDateString("en-GB"); // แปลงวันที่เป็น DD/MM/YYYY
   const lowerSearchTerm = searchTerm.toLowerCase(); // แปลงเป็นตัวพิมพ์เล็กเพื่อให้ค้นหาแบบ case-insensitive
 
   return (
+
     report.report_name.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากชื่อ
     report.report_uid.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากผู้ใช้
     reportDate.includes(lowerSearchTerm) //  ค้นหาจากวันที่
@@ -113,6 +123,7 @@ const filteredReports = reports.filter((report) => {
 
 
   /**  กดปุ่ม `VIEW` → เปิด Modal + อัปเดต `is_read` */
+
   const handleReadReport = async (report) => {
     setSelectedReport(report);
     setDialogOpen(true);
@@ -121,16 +132,19 @@ const filteredReports = reports.filter((report) => {
       const response = await updateNotificationAPI(sessionStorage.getItem("email"), report.report_id);
       // console.log(" API Response:", response);
 
+
       setUpdatedReports((prev) => [...prev, report.report_id]);
       fetchReports();
     } catch (error) {
-      console.error(" Error updating notification:", error);
+
+      console.error("Error updating notification:", error);
     }
   };
 
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
-     {/*  เพิ่มช่องค้นหา */}
+
+     {/* เพิ่มช่องค้นหา */}
      <SearchAdmin searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
      
       <Card>
@@ -214,7 +228,8 @@ const filteredReports = reports.filter((report) => {
         </CardBody>
       </Card>
 
-      {/*  Modal รายละเอียด */}
+
+      {/* Modal รายละเอียด */}
       <Dialog open={dialogOpen} handler={() => setDialogOpen(false)}>
         <DialogHeader>Detail</DialogHeader>
         <DialogBody>{selectedReport?.report_detail}</DialogBody>
