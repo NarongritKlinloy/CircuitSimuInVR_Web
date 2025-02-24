@@ -27,9 +27,9 @@ const WS_PORT = 5050;
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
+  password: "root",
   // password: "123456789",
-  database: "project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -582,23 +582,23 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
 
 
 // ดึงข้อมูล classroom ทั้งหมดของครู
-// app.get("/api/classroom/:uid", async (req, res) => {
-//   const { uid } = req.params;
-//   const sql_teach = "SELECT class_id FROM teach WHERE uid = ?";
-//   try {
-//     const [teachRows] = await db.query(sql_teach, [uid]);
-//     if (teachRows.length === 0) {
-//       return res.status(404).json({ message: "No classrooms found for this user" });
-//     }
-//     const classIds = teachRows.map((row) => row.class_id);
-//     const sql_classroom = "SELECT * FROM classroom WHERE class_id IN (?)";
-//     const [classRows] = await db.query(sql_classroom, [classIds]);
-//     res.status(200).json(classRows);
-//   } catch (err) {
-//     console.error("Error filtering data (classroom):", err);
-//     res.status(500).json({ error: "Query data teach/classroom failed" });
-//   }
-// });
+app.get("/api/classroom/teach/:uid", async (req, res) => {
+  const { uid } = req.params;
+  const sql_teach = "SELECT class_id FROM teach WHERE uid = ?";
+  try {
+    const [teachRows] = await db.query(sql_teach, [uid]);
+    if (teachRows.length === 0) {
+      return res.status(404).json({ message: "No classrooms found for this user" });
+    }
+    const classIds = teachRows.map((row) => row.class_id);
+    const sql_classroom = "SELECT classroom.*, teach.role FROM classroom JOIN teach ON classroom.class_id = teach.class_id WHERE classroom.class_id IN (?) AND teach.uid = ?";
+    const [classRows] = await db.query(sql_classroom, [classIds, uid]);
+    res.status(200).json(classRows);
+  } catch (err) {
+    console.error("Error filtering data (classroom):", err);
+    res.status(500).json({ error: "Query data teach/classroom failed" });
+  }
+});
 
 // เพิ่มข้อมูล classroom
 app.post("/api/classroom", async (req, res) => {
@@ -736,7 +736,7 @@ app.get("/api/classroom/student/:class_id", async (req, res) => {
 
 // เพิ่ม student เข้า classroom
 app.post("/api/classroom/student", async (req, res) => {
-  const { uid, class_id } = req.body;
+  const { uid, class_id, data } = req.body;
   if (!uid || !class_id) {
     return res.status(400).json({ error: "Missing parameter" });
   }
@@ -771,6 +771,54 @@ app.post("/api/classroom/student", async (req, res) => {
   } catch (err) {
     console.error("Error insert student:", err);
     return res.status(500).json({ error: "Insert student failed" });
+  }
+});
+
+// เพิ่ม student เข้า classroom แบบข้อมูล Excel
+app.post("/api/classroom/student/multidata", async (req, res) => {
+  const {uid, class_id} = req.body.data;
+  const data = req.body.data.data;
+  const user_failed = [];
+  if(data.length === 0){
+    return res.status(404).json({ error: "No data user" });
+  }
+  try {
+    const sql_check_user = "SELECT * FROM user WHERE uid = ?";
+    const sql_insert_user = "INSERT INTO user (uid, name, role_id, last_active) VALUES(?, ?, 3, ?)";
+    const sql_enroll_select = "SELECT * FROM enrollment WHERE uid = ?";
+    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
+
+    const now = new Date();
+    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    const last_active = now.toISOString().slice(0, 19).replace("T", " ");
+
+    const promises = data.map(async students => {
+      const uid = String(students?.id || "");
+      const name = students.name;
+      let processedUid = uid.endsWith("@kmitl.ac.th") ? uid : `${uid}@kmitl.ac.th`;
+      const [checkStudent] = await db.query(sql_check_user, [processedUid]);
+      // ตรวจสอบ user
+      if(checkStudent.length === 0){
+        await db.query(sql_insert_user, [processedUid, name, last_active])
+      }
+      else if(checkStudent[0].role_id !== 3){
+        user_failed.push({uid : uid, name : name});
+      }else{
+        // ตรวจสอบ enrollment
+        const [enrollRows] = await db.query(sql_enroll_select, [processedUid]);
+        if(enrollRows.length === 0){
+          await db.query(sql_enroll, [processedUid, class_id, last_active]);
+        }else{
+          user_failed.push({uid : uid, name : name});
+        }
+      }
+    });
+    await Promise.all(promises);
+    return res.status(200).json(user_failed);
+
+  } catch (err) {
+    console.error("Error insert student:", err);
+    return res.status(500).json({ message: "Insert student failed" });
   }
 });
 
