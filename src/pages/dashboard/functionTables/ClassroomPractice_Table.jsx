@@ -17,7 +17,7 @@ import ClassroomPracticeAssign from "@/data/classroom-practice-assign";
 import { addClassroomPractice } from "@/data/add-classroom-practice";
 import { removeClassroomPractice } from "@/data/remove-classroom-practice";
 
-function ClassroomPracticeTable({ classroom, checkStatus }) {
+function ClassroomPracticeTableAdmin({ classroom, checkStatus }) {
   const [selectedClassroom, setSelectedClassroom] = useState(null);
 
   // State สำหรับ modal แยกกัน
@@ -433,4 +433,4 @@ function ClassroomPracticeTable({ classroom, checkStatus }) {
   );
 }
 
-export default ClassroomPracticeTable;
+export default ClassroomPracticeTableAdmin;

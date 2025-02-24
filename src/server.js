@@ -473,7 +473,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
 // -------------------------- END จัดการข้อมูล Practice (Admin) -------------------------- //
 
 // เปลี่ยน status practice 
-app.put("/api/practice/update-status", async (req, res) => {
+app.put("/api/update-status-practice", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
   const sql_toggle = `update classroom_practice set practice_status = ? 
                       where class_id = ? and practice_id = ?`;
@@ -980,13 +980,13 @@ app.post("/api/addreport", async (req, res) => {
     const reportId = reportResult.insertId;
 
 
-  // เพิ่ม Notification (แก้ไขค่าที่ผิด)
-  const message = `${report_name}`;
-  await connection.execute(
-    `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
-    VALUES (?, ?, ?, ?, ?)`, 
-    [reportId, "admin", message, "report", 0]  //  "admin" เป็นผู้รับแจ้งเตือน
-  );
+    // เพิ่ม Notification (แก้ไขค่าที่ผิด)
+    const message = `${report_name}`;
+    await connection.execute(
+      `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
+    VALUES (?, ?, ?, ?, ?)`,
+      [reportId, "admin", message, "report", 0]  //  "admin" เป็นผู้รับแจ้งเตือน
+    );
 
 
     await connection.commit();
@@ -1051,7 +1051,9 @@ const fetchNotifications = async () => {
 const fetchReports = async () => {
   try {
     // ต้องการ ให้ is_read == 0 แสดงก่อน และเรียงวันที่จากน้อยไปมาก
-    const sql = "SELECT * FROM report AS re JOIN notifications AS noti ON re.report_id = noti.report_id ORDER BY noti.is_read ASC, noti.created_at DESC;";
+    const sql = `SELECT * FROM report AS re 
+                JOIN notifications AS noti ON re.report_id = noti.report_id 
+                ORDER BY noti.is_read ASC, noti.created_at DESC`;
     const [result] = await db.query(sql);
     return result;
   } catch (error) {
