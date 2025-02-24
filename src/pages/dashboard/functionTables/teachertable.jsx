@@ -100,9 +100,9 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["Name", "Email", "Status", "Last Active", "", ""].map((header) => (
+                                {["Name", "Email", "Status", "Last Active", "Edit", "Delete"].map((header, index) => (
                                     <th
-                                        key={header}
+                                        key={index}
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${
                                             header === "Name" ? "text-left" : "text-center"
                                         }`}
@@ -130,12 +130,12 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                     <tr key={teachers.uid}> {/* ใช้ uid เป็น key */}
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
-                                                <Avatar
+                                                {/* <Avatar
                                                     src={teachers.img || "https://via.placeholder.com/150"} // ใช้รูปเริ่มต้นหากไม่มีรูป
                                                     alt={teachers.name}
                                                     size="sm"
                                                     variant="rounded"
-                                                />
+                                                /> */}
                                                 <Typography
                                                     variant="small"
                                                     color="blue-gray"
@@ -146,7 +146,7 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                             </div>
                                         </td>
 
-                                        <td className={`${rowClassName} text-center`}>
+                                        <td className={`${rowClassName} text-left`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {teachers.uid}
                                             </Typography>
@@ -163,7 +163,15 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
 
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                {teachers.last_active}
+                                                {new Date(teachers.last_active).toLocaleString("en-GB", {
+                                                    year: "numeric",
+                                                    month: "2-digit",
+                                                    day: "2-digit",
+                                                    hour: "2-digit",
+                                                    minute: "2-digit",
+                                                    second: "2-digit",
+                                                    hour12: false,
+                                                }).replace(",", "")}
                                             </Typography>
                                         </td>
 

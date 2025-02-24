@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import SearchAndAddSection from "./functionTables/SearchAndAdd";
 import ClassroomTable from "./functionTables/ClassroomTable";
 import ClassroomModal from "./functionTables/classroommodal";
-import { classroomTableData } from "@/data/classroom-table-data";
+import { ClassroomData, ClassroomDataTeacher } from "@/data/classroom-list-teacher";
 import { addClassroomAPI } from "@/data/add-classroom";
 import { useNavigate } from "react-router-dom";
 
@@ -28,7 +28,7 @@ export function ClassroomMgn() {
   const [refresh, setRefresh] = useState(false);
   
   const getClassroom = async () => {
-    const data = await classroomTableData(sessionStorage.getItem("email"));
+    const data = await ClassroomDataTeacher(sessionStorage.getItem("email"));
     setClassroom(data);
   };
 

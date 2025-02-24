@@ -18,7 +18,7 @@ const NotificationBellAdmin = ({ isOpen, toggleMenu }) => {
       const response = await axios.get("http://localhost:5000/api/all_notifications");
       setNotifications(response.data);
     } catch (error) {
-      console.error("❌ Error fetching notifications:", error);
+      console.error("Error fetching notifications:", error);
     }
   };
 

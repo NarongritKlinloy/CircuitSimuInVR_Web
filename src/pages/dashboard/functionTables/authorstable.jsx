@@ -86,7 +86,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["Name", "Email", "Status", "Last Active", "", ""].map((header, index) => (
+                                {["Name", "Email", "Status", "Last Active", "Edit", "Delete"].map((header, index) => (
                                     <th
                                         key={index} // ใช้ index เป็น key
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${
@@ -115,12 +115,12 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                                     <tr key={user.uid}> {/* ใช้ uid เป็น key */}
                                         <td className={`${rowClassName} text-left`}>
                                             <div className="flex items-center gap-4">
-                                                <Avatar
+                                                {/* <Avatar
                                                     src={user.img || "https://via.placeholder.com/150"} // ใช้รูปเริ่มต้นหากไม่มีรูป
                                                     alt={user.name}
                                                     size="sm"
                                                     variant="rounded"
-                                                />
+                                                /> */}
                                                 <Typography
                                                     variant="small"
                                                     color="blue-gray"
@@ -148,7 +148,15 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
 
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
-                                                {user.last_active}
+                                            {new Date(user.last_active).toLocaleString("en-GB", {
+                                                year: "numeric",
+                                                month: "2-digit",
+                                                day: "2-digit",
+                                                hour: "2-digit",
+                                                minute: "2-digit",
+                                                second: "2-digit",
+                                                hour12: false,
+                                            }).replace(",", "")}
                                             </Typography>
                                         </td>
 

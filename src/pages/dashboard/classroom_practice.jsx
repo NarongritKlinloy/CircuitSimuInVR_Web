@@ -3,7 +3,7 @@ import SearchSection from "./functionTables/SearchSection";
 import { useNavigate } from "react-router-dom";
 
 import ClassroomPracticeModal from "./functionTables/ClassroomPractice_Modal";
-import ClassroomPracticeTable from "./functionTables/ClassroomPractice_Table";
+import ClassroomPracticeTableAdmin from "./functionTables/ClassroomPractice_Table";
 import { classroomTableData } from "@/data/classroom-table-data";
 
 
@@ -72,7 +72,7 @@ export function ClassroomPractice() {
         setSearch={setSearch}
       />
 
-      <ClassroomPracticeTable
+      <ClassroomPracticeTableAdmin
         classroom={filteredClassroom}
         checkStatus={handleRefresh}
       />

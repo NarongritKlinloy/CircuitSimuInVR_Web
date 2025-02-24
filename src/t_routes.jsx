@@ -6,8 +6,7 @@ import {
   UserGroupIcon
 } from "@heroicons/react/24/solid";
 import { HomeTeacher, 
-  StudentMgn, 
-  PracticeMgn, 
+  StudentMgn,
   ClassroomMgn, 
   TeacherReports, 
   TAManagement, 

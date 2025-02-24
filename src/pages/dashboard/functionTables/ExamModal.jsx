@@ -48,7 +48,7 @@ function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave 
   return (
   <>
     <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{btnStatus} Classroom</DialogHeader>
+      <DialogHeader>{btnStatus} Practice</DialogHeader>
       <DialogBody>
         <div className="flex flex-col gap-4">
           <div>

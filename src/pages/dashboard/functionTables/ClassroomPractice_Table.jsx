@@ -17,7 +17,7 @@ import ClassroomPracticeAssign from "@/data/classroom-practice-assign";
 import { addClassroomPractice } from "@/data/add-classroom-practice";
 import { removeClassroomPractice } from "@/data/remove-classroom-practice";
 
-function ClassroomPracticeTable({ classroom, checkStatus }) {
+function ClassroomPracticeTableAdmin({ classroom, checkStatus }) {
   const [selectedClassroom, setSelectedClassroom] = useState(null);
 
   // State สำหรับ modal แยกกัน
@@ -191,7 +191,7 @@ function ClassroomPracticeTable({ classroom, checkStatus }) {
 
       {/* Edit Modal */}
       <Dialog open={isEditOpen} handler={closeModal}>
-        <DialogHeader>Edit Classroom Practice (Add)</DialogHeader>
+        <DialogHeader>Add Classroom Practice</DialogHeader>
         <DialogBody className="p-6">
           {/* แสดงข้อมูล classroom ที่เลือก */}
           <div className="mb-4 p-4 bg-gray-50 rounded-lg">
@@ -433,4 +433,4 @@ function ClassroomPracticeTable({ classroom, checkStatus }) {
   );
 }
 
-export default ClassroomPracticeTable;
+export default ClassroomPracticeTableAdmin;
