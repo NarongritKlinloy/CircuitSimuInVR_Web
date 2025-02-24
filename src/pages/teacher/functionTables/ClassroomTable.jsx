@@ -236,7 +236,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                                     </Link>
                                                 </td>
                                             )}
-                                            {/* Edit Classroom Button */}
+                                            {/* Edit Classroom Button  */}
                                             {String(role) === "1" && (
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
@@ -271,6 +271,43 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                                 </button>
                                             </td>
                                             )}
+
+
+                                            {/* Teacher Assistant */}                                           
+                                            {/* Add TA Button */}
+                                            {String(role) === "2" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <Link
+                                                        to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                                                        className="text-gray-400 cursor-not-allowed"
+                                                    >
+                                                        <UsersIcon className="h-5 w-5 mx-auto" />
+                                                    </Link>
+                                                </td>
+                                            )}
+
+                                            {String(role) === "2" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <button
+                                                        className="text-gray-400 cursor-not-allowed"
+                                                        disabled
+                                                    >
+                                                        <PencilSquareIcon className="h-5 w-5" />
+                                                    </button>
+                                                </td>
+                                            )}
+                                            {/* Delete Classroom Button */}
+                                            {String(role) === "2" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <button
+                                                        className="text-gray-400 cursor-not-allowed"
+                                                        disabled
+                                                    >
+                                                        <TrashIcon className="h-5 w-5" />
+                                                    </button>
+                                                </td>
+                                            )}
+
                                         </tr>
                                     );
                                 }
