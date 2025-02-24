@@ -4,9 +4,8 @@ import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
 import StudentTable from "./functionTables/StudentTable";
 import StudentModal from "./functionTables/StudentModal";
 import { studentTableData } from "@/data/student-table-data";
-import { addStudentAPI } from "@/data/add-student-classroom";
+import { addStudentAPI, addMultiStudentAPI } from "@/data/add-student-classroom";
 import { useNavigate } from "react-router-dom";
-
 
 export function StudentMgn() {
   const navigate = useNavigate();
@@ -50,6 +49,7 @@ export function StudentMgn() {
   const [newStudent, setNewStudent] = useState({
     uid: "",
     class_id: sessionStorage.getItem("class_id"),
+    data: [],
   });
 
   // seach 
@@ -62,9 +62,12 @@ export function StudentMgn() {
   // add
   const handleAddStudent = () => {
     //console.log(newStudent);
-    addStudentAPI(newStudent);
-    // setStudent([...students, newStudent]);
-    setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id")});
+    if(newStudent.data.length > 0){
+      addMultiStudentAPI(newStudent);
+    }else{
+      addStudentAPI(newStudent);
+    }
+    setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id"), data: []});
     setIsAddStudentOpen(false);
     handleRefresh();
   };

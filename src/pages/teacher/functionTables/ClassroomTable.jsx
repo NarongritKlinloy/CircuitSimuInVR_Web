@@ -163,7 +163,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                         </thead>
                         <tbody>
                             {classrooms.map(
-                                ({ class_id, class_name, sec, semester, year }, key) => {
+                                ({ class_id, class_name, sec, semester, year , role}, key) => {
                                     const isLast = key === classrooms.length - 1;
                                     const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"
                                         }`;
@@ -223,19 +223,21 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                             </td>
 
                                             {/* Add TA Button */}
-                                            <td className={`${rowClassName} text-center`}>
-                                                <Link
-                                                    to={`/teacher/TA_mgn/${class_name} (${sec})`}
-                                                    onClick={() => {
-                                                        sessionStorage.setItem("class_id", class_id);
-                                                    }}
-                                                    className="text-blue-500 hover:text-blue-700"
-                                                >
-                                                    <UsersIcon className="h-5 w-5 mx-auto" />
-                                                </Link>
-                                            </td>
-
+                                            {String(role) === "1" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <Link
+                                                        to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                                                        onClick={() => {
+                                                            sessionStorage.setItem("class_id", class_id);
+                                                        }}
+                                                        className="text-blue-500 hover:text-blue-700"
+                                                    >
+                                                        <UsersIcon className="h-5 w-5 mx-auto" />
+                                                    </Link>
+                                                </td>
+                                            )}
                                             {/* Edit Classroom Button */}
+                                            {String(role) === "1" && (
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
                                                     onClick={() =>
@@ -252,8 +254,9 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                                     <PencilSquareIcon className="h-5 w-5" />
                                                 </button>
                                             </td>
-
+                                            )}
                                             {/* Delete Classroom Button */}
+                                            {String(role) === "1" && (
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
                                                     onClick={() =>
@@ -267,6 +270,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                                     <TrashIcon className="h-5 w-5" />
                                                 </button>
                                             </td>
+                                            )}
                                         </tr>
                                     );
                                 }
@@ -330,33 +334,6 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                     </Button>
                 </DialogFooter>
             </Dialog>
-
-            {/* Add TA Modal */}
-            {/* <Dialog open={isAddTAOpen} handler={closeAddTAModal}>
-                <DialogHeader>Add Teacher Assistant</DialogHeader>
-                <DialogBody>
-                    <Typography className="mb-4">
-                        class : {selectedClassroom?.class_name}
-                    </Typography>
-                    <div className="flex flex-col gap-4">
-                        <div>
-                            <Input
-                                label="Email"
-                                name="uid"
-                                onChange={inputHandle}
-                            />
-                        </div>
-                    </div>
-                </DialogBody>
-                <DialogFooter>
-                    <Button variant="text" color="red" onClick={closeAddTAModal}>
-                        Cancel
-                    </Button>
-                    <Button variant="gradient" color="green" onClick={handleAddTA}>
-                        Add
-                    </Button>
-                </DialogFooter>
-            </Dialog> */}
         </div>
     );
 }
