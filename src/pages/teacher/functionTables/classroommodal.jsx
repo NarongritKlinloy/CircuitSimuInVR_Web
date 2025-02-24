@@ -77,8 +77,8 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
             )}
           </div>
         
-          <div className="flex gap-4">
-            <div className="w-1/3">
+          <div className="flex flex-col sm:flex-row gap-4">
+              <div className="sm:w-1/3">
               <Input
                 label="sec"
                 value={classroomData.sec || ""}
@@ -94,7 +94,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
               )}
             </div>
 
-            <div className="w-1/3">
+            <div className="sm:w-1/3">
               <Input
                 label="semester"
                 value={classroomData.semester || ""}
@@ -110,7 +110,7 @@ function ClassroomModal({ isOpen, toggleModal, classroomData, setClassroomData, 
               )}
             </div>
 
-            <div className="w-1/3">
+            <div className="sm:w-1/3">
               <Input
                 label="year"
                 value={classroomData.year || ""}

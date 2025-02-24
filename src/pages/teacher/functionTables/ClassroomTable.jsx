@@ -335,8 +335,8 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                             />
                         </div>
 
-                        <div className="flex gap-4">
-                            <div className="w-1/3">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="sm:w-1/3">
                                 <Input
                                     label="sec"
                                     name="sec"
@@ -344,7 +344,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                     onChange={inputHandle}
                                 />
                             </div>
-                            <div className="w-1/3">
+                            <div className="sm:w-1/3">
                                 <Input
                                     label="semester"
                                     name="semester"
@@ -352,7 +352,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                     onChange={inputHandle}
                                 />
                             </div>
-                            <div className="w-1/3">
+                            <div className="sm:w-1/3">
                                 <Input
                                     label="year"
                                     name="year"
