@@ -279,6 +279,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
                                                 <td className={`${rowClassName} text-center`}>
                                                     <Link
                                                         to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                                                        onClick={(e) => e.preventDefault()}
                                                         className="text-gray-400 cursor-not-allowed"
                                                     >
                                                         <UsersIcon className="h-5 w-5 mx-auto" />
