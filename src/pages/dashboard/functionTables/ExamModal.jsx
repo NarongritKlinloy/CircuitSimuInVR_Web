@@ -1,15 +1,16 @@
-import React, { useState , useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Dialog,
   DialogHeader,
   DialogBody,
   DialogFooter,
   Input,
+  Textarea,
   Button,
   Typography,
 } from "@material-tailwind/react";
 
-function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave , btnStatus}) {
+function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave, btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
 
   if (!practiceData) return null;
@@ -44,32 +45,51 @@ function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave 
       resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
     }
   };
-  
+
   return (
-  <>
-    <Dialog open={isOpen} handler={handleClose}>
-      <DialogHeader>{btnStatus} Practice</DialogHeader>
-      <DialogBody>
-        <div className="flex flex-col gap-4">
-          <div>
-            <Input
-              label="Name"
-              value={practiceData.practice_name || ""}
-              onChange={(e) =>
-                setPracticeData({ ...practiceData, practice_name: e.target.value })
-              }
-              error={!!errors.practice_name}
-            />
-            {errors.classname && (
-              <Typography variant="small" color="red" className="mt-1">
-                {errors.practice_name}
-              </Typography>
-            )}
-          </div>
-        
-          <div className="flex gap-4">
-            <div className="w-1/2">
-              <Input
+    <>
+      <Dialog open={isOpen} handler={handleClose}>
+        <DialogHeader>{btnStatus} Practice</DialogHeader>
+        <DialogBody>
+          <div className="flex flex-col gap-4">
+            {/* <div className="flex gap-4"> */}
+            {/* <div className="w-1/2"> */}
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="sm:w-1/2">
+                <Input
+                  label="Name"
+                  value={practiceData.practice_name || ""}
+                  onChange={(e) =>
+                    setPracticeData({ ...practiceData, practice_name: e.target.value })
+                  }
+                  error={!!errors.practice_name}
+                />
+                {errors.classname && (
+                  <Typography variant="small" color="red" className="mt-1">
+                    {errors.practice_name}
+                  </Typography>
+                )}
+              </div>
+              <div className="sm:w-1/2">
+                <Input
+                  label="score"
+                  value={practiceData.practice_score || ""}
+                  maxLength={2}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/\D/g, "");
+                    setPracticeData({ ...practiceData, practice_score: value });
+                  }}
+                  error={!!errors.practice_score}
+                />
+                {errors.practice_score && (
+                  <Typography variant="small" color="red" className="mt-1">
+                    {errors.practice_score}
+                  </Typography>
+                )}
+              </div>
+            </div>
+            <div>
+              <Textarea
                 label="detail"
                 value={practiceData.practice_detail || ""}
                 onChange={(e) =>
@@ -83,38 +103,18 @@ function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave 
                 </Typography>
               )}
             </div>
-
-            <div className="w-1/2">
-            <Input
-              label="score"
-              value={practiceData.practice_score || ""}
-              maxLength={2}
-              onChange={(e) => {
-                const value = e.target.value.replace(/\D/g, "");
-                setPracticeData({ ...practiceData, practice_score: value });
-              }}
-              error={!!errors.practice_score}
-            />
-            {errors.practice_score && (
-              <Typography variant="small" color="red" className="mt-1">
-                {errors.practice_score}
-              </Typography>
-            )}
           </div>
-
-          </div>
-        </div>
-      </DialogBody>
-      <DialogFooter>
-        <Button variant="text" color="red" onClick={handleClose}>
-          Cancel
-        </Button>
-        <Button variant="gradient" color="green" onClick={handleSave}>
-          {btnStatus}
-        </Button>
-      </DialogFooter>
-    </Dialog>
-  </>
+        </DialogBody>
+        <DialogFooter>
+          <Button variant="text" color="red" onClick={handleClose}>
+            Cancel
+          </Button>
+          <Button variant="gradient" color="green" onClick={handleSave}>
+            {btnStatus}
+          </Button>
+        </DialogFooter>
+      </Dialog>
+    </>
   );
 }
 

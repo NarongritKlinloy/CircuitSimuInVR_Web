@@ -202,25 +202,16 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
             Update practice information
           </Typography>
           <div className="flex flex-col gap-4">
-            <div>
-              <Input
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="sm:w-1/2">
+                <Input
                 label="Name"
                 name="practice_name"
                 value={selectedPractice?.practice_name || ""}
                 onChange={inputHandle}
               />
-            </div>
-
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <Input
-                  label="detail"
-                  name="practice_detail"
-                  value={selectedPractice?.practice_detail || ""}
-                  onChange={inputHandle}
-                />
               </div>
-              <div className="w-1/2">
+              <div className="sm:w-1/2">
                 <Input
                   label="score"
                   name="practice_score"
@@ -229,6 +220,14 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
                   onChange={inputHandle}
                 />
               </div>
+            </div>
+            <div>
+                <Textarea
+                  label="detail"
+                  name="practice_detail"
+                  value={selectedPractice?.practice_detail || ""}
+                  onChange={inputHandle}
+                />              
             </div>
           </div>
         </DialogBody>
