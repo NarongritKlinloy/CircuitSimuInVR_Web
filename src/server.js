@@ -29,7 +29,7 @@ const db = mysql.createPool({
   user: "root",
   password: "Dream241244",
   // password: "123456789",
-  database: "project_circuit_test",
+  database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -513,7 +513,7 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
                         LEFT JOIN practice_save ps
-                            ON ps.class_practice_id = cp.class_practice_id
+                            ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
                         GROUP BY p.practice_id, 
@@ -539,38 +539,21 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
   const { class_id, practice_id } = req.params;
   const sql_practice_score = `SELECT 
-                              u.uid,
-                              u.name,
-                              e.class_id,
-                              ps.score,
-                              ps.submit_date
-                              FROM classroom_practice cp
-                              JOIN classroom c 
-                              ON cp.class_id = c.class_id
-                              JOIN enrollment e 
-                              ON cp.class_id = e.class_id
-                              JOIN practice_save ps 
-                              ON ps.class_practice_id = cp.class_practice_id
-                              AND ps.uid = e.uid
-                              JOIN user u
-                              ON ps.uid = u.uid
-                              JOIN (
-                              SELECT e.uid, e.class_id, cp.practice_id, MAX(ps.score) AS max_score
-                              FROM enrollment e
-                              JOIN classroom_practice cp 
-                                  ON e.class_id = cp.class_id
-                              JOIN practice_save ps 
-                                  ON ps.class_practice_id = cp.class_practice_id
-                                  AND ps.uid = e.uid
-                              GROUP BY e.uid, e.class_id, cp.practice_id
-                              ) max_scores
-                              ON ps.uid = max_scores.uid 
-                              AND e.class_id = max_scores.class_id
-                              AND cp.practice_id = max_scores.practice_id 
-                              AND ps.score = max_scores.max_score
-                              WHERE cp.class_id = ?
-                              AND cp.practice_id = ?
-                              `;
+    u.uid,
+    u.name,
+    MAX(ps.score) AS max_score,
+    ps.submit_date
+FROM classroom_practice cp
+JOIN classroom c 
+    ON cp.class_id = c.class_id
+JOIN practice_save ps 
+    ON cp.practice_id = ps.practice_id
+JOIN user u
+    ON ps.uid = u.uid
+WHERE cp.class_id = ?
+  AND cp.practice_id = ?
+GROUP BY u.uid, u.name, ps.submit_date;
+`;
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
