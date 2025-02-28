@@ -27,9 +27,9 @@ const WS_PORT = 5050;
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
+  password: "root",
   // password: "123456789",
-  database: "project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
