@@ -27,9 +27,9 @@ const WS_PORT = 5050;
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
+  password: "root",
   // password: "123456789",
-  database: "project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -630,18 +630,15 @@ app.delete("/api/classroom/:class_id", async (req, res) => {
   const sql_enroll = "DELETE FROM enrollment WHERE class_id = ?";
 
   try {
-    const [delEnroll] = await db.query(sql_enroll, [class_id]);
-    // if (delEnroll.affectedRows === 0) {
-    //   return res.status(404).json({ error: "Enrollment not found" });
-    // }
-    const [delTeach] = await db.query(sql_teach, [class_id]);
-    if (delTeach.affectedRows === 0) {
-      return res.status(404).json({ error: "Teach not found" });
-    }
     const [delClass] = await db.query(sql_classroom, [class_id]);
     if (delClass.affectedRows === 0) {
       return res.status(404).json({ error: "Classroom not found" });
     }
+    const [delTeach] = await db.query(sql_teach, [class_id]);
+    if (delTeach.affectedRows === 0) {
+      return res.status(404).json({ error: "Teach not found" });
+    }
+    await db.query(sql_enroll, [class_id]);
     res.status(200).json({ message: "Classroom and teach deleted successfully" });
   } catch (err) {
     console.error("Error deleting classroom/teach:", err);
