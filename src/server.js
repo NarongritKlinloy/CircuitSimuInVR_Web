@@ -630,17 +630,17 @@ app.delete("/api/classroom/:class_id", async (req, res) => {
   const sql_enroll = "DELETE FROM enrollment WHERE class_id = ?";
 
   try {
-    const [delClass] = await db.query(sql_classroom, [class_id]);
-    if (delClass.affectedRows === 0) {
-      return res.status(404).json({ error: "Classroom not found" });
-    }
+    const [delEnroll] = await db.query(sql_enroll, [class_id]);
+    // if (delEnroll.affectedRows === 0) {
+    //   return res.status(404).json({ error: "Enrollment not found" });
+    // }
     const [delTeach] = await db.query(sql_teach, [class_id]);
     if (delTeach.affectedRows === 0) {
       return res.status(404).json({ error: "Teach not found" });
     }
-    const [delEnroll] = await db.query(sql_enroll, [class_id]);
-    if (delEnroll.affectedRows === 0) {
-      return res.status(404).json({ error: "Enrollment not found" });
+    const [delClass] = await db.query(sql_classroom, [class_id]);
+    if (delClass.affectedRows === 0) {
+      return res.status(404).json({ error: "Classroom not found" });
     }
     res.status(200).json({ message: "Classroom and teach deleted successfully" });
   } catch (err) {

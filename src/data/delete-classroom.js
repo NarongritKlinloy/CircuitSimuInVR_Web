@@ -4,9 +4,9 @@ import Swal from 'sweetalert2';
 export const deleteClassroomAPI = async (class_id, class_name) => {
     try {
         const result = await axios.delete(`http://localhost:5000/api/classroom/${class_id}`);
-        console.log(result.data.message);
+        console.log(result);
         if (result.status === 200) {
-            await Swal.fire({
+            Swal.fire({
                 title: "Deleted!",
                 text: `${class_name} has been deleted.`,
                 icon: "success",
@@ -18,7 +18,7 @@ export const deleteClassroomAPI = async (class_id, class_name) => {
         }
     } catch (error) {
         console.error("Error deleting classroom:", error);
-        await Swal.fire({
+        Swal.fire({
             title: "Failed!",
             text: `Can not delete ${class_name}`,
             icon: "error",
