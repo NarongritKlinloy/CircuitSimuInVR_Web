@@ -313,10 +313,10 @@ app.get("/api/practice", async (req, res) => {
 app.get("/api/practice/classroom/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql = `SELECT p.*, 
-                    CASE 
-                      WHEN cp.practice_id IS NOT NULL THEN 1 
-                      ELSE 0 
-                    END AS is_assigned
+               CASE 
+                WHEN cp.practice_id IS NOT NULL THEN 1 
+                ELSE 0 
+                END AS is_assigned
               FROM practice p
               LEFT JOIN classroom_practice cp 
                   ON p.practice_id = cp.practice_id 
@@ -365,21 +365,6 @@ app.post("/api/practice", async (req, res) => {
 });
 
 // ลบ practice
-// app.delete("/api/practice/:practice_id", async (req, res) => {
-//   const { practice_id } = req.params;
-//   const sql = "DELETE FROM practice WHERE practice_id = ?";
-//   try {
-//     const [result] = await db.query(sql, [practice_id]);
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: "Practice not found" });
-//     }
-//     res.status(200).json({ message: "Practice deleted successfully" });
-//   } catch (err) {
-//     console.error("Error deleting practice:", err);
-//     return res.status(500).json({ error: "Delete failed" });
-//   }
-// });
-
 app.delete("/api/practice/:practice_id", async (req, res) => {
   const { practice_id } = req.params;
   const sql = `
@@ -554,19 +539,21 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
   const { class_id, practice_id } = req.params;
   const sql_practice_score = `SELECT 
-                            u.uid,
-                            u.name,
-                            ps.score,
-                            ps.submit_date
-                        FROM classroom_practice cp
-                        JOIN classroom c 
-                            ON cp.class_id = c.class_id
-                        JOIN practice_save ps 
-                            ON cp.practice_id = ps.practice_id
-                        JOIN user u
-                            ON ps.uid = u.uid
-                        WHERE cp.class_id = ?
-                          AND cp.practice_id = ?`;
+    u.uid,
+    u.name,
+    MAX(ps.score) AS max_score,
+    ps.submit_date
+FROM classroom_practice cp
+JOIN classroom c 
+    ON cp.class_id = c.class_id
+JOIN practice_save ps 
+    ON cp.practice_id = ps.practice_id
+JOIN user u
+    ON ps.uid = u.uid
+WHERE cp.class_id = ?
+  AND cp.practice_id = ?
+GROUP BY u.uid, u.name, ps.submit_date;
+`;
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
