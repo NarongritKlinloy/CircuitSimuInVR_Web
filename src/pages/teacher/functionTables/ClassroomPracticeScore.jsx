@@ -59,7 +59,7 @@ function ClassroomPracticeScore({ practices, checkStatus}) {
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
-                                                {data.max_score}
+                                                {data.max_score}/{data.practice_score}
                                             </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>

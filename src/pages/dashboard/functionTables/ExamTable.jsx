@@ -29,9 +29,15 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
 
   // handle data change
   const inputHandle = (event) => {
+    let { name, value } = event.target;
+    value = value.replace(/\D/g, "");
+    if (value !== "" && Number(value) > 100) {
+      value = "100";
+    }
+
     setSelectedPractice((prev) => ({
       ...prev,
-      [event.target.name]: event.target.value,
+      [name]: value,
     }));
   };
 
@@ -92,7 +98,7 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
           <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
               <tr>
-                {["No.", "Name", "Detail", "Create Date", "Edit", "Delete"].map((el) => (
+                {["No.", "Name", "Detail","Score", "Create Date", "Edit", "Delete"].map((el) => (
                   <th
                     key={el}
                     className={`border-b border-blue-gray-50 px-5 py-2 ${el === "Name" || el === "Detail"
@@ -139,6 +145,13 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
                         {data.practice_detail}
                       </Typography>
                     </td>
+
+                    <td className={`${rowClassName} text-center`}>
+                      <Typography className="text-s font-normal text-blue-gray-500">
+                        {data.practice_score}
+                      </Typography>
+                    </td>
+
                     <td className={`${rowClassName} text-center`}>
                       <Typography className="text-s font-normal text-blue-gray-500">
                         {new Date(data.create_date).toLocaleString("en-GB", {
@@ -152,16 +165,6 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
                         }).replace(',', '')}
                       </Typography>
                     </td>
-
-
-                    {/* <td className={`${rowClassName}`}>
-                      <div className="flex justify-center">
-                        <Switch
-                          checked={data.practice_status}
-                          onClick={(e) => switchCheck(e, data)}
-                        />
-                      </div>
-                    </td> */}
 
                     {/* Edit Button */}
                     <td className={`${rowClassName} text-center`}>
@@ -213,9 +216,9 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
               </div>
               <div className="sm:w-1/2">
                 <Input
-                  label="score"
+                  label="score (0-100)"
                   name="practice_score"
-                  maxLength={2}
+                  maxLength={3}
                   value={selectedPractice?.practice_score || ""}
                   onChange={inputHandle}
                 />
