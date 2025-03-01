@@ -9,7 +9,7 @@ import { ClassroomSecAPI } from "@/data/classroom_sec";
 import { countStudentAPI } from "@/data/student-count";
 import { string } from "prop-types";
 
-function StudentTable({ students, onEditClick, onDelete, checkStatus }) {
+function StudentTable({ students, onEditClick, onDelete, checkStatus,TotalStudent }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedStudent, setSelectedStudent] = useState(null);
@@ -22,17 +22,6 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus }) {
         };
         getSec();
     }, []);
-
-    const [totalStudent, setTotalStudent] = useState(0);
-
-    useEffect(() => {
-      const fetchStudentCount = async () => {
-        const count = await countStudentAPI(sessionStorage.getItem("class_id"));
-        setTotalStudent(count);
-      };
-      fetchStudentCount();
-    }, []);
-    
 
     const [newClassroom, setNewClassroom] = useState({
         class_id: sessionStorage.getItem("class_id"),
@@ -97,7 +86,7 @@ function StudentTable({ students, onEditClick, onDelete, checkStatus }) {
                         Student Table : {classname}
                     </Typography>
                     <Typography variant="h6" color="white" className="text-right">
-                        Total Student : {totalStudent}
+                        Total Student : {TotalStudent}
                     </Typography>
                 </CardHeader>
 
