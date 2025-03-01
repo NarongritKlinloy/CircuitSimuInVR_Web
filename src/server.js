@@ -539,20 +539,28 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
   const { class_id, practice_id } = req.params;
   const sql_practice_score = `SELECT 
-    u.uid,
-    u.name,
-    MAX(ps.score) AS max_score,
-    ps.submit_date
-FROM classroom_practice cp
-JOIN classroom c 
-    ON cp.class_id = c.class_id
-JOIN practice_save ps 
-    ON cp.practice_id = ps.practice_id
-JOIN user u
-    ON ps.uid = u.uid
-WHERE cp.class_id = ?
-  AND cp.practice_id = ?
-GROUP BY u.uid, u.name, ps.submit_date;
+                                  u.uid,
+                                  u.name,
+                                  ps.score AS max_score,
+                                  ps.submit_date,
+                                  p.practice_score
+                              FROM classroom_practice cp
+                              JOIN classroom c 
+                                  ON cp.class_id = c.class_id
+                              JOIN practice_save ps 
+                                  ON cp.practice_id = ps.practice_id
+                              JOIN user u
+                                  ON ps.uid = u.uid
+                              JOIN practice p  
+                                  ON cp.practice_id = p.practice_id
+                              JOIN (
+                                  SELECT uid, MAX(score) AS max_score
+                                  FROM practice_save
+                                  GROUP BY uid
+                              ) AS max_scores
+                                  ON ps.uid = max_scores.uid AND ps.score = max_scores.max_score
+                              WHERE cp.class_id = ? 
+                                AND cp.practice_id = ?;
 `;
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
@@ -760,10 +768,10 @@ app.post("/api/classroom/student", async (req, res) => {
 
 // เพิ่ม student เข้า classroom แบบข้อมูล Excel
 app.post("/api/classroom/student/multidata", async (req, res) => {
-  const {uid, class_id} = req.body.data;
+  const { uid, class_id } = req.body.data;
   const data = req.body.data.data;
   const user_failed = [];
-  if(data.length === 0){
+  if (data.length === 0) {
     return res.status(404).json({ error: "No data user" });
   }
   try {
@@ -782,18 +790,18 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
       let processedUid = uid.endsWith("@kmitl.ac.th") ? uid : `${uid}@kmitl.ac.th`;
       const [checkStudent] = await db.query(sql_check_user, [processedUid]);
       // ตรวจสอบ user
-      if(checkStudent.length === 0){
+      if (checkStudent.length === 0) {
         await db.query(sql_insert_user, [processedUid, name, last_active])
       }
-      else if(checkStudent[0].role_id !== 3){
-        user_failed.push({uid : uid, name : name});
-      }else{
+      else if (checkStudent[0].role_id !== 3) {
+        user_failed.push({ uid: uid, name: name });
+      } else {
         // ตรวจสอบ enrollment
         const [enrollRows] = await db.query(sql_enroll_select, [processedUid]);
-        if(enrollRows.length === 0){
+        if (enrollRows.length === 0) {
           await db.query(sql_enroll, [processedUid, class_id, last_active]);
-        }else{
-          user_failed.push({uid : uid, name : name});
+        } else {
+          user_failed.push({ uid: uid, name: name });
         }
       }
     });
