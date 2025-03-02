@@ -27,8 +27,8 @@ const WS_PORT = 5050;
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "Dream241244",
-  // password: "123456789",
+  // password: "Dream241244",
+  password: "123456789",
   database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
@@ -978,8 +978,8 @@ app.get("/api/report", async (req, res) => {
   if (!email) {
     return res.status(400).json({ error: "Missing 'email' query parameter" });
   }
-  //ต้องการ ให้ is_read == 0 แสดงก่อน และเรียงวันที่จากน้อยไปมาก
-  const sql = "SELECT * FROM report AS re JOIN notifications AS noti ON re.report_id = noti.report_id ORDER BY noti.is_read ASC, noti.created_at DESC;";
+  // only user
+  const sql = "SELECT * FROM report WHERE report_uid = ? ORDER BY report_create_date DESC";
   try {
     const [rows] = await db.query(sql, [email]);
     res.status(200).json(rows);
@@ -1004,11 +1004,12 @@ app.get("/api/report", async (req, res) => {
 // });
 
 /********************************************************************************* */
-//  API: เพิ่ม Report + Notification
+//  API: เพิ่ม Report 
 app.post("/api/addreport", async (req, res) => {
-  const { report_uid, report_name, report_detail, report_date } = req.body;
+  const { report_uid, report_name, report_detail, report_create_date } = req.body;
 
-  if (!report_uid || !report_name || !report_detail || !report_date) {
+  
+  if (!report_uid || !report_name || !report_detail || !report_create_date) {
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
   }
 
@@ -1020,20 +1021,9 @@ app.post("/api/addreport", async (req, res) => {
     // เพิ่ม Report
 
     const [reportResult] = await connection.execute(
-      `INSERT INTO report (report_uid, report_name, report_detail, report_date) 
-      VALUES (?, ?, ?, ?)`,
-      [report_uid, report_name, report_detail, report_date]
-    );
-
-    const reportId = reportResult.insertId;
-
-
-    // เพิ่ม Notification (แก้ไขค่าที่ผิด)
-    const message = `${report_name}`;
-    await connection.execute(
-      `INSERT INTO notifications (report_id, recipient_uid, message, type, is_read) 
-    VALUES (?, ?, ?, ?, ?)`,
-      [reportId, "admin", message, "report", 0]  //  "admin" เป็นผู้รับแจ้งเตือน
+      `INSERT INTO report (report_uid, report_name, report_detail, report_create_date, report_isread) 
+      VALUES (?, ?, ?, ?, ?)`,
+      [report_uid, report_name, report_detail, report_create_date, 0]
     );
 
 
@@ -1042,8 +1032,8 @@ app.post("/api/addreport", async (req, res) => {
 
     res.status(200).json({
 
-      message: "เพิ่มรายงานและแจ้งเตือนสำเร็จ",
-      report_id: reportId,
+      message: "เพิ่มรายงานและแจ้งเตือนสำเร็จ"
+      // report_id: reportId,
     });
 
     // แจ้งเตือน WebSocket Clients
@@ -1070,7 +1060,7 @@ const wssReact = new WebSocketServer({ port: WS_PORT });
 
 const fetchUnreadNotifications = async () => {
   try {
-    const sql = "SELECT COUNT(*) AS unread_count FROM notifications WHERE is_read = 0";
+    const sql = "SELECT COUNT(*) AS unread_count FROM report WHERE report_isread = 0";
     const [result] = await db.query(sql);
     return result[0]?.unread_count ?? 0;
   } catch (error) {
@@ -1084,7 +1074,7 @@ const fetchUnreadNotifications = async () => {
 const fetchNotifications = async () => {
   try {
     //ต้องการ ให้ is_read == 0 แสดงก่อน และเรียงวันที่จากน้อยไปมาก
-    const sql = "SELECT * FROM report AS re JOIN notifications AS noti ON re.report_id = noti.report_id ORDER BY noti.is_read ASC, noti.created_at DESC;";
+    const sql = "SELECT * FROM report  ORDER BY report_isread ASC, report_create_date DESC;";
     // const sql = "SELECT * FROM report as re, notifications as noti WHERE re.report_id = noti.report_id ORDER BY created_at DESC";
     const [result] = await db.query(sql);
     return result;
@@ -1095,13 +1085,10 @@ const fetchNotifications = async () => {
 };
 
 // ฟังก์ชันดึงข้อมูล `Reports`
-
 const fetchReports = async () => {
   try {
     // ต้องการ ให้ is_read == 0 แสดงก่อน และเรียงวันที่จากน้อยไปมาก
-    const sql = `SELECT * FROM report AS re 
-                JOIN notifications AS noti ON re.report_id = noti.report_id 
-                ORDER BY noti.is_read ASC, noti.created_at DESC`;
+    const sql = `SELECT * FROM report ORDER BY report_create_date DESC`;
     const [result] = await db.query(sql);
     return result;
   } catch (error) {
@@ -1200,13 +1187,41 @@ wssReact.on("connection", (ws) => {
 
 
 // เปลี่ยน update-notification
-app.put("/api/update-notification", async (req, res) => {
-  const { recipient_uid, report_id } = req.body;
-  const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
-  try {
-    await db.query(sql, [recipient_uid, report_id]);
-    res.status(200).send({ message: "notification updated successfully" });
+// app.put("/api/update-notification", async (req, res) => {
+//   const { recipient_uid, report_id } = req.body;
+//   const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
+//   try {
+//     await db.query(sql, [recipient_uid, report_id]);
+//     res.status(200).send({ message: "notification updated successfully" });
 
+//     // แจ้งเตือน WebSocket Clients
+//     broadcastData();
+
+//   } catch (err) {
+//     console.error("Error updating notification:", err);
+//     res.status(500).send("Error updating notification");
+//   }
+// });
+app.put("/api/update-notification", async (req, res) => {
+  const {  report_id } = req.body;
+  // const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
+  const sql = `
+    UPDATE report
+    SET report_isread = 1, report_dateread = NOW() 
+    WHERE report_id = ?
+  `;
+
+  try {
+    // await db.query(sql, [recipient_uid, report_id]);
+    // res.status(200).send({ message: "notification updated successfully" });
+
+    const [result] = await db.query(sql, [report_id]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "Report not found or already updated" });
+    }
+
+    res.status(200).send({ message: "Report read status updated successfully" });
     // แจ้งเตือน WebSocket Clients
     broadcastData();
 
@@ -1217,23 +1232,23 @@ app.put("/api/update-notification", async (req, res) => {
 });
 
 //อ่านค่า read = 1 ในการเปลี่ยนสีปุ่ม
-app.get("/api/get-read-notifications", async (req, res) => {
-  const { recipient_uid } = req.query;
+// app.get("/api/get-read-notifications", async (req, res) => {
+//   const { recipient_uid } = req.query;
 
-  if (!recipient_uid) {
-    return res.status(400).json({ error: "recipient_uid is required" });
-  }
+//   if (!recipient_uid) {
+//     return res.status(400).json({ error: "recipient_uid is required" });
+//   }
 
-  try {
-    const sql = "SELECT report_id FROM notifications WHERE recipient_uid = ? AND is_read = 1";
-    const [result] = await db.query(sql, [recipient_uid]);
+//   try {
+//     const sql = "SELECT report_id FROM notifications WHERE recipient_uid = ? AND is_read = 1";
+//     const [result] = await db.query(sql, [recipient_uid]);
 
-    res.status(200).json(result);
-  } catch (error) {
-    console.error("Error fetching read notifications:", error);
-    res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือนที่อ่านแล้ว" });
-  }
-});
+//     res.status(200).json(result);
+//   } catch (error) {
+//     console.error("Error fetching read notifications:", error);
+//     res.status(500).json({ error: "เกิดข้อผิดพลาดในการดึงข้อมูลแจ้งเตือนที่อ่านแล้ว" });
+//   }
+// });
 
 // -----------------------------------------------------------
 

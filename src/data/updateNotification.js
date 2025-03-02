@@ -1,15 +1,14 @@
 import axios from 'axios';
 
-export const updateNotificationAPI = async (recipient_uid, report_id) => {
-    if (!recipient_uid || !report_id) {
+export const updateNotificationAPI = async (report_id) => {
+    if (!report_id) {
         console.error("Error: Missing required parameters (recipient_uid or report_id)");
         return { error: "Missing required parameters" };
     }
 
     try {
          // ส่งคำขออัพเดตไปที่ API
-      const response = await axios.put('http://localhost:5000/api/update-notification', {
-        recipient_uid: recipient_uid,
+      const response = await axios.put('http://localhost:5000/api/update-notification', {    
         report_id: report_id,
       });
 
@@ -23,5 +22,3 @@ export const updateNotificationAPI = async (recipient_uid, report_id) => {
         return { error: error.response?.data?.error || "Failed to update notification" };
     }
 };
-
-
