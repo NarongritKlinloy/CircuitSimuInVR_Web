@@ -29,7 +29,7 @@ const db = mysql.createPool({
   user: "root",
   password: "boomza532",
   // password: "123456789",
-  database: "project_circuit",
+  database: "circuitsimproject",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -62,6 +62,8 @@ function notifyUnity(token, userId) {
     }
   });
 }
+
+//+++++++++++++++++++++++++++++++จุดเริ่มต้นของ UNITY +++++++++++++++++++++++++++//
 // -----------------------------------------------------------
 // Google OAuth Callback & Logout
 // -----------------------------------------------------------
@@ -120,6 +122,14 @@ app.post("/register", async (req, res) => {
     );
     console.log("Google Response:", googleResponse.data);
     const { email, name } = googleResponse.data;
+
+    // ตรวจสอบว่าอีเมลลงท้ายด้วย @kmitl.ac.th หรือไม่
+    if (!email.endsWith("@kmitl.ac.th")) {
+      console.log(`Unauthorized email attempt: ${email}`);
+      notifyUnityError(accessToken, email); // เรียกให้ Unity แสดง Error ทันที
+      return res.status(403).json({ error: "Unauthorized email domain" });
+    }
+
     const now = new Date();
     now.setHours(now.getHours() + 7); // ปรับเวลาตามไทย
     const last_active = now.toISOString().slice(0, 19).replace("T", " ");
@@ -155,81 +165,107 @@ app.post("/register", async (req, res) => {
 });
 
 
+wss.on("connection", function connection(ws) {
+  console.log("Client connected to WebSocket");
 
-app.post("/api/save", async (req, res) => {
-  const saveData = req.body;
-  if (!saveData) {
-    return res.status(400).json({ error: "No save data provided" });
-  }
+  ws.on("message", function incoming(message) {
+    console.log("📡 Received message from client:", message);
+  });
+
+  ws.on("close", () => {
+    console.log("Client disconnected");
+  });
+});
+
+
+// ฟังก์ชันแจ้งเตือน Unity ให้แสดง Error
+function notifyUnityError(accessToken, email) {
+  const payload = JSON.stringify({ error: "Unauthorized email domain", email });
+
+  console.log("Sending error notification to WebSocket:", payload);
+
+  // ส่ง error ไปยัง **ทุก Unity client** ที่เชื่อมต่อ
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.send(payload);
+      console.log("📡 Sent error message to Unity:", payload);
+    }
+  });
+}
+
+
+
+
+// ======== [ ใหม่ ] สร้าง Endpoint เพื่อดึงข้อมูล practice ========
+// GET /api/practice/:practiceId
+app.get("/api/practice/:practiceId", async (req, res) => {
+  const { practiceId } = req.params;
   try {
-    const userId = saveData.userId || "unknown";
-    const practiceId = saveData.practiceId || 2;
+    // SELECT จากตาราง practice
+    const sql = "SELECT * FROM practice WHERE practice_id = ?";
+    const [rows] = await db.query(sql, [practiceId]);
+    if (rows.length === 0) {
+      return res.status(404).json({ error: "Practice not found" });
+    }
+    // ส่งกลับแถวแรก (เพราะ practice_id เป็น unique)
+    return res.json(rows[0]);
+  } catch (error) {
+    console.error("Error selecting practice:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
 
-    let score = 0;
-    if (saveData.quizData && typeof saveData.quizData.score === "number") {
-      score = saveData.quizData.score;
+
+// ------------------ Endpoint สำหรับ Practice socre------------------
+app.post("/api/saveScore", async (req, res) => {
+  try {
+    // รับข้อมูล JSON ที่ส่งมาจาก Unity
+    const { userId, practiceId, quizData } = req.body;
+
+    // เช็คว่ามีค่าไหม
+    if (!userId || !practiceId || !quizData) {
+      return res.status(400).json({ error: "Invalid request body" });
     }
 
-    let practiceJson = "{}";
-    if (
-      saveData.practiceData &&
-      typeof saveData.practiceData.json === "string"
-    ) {
-      if (saveData.practiceData.json.trim().length > 0) {
-        practiceJson = saveData.practiceData.json;
-      }
-    }
+    // ดึงค่า score
+    const score = quizData.score || 0;
 
-    console.log("Saving data for user:", userId, "practiceId:", practiceId);
+    // ตัวอย่าง: ถ้าคุณต้องการเก็บ JSON อื่น ๆ เพิ่ม เช่น digitalDataJson ก็สามารถดึงมาได้เหมือนกัน
+    // const digitalJson = req.body.digitalDataJson || "{}";
 
+    // INSERT ลงตาราง practicesave
     const sql = `
-      INSERT INTO practice_save (uid, practice_id, submit_date, score, practice_json)
-      VALUES (?, ?, NOW(), ?, ?)
+      INSERT INTO practicesave (uid, practice_id, submit_date, score)
+      VALUES (?, ?, NOW(), ?)
     `;
-    const [result] = await db.query(sql, [
-      userId,
-      practiceId,
-      score,
-      practiceJson,
-    ]);
+    const [result] = await db.query(sql, [userId, practiceId, score]);
 
-    console.log(`Save data inserted with id: ${result.insertId}`);
-    res.json({
-      message: "Save data inserted successfully",
-      id: result.insertId,
+    console.log(`Score saved for user=${userId} practice=${practiceId} score=${score}`);
+
+    // ส่ง response กลับ
+    return res.json({
+      message: "Score saved successfully",
+      insertId: result.insertId,
     });
   } catch (error) {
-    console.error("Error saving game data:", error);
-    res.status(500).json({ error: error.message });
+    console.error("Error saving score:", error);
+    return res.status(500).json({ error: error.message });
   }
 });
 
-app.get("/api/load", async (req, res) => {
-  try {
-    const sql = "SELECT * FROM practice_save ORDER BY submit_date DESC LIMIT 1";
-    const [rows] = await db.query(sql);
-    if (rows.length === 0) {
-      return res.status(404).json({ error: "No save data found" });
-    }
-    res.json(rows[0]);
-  } catch (error) {
-    console.error("Error loading game data:", error);
-    res.status(500).json({ error: error.message });
-  }
-});
 
-// -----------------------------------------------------------
+
 // Endpoint สำหรับเซฟข้อมูล Simulator (INSERT)
 app.post("/api/simulator/save", async (req, res) => {
   try {
-    const { userId, saveJson, save_type } = req.body;
+    const { userId, saveJson } = req.body;
     if (!userId || !saveJson) {
       return res.status(400).json({ error: "userId or saveJson is missing" });
     }
    
     // นับจำนวน row เฉพาะ userId นี้ เพื่อจะตั้งชื่อ "Save X"
     const getCountSql =
-      "SELECT COUNT(*) AS userSaves FROM SimulatorSave WHERE UID = ?";
+      "SELECT COUNT(*) AS userSaves FROM savecircuit WHERE uid = ?";
     const [countRows] = await db.query(getCountSql, [userId]);
     const newIndex = countRows[0].userSaves + 1;
 
@@ -238,14 +274,14 @@ app.post("/api/simulator/save", async (req, res) => {
 
     // INSERT ลงตาราง
     const sql = `
-      INSERT INTO SimulatorSave (UID, save_json, simulate_date, simulate_name ,save_type)
-      VALUES (?, ?, NOW(), ? , ?)
+      INSERT INTO savecircuit (uid, circuit_json, circuit_date, circuit_name )
+      VALUES (?, ?, NOW(), ? )
     `;
     const [result] = await db.query(sql, [
       userId,
       saveJson,
       simulateName,
-      save_type,
+      
     ]);
 
     return res.json({
@@ -270,9 +306,9 @@ app.get("/api/simulator/load", async (req, res) => {
 
     // ดึงอันล่าสุด
     const sql = `
-      SELECT * FROM SimulatorSave
-      WHERE UID = ?
-      ORDER BY simulate_date DESC
+      SELECT * FROM savecircuit
+      WHERE uid = ?
+      ORDER BY circuit_date DESC
       LIMIT 1
     `;
     const [rows] = await db.query(sql, [userId]);
@@ -285,9 +321,9 @@ app.get("/api/simulator/load", async (req, res) => {
 
     return res.json({
       message: "Load success",
-      saveJson: rows[0].save_json,
-      simulateName: rows[0].simulate_name, // เช่น "Save 1"
-      simulateDate: rows[0].simulate_date,
+      saveJson: rows[0].circuit_json,
+      simulateName: rows[0].circuit_name, // เช่น "Save 1"
+      simulateDate: rows[0].circuit_date,
     });
   } catch (error) {
     console.error("Error loading simulator data:", error);
@@ -304,10 +340,10 @@ app.get("/api/simulator/listSavesDigital", async (req, res) => {
       return res.status(400).json({ error: "No userId provided" });
     }
     const sql = `
-      SELECT simulate_id, simulate_name, simulate_date
-      FROM SimulatorSave
-      WHERE UID = ? AND save_type = 0
-      ORDER BY simulate_date DESC
+      SELECT circuit_id, circuit_name, circuit_date
+      FROM savecircuit
+      WHERE uid = ? 
+      ORDER BY circuit_date DESC
     `;
     const [rows] = await db.query(sql, [userId]);
     return res.json(rows);
@@ -317,26 +353,31 @@ app.get("/api/simulator/listSavesDigital", async (req, res) => {
   }
 });
 
-// (ใหม่) Endpoint สำหรับ SaveCircuit
-app.get("/api/simulator/listSavesCircuit", async (req, res) => {
-  try {
-    const { userId } = req.query;
-    if (!userId) {
-      return res.status(400).json({ error: "No userId provided" });
-    }
-    const sql = `
-      SELECT simulate_id, simulate_name, simulate_date
-      FROM SimulatorSave
-      WHERE UID = ? AND save_type = 1
-      ORDER BY simulate_date DESC
-    `;
-    const [rows] = await db.query(sql, [userId]);
-    return res.json(rows);
-  } catch (error) {
-    console.error("Error listing simulator data:", error);
-    return res.status(500).json({ error: error.message });
-  }
-});
+
+
+
+
+
+// // (ใหม่) Endpoint สำหรับ SaveCircuit
+// app.get("/api/simulator/listSavesCircuit", async (req, res) => {
+//   try {
+//     const { userId } = req.query;
+//     if (!userId) {
+//       return res.status(400).json({ error: "No userId provided" });
+//     }
+//     const sql = `
+//       SELECT circuit_id, circuit_name, circuit_date
+//       FROM savecircuit
+//       WHERE uid = ? 
+//       ORDER BY circuit_date DESC
+//     `;
+//     const [rows] = await db.query(sql, [userId]);
+//     return res.json(rows);
+//   } catch (error) {
+//     console.error("Error listing simulator data:", error);
+//     return res.status(500).json({ error: error.message });
+//   }
+// });
 
 // -----------------------------------------------------------
 // (ใหม่) Endpoint สำหรับ "โหลดตาม ID เฉพาะเจาะจง"
@@ -348,8 +389,8 @@ app.get("/api/simulator/loadById", async (req, res) => {
     }
 
     const sql = `
-      SELECT * FROM SimulatorSave
-      WHERE UID = ? AND simulate_id = ?
+      SELECT * FROM savecircuit
+      WHERE uid = ? AND circuit_id = ?
       LIMIT 1
     `;
     const [rows] = await db.query(sql, [userId, saveId]);
@@ -359,9 +400,9 @@ app.get("/api/simulator/loadById", async (req, res) => {
 
     return res.json({
       message: "Load success",
-      saveJson: rows[0].save_json,
-      simulateName: rows[0].simulate_name,
-      simulateDate: rows[0].simulate_date,
+      saveJson: rows[0].circuit_json,
+      simulateName: rows[0].circuit_name,
+      simulateDate: rows[0].circuit_date,
     });
   } catch (error) {
     console.error("Error loading simulator data by id:", error);
@@ -376,8 +417,8 @@ app.delete("/api/simulator/deleteById", async (req, res) => {
       return res.status(400).json({ error: "userId or saveId missing" });
     }
 
-    // ลบ row ในตาราง SimulatorSave
-    const sql = "DELETE FROM SimulatorSave WHERE UID = ? AND simulate_id = ?";
+    // ลบ row ในตาราง savecircuit
+    const sql = "DELETE FROM savecircuit WHERE uid = ? AND circuit_id = ?";
     const [result] = await db.query(sql, [userId, saveId]);
 
     if (result.affectedRows === 0) {
@@ -395,6 +436,34 @@ app.delete("/api/simulator/deleteById", async (req, res) => {
   }
 });
 
+// เพิ่ม Endpoint สำหรับ Update Save (ใช้ HTTP PUT)
+app.put("/api/simulator/update", async (req, res) => {
+  try {
+    const { userId, saveJson } = req.body;
+    const { saveId } = req.query; // รับ saveId จาก query string
+    if (!userId || !saveJson || !saveId) {
+      return res.status(400).json({ error: "Missing parameters" });
+    }
+    // ใช้ SQL UPDATE แทน INSERT
+    const sql = `
+      UPDATE savecircuit 
+      SET circuit_json = ?, circuit_date = NOW() 
+      WHERE circuit_id = ? AND uid = ?
+    `;
+    const [result] = await db.query(sql, [saveJson, saveId, userId]);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: "No save data found or it doesn't belong to this user" });
+    }
+    return res.json({
+      message: "Update successful",
+      saveId: saveId
+    });
+  } catch (error) {
+    console.error("Error updating simulator data:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
  
 app.get("/api/practice/find/:uid", async (req, res) => {
   const { uid } = req.params;
@@ -402,7 +471,7 @@ app.get("/api/practice/find/:uid", async (req, res) => {
     const sql_find_classroom = `
       SELECT p.practice_id, p.practice_name, p.practice_detail, cp.practice_status 
       FROM enrollment AS enroll 
-      JOIN classroom_practice AS cp 
+      JOIN classroompractice AS cp 
       JOIN practice AS p 
         ON enroll.class_id = cp.class_id 
         AND cp.practice_id = p.practice_id 
@@ -417,7 +486,7 @@ app.get("/api/practice/find/:uid", async (req, res) => {
   }
 });
 
-
+//++++++++++++++++++สิ้นสุดของ UNITY++++++++++++++++++++++++++++++++++++++++++++//
 
 // ฟังก์ชันดึงข้อมูล user ตาม role
 async function getUsersByRole(roleId) {
@@ -752,7 +821,7 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
-                        LEFT JOIN practice_save ps
+                        LEFT JOIN practicesave ps
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
@@ -786,7 +855,7 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
                         FROM classroom_practice cp
                         JOIN classroom c 
                             ON cp.class_id = c.class_id
-                        JOIN practice_save ps 
+                        JOIN practicesave ps 
                             ON cp.practice_id = ps.practice_id
                         JOIN user u
                             ON ps.uid = u.uid
