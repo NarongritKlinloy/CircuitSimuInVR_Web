@@ -5,6 +5,7 @@ import StudentTable from "./functionTables/StudentTable";
 import StudentModal from "./functionTables/StudentModal";
 import { studentTableData } from "@/data/student-table-data";
 import { addStudentAPI, addMultiStudentAPI } from "@/data/add-student-classroom";
+import { countStudentAPI } from "@/data/student-count";
 import { useNavigate } from "react-router-dom";
 
 export function StudentMgn() {
@@ -27,9 +28,16 @@ export function StudentMgn() {
   const [students, setStudent] = useState([]);
   const [refresh, setRefresh] = useState(false);
 
+
   const getStudent = async () => {
     const data = await studentTableData(sessionStorage.getItem("class_id"));
     setStudent(data);
+  };
+
+  const [totalStudent, setTotalStudent] = useState(0);
+  const fetchStudentCount = async () => {
+      const count = await countStudentAPI(sessionStorage.getItem("class_id"));
+      setTotalStudent(count);
   };
 
   // toggle refresh status
@@ -40,6 +48,7 @@ export function StudentMgn() {
   // auto refresh page after data change
   useEffect(() => {
     getStudent();
+    fetchStudentCount();
   }, [refresh]);
 
   // Modal State
@@ -93,6 +102,7 @@ export function StudentMgn() {
 
       <StudentTable
         students={filteredStudent}
+        TotalStudent={totalStudent}
         checkStatus={handleRefresh}
       />
       
