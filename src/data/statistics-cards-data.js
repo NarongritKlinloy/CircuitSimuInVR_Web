@@ -1,36 +1,33 @@
 import {
-  BanknotesIcon,
-  UserIcon,
   UsersIcon,
-  ChartBarIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  AcademicCapIcon,
+  BookOpenIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/solid";
-import { collapse } from "@material-tailwind/react";
 import axios from 'axios';
 
-export const countUserAPI = async () => {
+export const countStudentAPI = async () => {
     try {
-        const response = await axios.get('http://localhost:5000/api/user/count');
-        //console.log(response.data);
+        const response = await axios.get('http://localhost:5000/api/student/count');
         return response.data.count;
     } catch (error) {
-        console.error("Error counting user:", error);
+        console.error("Error counting student:", error);
         return 0;
     }
 };
-const user_count = await countUserAPI();
+const student_count = await countStudentAPI();
 
-export const countAdminAPI = async () => {
+export const countTeacherAPI = async () => {
   try {
-      const response = await axios.get('http://localhost:5000/api/admin/count');
-      //console.log(response.data);
+      const response = await axios.get('http://localhost:5000/api/teacher/count');
       return response.data.count;
   } catch (error) {
-      console.error("Error counting admin:", error);
+      console.error("Error counting teacher:", error);
       return 0;
   }
 };
-const admin_count = await countAdminAPI();
+const teacher_count = await countTeacherAPI();
 
 export const countReportAPI = async () => {
   try {
@@ -43,39 +40,58 @@ export const countReportAPI = async () => {
 };
 const report_count = await countReportAPI();
 
+export const countClassroomAPI = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/classroom/count');
+    return response.data.count;
+  } catch (error) {
+    console.error("Error counting classroom:", error);
+    return 0;
+  }
+};
+const classroom_count = await countClassroomAPI();
+
+export const countPracticeAPI = async () => {
+  try {
+    const response = await axios.get('http://localhost:5000/api/practices/count');
+    return response.data.count;
+  } catch (error) {
+    console.error("Error counting practice:", error);
+    return 0;
+  }
+};
+const practice_count = await countPracticeAPI();
+
 export const statisticsCardsData = [
   {
     color: "gray",
+    icon: AcademicCapIcon,
+    title: "Students",
+    value: student_count,
+  },
+  {
+    color: "gray",
     icon: UsersIcon,
-    title: "Total Users",
-    value: user_count,
-    footer: {
-      color: "text-green-500",
-      value: "+3%",
-      label: "than last month",
-    },
+    title: "Teachers",
+    value: teacher_count,
   },
   {
     color: "gray",
     icon: DocumentTextIcon,
-    title: "Total report",
+    title: "New Feedbacks",
     value: report_count,
-    footer: {
-      color: "text-green-500",
-      value: "+55%",
-      label: "than last week",
-    },
   },
   {
     color: "gray",
-    icon: UserIcon,
-    title: "Admin",
-    value: admin_count,
-    footer: {
-      color: "text-red-500",
-      value: "-2%",
-      label: "than yesterday",
-    },
+    icon: BookOpenIcon,
+    title: "Practices",
+    value: practice_count,
+  },
+  {
+    color: "gray",
+    icon: BuildingOffice2Icon,
+    title: "Classrooms",
+    value: classroom_count,
   },
 ];
 

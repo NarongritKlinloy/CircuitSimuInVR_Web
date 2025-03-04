@@ -28,8 +28,8 @@ const db = mysql.createPool({
   host: "localhost",
   user: "root",
   // password: "Dream241244",
-  password: "123456789",
-  database: "project_circuit",
+  password: "root",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -257,9 +257,9 @@ app.delete("/api/user/:uid", async (req, res) => {
   }
 });
 
-// นับจำนวน user (ยกเว้น role_id = 2)
-app.get("/api/user/count", async (req, res) => {
-  const sql = "SELECT COUNT(*) AS userCount FROM user WHERE role_id != 2";
+// นับจำนวน student
+app.get("/api/student/count", async (req, res) => {
+  const sql = "SELECT COUNT(*) AS userCount FROM user WHERE role_id = 3";
   try {
     const [rows] = await db.query(sql);
     const userCount = rows[0].userCount;
@@ -270,29 +270,230 @@ app.get("/api/user/count", async (req, res) => {
   }
 });
 
-// นับจำนวน admin (role_id = 2)
-app.get("/api/admin/count", async (req, res) => {
-  const sql = "SELECT COUNT(*) AS adminCount FROM user WHERE role_id = 2";
+// นับจำนวน teacher
+app.get("/api/teacher/count", async (req, res) => {
+  const sql = "SELECT COUNT(*) AS userCount FROM user WHERE role_id = 1";
   try {
     const [rows] = await db.query(sql);
-    const adminCount = rows[0].adminCount;
-    res.status(200).json({ count: adminCount });
+    const userCount = rows[0].userCount;
+    res.status(200).json({ count: userCount });
   } catch (err) {
-    console.error("Error counting admin:", err);
-    res.status(500).json({ error: "Count admin failed" });
+    console.error("Error counting user:", err);
+    res.status(500).json({ error: "Count user failed" });
   }
 });
 
 // นับจำนวน report
 app.get("/api/report/count", async (req, res) => {
   try {
-    const sql = "SELECT COUNT(*) AS reportCount FROM report";
+    const sql = "SELECT COUNT(*) AS reportCount FROM report WHERE report_isread = 0";
     const [rows] = await db.query(sql);
     const reportCount = rows[0].reportCount;
     res.status(200).json({ count: reportCount });
   } catch (err) {
     console.error("Error counting report:", err);
     res.status(500).json({ error: "Count report failed" });
+  }
+});
+
+// นับจำนวน classroom
+app.get("/api/classroom/count", async (req, res) => {
+  try {
+    const sql = "SELECT COUNT(*) AS classroomCount FROM classroom";
+    const [rows] = await db.query(sql);
+    const classroomCount = rows[0].classroomCount;
+    res.status(200).json({ count: classroomCount });
+  } catch (err) {
+    console.error("Error counting classroom:", err);
+    res.status(500).json({ error: "Count classroom failed" });
+  }
+});
+
+// นับจำนวน practice
+app.get("/api/practices/count", async (req, res) => {
+  try {
+    const sql = "SELECT COUNT(*) AS practiceCount FROM practice";
+    const [rows] = await db.query(sql);
+    const practiceCount = rows[0].practiceCount;
+    res.status(200).json({ count: practiceCount });
+  } catch (err) {
+    console.error("Error counting practice:", err);
+    res.status(500).json({ error: "Count practice failed" });
+  }
+});
+
+// นับจำนวน student ทั้งหมดที่อยู่ใน classroom ของ teacher
+app.get("/api/student_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT count(*) AS studentCount 
+                FROM circuit_project.teach t 
+                JOIN circuit_project.enrollment en ON en.class_id = t.class_id
+                WHERE t.uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const studentCount = rows[0].studentCount;
+    res.status(200).json({ count: studentCount });
+  } catch (err) {
+    console.error("Error counting user:", err);
+    res.status(500).json({ error: "Count user failed" });
+  }
+});
+
+// นับจำนวน classroom ทั้งหมดที่ teacher มี
+app.get("/api/classroom_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT count(*) AS classroomCount
+                FROM circuit_project.teach
+                WHERE uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const classroomCount = rows[0].classroomCount;
+    res.status(200).json({ count: classroomCount });
+  } catch (err) {
+    console.error("Error counting classroom:", err);
+    res.status(500).json({ error: "Count classroom failed" });
+  }
+});
+
+// นับจำนวน practice ทั้งหมดที่ teacher เปิด
+app.get("/api/practice_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT
+                SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS practiceOpen,
+                COUNT(*) AS practiceCount
+                FROM
+                circuit_project.teach t
+                JOIN
+                circuit_project.classroompractice cp ON cp.class_id = t.class_id
+                WHERE
+                t.uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const practiceOpen = rows[0].practiceOpen || 0;
+    const practiceCount = rows[0].practiceCount || 0;
+    res.status(200).json({ open: practiceOpen, count: practiceCount });
+  } catch (err) {
+    console.error("Error counting classroom:", err);
+    res.status(500).json({ error: "Count classroom failed" });
+  }
+});
+
+// นับจำนวน report ที่ admin ยังไม่อ่าน
+app.get("/api/report_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT COUNT(*) AS reportCount,
+    SUM(CASE WHEN report_isread = 1 THEN 1 ELSE 0 END) AS reportOpen
+    FROM report WHERE report_isread = 0 AND uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const reportOpen = rows[0].reportOpen || 0;
+    const reportCount = rows[0].reportCount || 0;
+    res.status(200).json({ open: reportOpen, count: reportCount });
+  } catch (err) {
+    console.error("Error counting report:", err);
+    res.status(500).json({ error: "Count report failed" });
+  }
+});
+
+// -------------------------- ส่วน Log -------------------------- //
+// เพิ่ม log
+app.post("/api/log/visit", async (req, res) => {
+  const { uid, log_type, practice_id } = req.body;
+  const sql = "INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, ?, ?, ?)";
+  try {
+    const now = new Date();
+    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    const date = now.toISOString().slice(0, 19).replace("T", " ");
+    await db.query(sql, [uid, date, log_type, practice_id]);
+    return res.status(200).json({message: "Added log successfully"});
+  } catch (err) {
+    console.error("Error adding log:", err);
+    res.status(500).json({ error: "Add log failed" });
+  }
+});
+
+// ดึงข้อมูลการเข้าใช้งานย้อนหลัง 7 วัน
+app.get("/api/log/visits/7days", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DATE(log_time) AS date, COUNT(*) AS count
+      FROM log
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 0
+      GROUP BY DATE(log_time)
+      ORDER BY date ASC;
+    `);
+
+    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      dates.push(date.toISOString().split('T')[0]);
+    }
+
+    // สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
+    const formattedData = {};
+    dates.forEach((date) => {
+      let foundRow = null;
+      for (const row of rows) {
+        const rowDate = new Date(row.date);
+        // แปลง UTC เป็น +07:00 (โดยประมาณ)
+        rowDate.setHours(rowDate.getHours() + 7);
+        if (rowDate.toISOString().split('T')[0] === date) {
+          foundRow = row;
+          break;
+        }
+      }
+      formattedData[date] = foundRow ? foundRow.count : 0;
+    });
+
+    return res.status(200).json(formattedData);
+  } catch (error) {
+    console.error('Error fetching log data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ดึงข้อมูลการเข้าใช้แบบทดสอบย้อนหลัง 7 วัน
+app.get("/api/log/practice/7days", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DATE(log_time) AS date, p.practice_name, COUNT(*) AS count
+      FROM log l JOIN practice p ON p.practice_id = l.practice_id
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 1
+      GROUP BY DATE(log_time), p.practice_name
+      ORDER BY date ASC, p.practice_name ASC;
+    `);
+
+    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      dates.push(date.toISOString().split('T')[0]);
+    }
+
+    // สร้าง object โดยมีวันที่เป็น key และ array ของ practice_id และจำนวนเป็น value
+    const formattedData = {};
+    dates.forEach((date) => {
+      formattedData[date] = [];
+      const filteredRows = rows.filter(row => {
+        const rowDate = new Date(row.date);
+        // แปลง UTC เป็น +07:00 (โดยประมาณ)
+        rowDate.setHours(rowDate.getHours() + 7);
+        return rowDate.toISOString().split('T')[0] === date;
+      });
+      filteredRows.forEach(row => {
+        formattedData[date].push({
+          practice_name: row.practice_name,
+          count: row.count
+        });
+      });
+    });
+    return res.status(200).json(formattedData);
+  } catch (error) {
+    console.error('Error fetching log data:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -313,12 +514,12 @@ app.get("/api/practice", async (req, res) => {
 app.get("/api/practice/classroom/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql = `SELECT p.*, 
-                    CASE 
-                      WHEN cp.practice_id IS NOT NULL THEN 1 
-                      ELSE 0 
-                    END AS is_assigned
+               CASE 
+                WHEN cp.practice_id IS NOT NULL THEN 1 
+                ELSE 0 
+                END AS is_assigned
               FROM practice p
-              LEFT JOIN classroom_practice cp 
+              LEFT JOIN ClassroomPractice cp 
                   ON p.practice_id = cp.practice_id 
                   AND cp.class_id = ?`;
   try {
@@ -365,32 +566,17 @@ app.post("/api/practice", async (req, res) => {
 });
 
 // ลบ practice
-// app.delete("/api/practice/:practice_id", async (req, res) => {
-//   const { practice_id } = req.params;
-//   const sql = "DELETE FROM practice WHERE practice_id = ?";
-//   try {
-//     const [result] = await db.query(sql, [practice_id]);
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: "Practice not found" });
-//     }
-//     res.status(200).json({ message: "Practice deleted successfully" });
-//   } catch (err) {
-//     console.error("Error deleting practice:", err);
-//     return res.status(500).json({ error: "Delete failed" });
-//   }
-// });
-
 app.delete("/api/practice/:practice_id", async (req, res) => {
   const { practice_id } = req.params;
   const sql = `
     DELETE FROM practice 
     WHERE practice_id = ? 
-      AND practice_id NOT IN (SELECT practice_id FROM classroom_practice)
+      AND practice_id NOT IN (SELECT practice_id FROM ClassroomPractice)
   `;
   try {
     const [result] = await db.query(sql, [practice_id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Practice not found or is assigned in classroom_practice" });
+      return res.status(404).json({ error: "Practice not found or is assigned in ClassroomPractice" });
     }
     res.status(200).json({ message: "Practice deleted successfully" });
   } catch (err) {
@@ -443,7 +629,7 @@ app.post("/api/classroom/practice", async (req, res) => {
   const { class_id, practice_ids } = req.body;
   try {
     for (const pid of practice_ids) {
-      const sql_insert = `INSERT INTO classroom_practice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
+      const sql_insert = `INSERT INTO ClassroomPractice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
       await db.query(sql_insert, [class_id, pid]);
     }
     res.status(200).json({ message: "Insert classroom practices successfully" });
@@ -460,7 +646,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
   }
   try {
     for (const pid of practice_ids) {
-      const sql_delete = "DELETE FROM classroom_practice WHERE class_id = ? AND practice_id = ?";
+      const sql_delete = "DELETE FROM ClassroomPractice WHERE class_id = ? AND practice_id = ?";
       await db.query(sql_delete, [class_id, pid]);
     }
     res.status(200).json({ message: "Classroom practices removed successfully" });
@@ -475,7 +661,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
 // เปลี่ยน status practice 
 app.put("/api/update-status-practice", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
-  const sql_toggle = `update classroom_practice set practice_status = ? 
+  const sql_toggle = `update ClassroomPractice set practice_status = ? 
                       where class_id = ? and practice_id = ?`;
   try {
     await db.query(sql_toggle, [new_status, class_id, practice_id]);
@@ -495,7 +681,7 @@ app.get("/api/classroom/:uid", async (req, res) => {
                 SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
                 FROM classroom c
                 JOIN teach t ON c.class_id = t.class_id
-                LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
+                LEFT JOIN ClassroomPractice cp ON c.class_id = cp.class_id
                 WHERE t.uid = ?
                 GROUP BY c.class_id`;
   try {
@@ -520,14 +706,14 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             c.sec,
                             COUNT(DISTINCT e.uid) AS enrolled_count,
                             COUNT(DISTINCT CASE WHEN ps.score IS NOT NULL THEN e.uid END) AS submit_total
-                        FROM classroom_practice cp
+                        FROM ClassroomPractice cp
                         JOIN practice p 
                             ON p.practice_id = cp.practice_id
                         JOIN classroom c 
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
-                        LEFT JOIN practice_save ps
+                        LEFT JOIN PracticeSave ps
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
@@ -554,19 +740,28 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
   const { class_id, practice_id } = req.params;
   const sql_practice_score = `SELECT 
-                            u.uid,
-                            u.name,
-                            ps.score,
-                            ps.submit_date
-                        FROM classroom_practice cp
-                        JOIN classroom c 
-                            ON cp.class_id = c.class_id
-                        JOIN practice_save ps 
-                            ON cp.practice_id = ps.practice_id
-                        JOIN user u
-                            ON ps.uid = u.uid
-                        WHERE cp.class_id = ?
-                          AND cp.practice_id = ?`;
+                                  u.uid,
+                                  u.name,
+                                  ps.score AS max_score,
+                                  ps.submit_date,
+                                  p.practice_score
+                              FROM ClassroomPractice cp
+                              JOIN classroom c 
+                                  ON cp.class_id = c.class_id
+                              JOIN PracticeSave ps 
+                                  ON cp.practice_id = ps.practice_id
+                              JOIN user u
+                                  ON ps.uid = u.uid
+                              JOIN practice p  
+                                  ON cp.practice_id = p.practice_id
+                              JOIN (
+                                  SELECT uid, MAX(score) AS max_score
+                                  FROM PracticeSave
+                                  GROUP BY uid
+                              ) AS max_scores
+                                  ON ps.uid = max_scores.uid AND ps.score = max_scores.max_score
+                              WHERE cp.class_id = ? 
+                                AND cp.practice_id = ?`;
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
@@ -651,10 +846,7 @@ app.delete("/api/classroom/:class_id", async (req, res) => {
     if (delTeach.affectedRows === 0) {
       return res.status(404).json({ error: "Teach not found" });
     }
-    const [delEnroll] = await db.query(sql_enroll, [class_id]);
-    if (delEnroll.affectedRows === 0) {
-      return res.status(404).json({ error: "Enrollment not found" });
-    }
+    await db.query(sql_enroll, [class_id]);
     res.status(200).json({ message: "Classroom and teach deleted successfully" });
   } catch (err) {
     console.error("Error deleting classroom/teach:", err);
@@ -776,10 +968,10 @@ app.post("/api/classroom/student", async (req, res) => {
 
 // เพิ่ม student เข้า classroom แบบข้อมูล Excel
 app.post("/api/classroom/student/multidata", async (req, res) => {
-  const {uid, class_id} = req.body.data;
+  const { uid, class_id } = req.body.data;
   const data = req.body.data.data;
   const user_failed = [];
-  if(data.length === 0){
+  if (data.length === 0) {
     return res.status(404).json({ error: "No data user" });
   }
   try {
@@ -798,18 +990,18 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
       let processedUid = uid.endsWith("@kmitl.ac.th") ? uid : `${uid}@kmitl.ac.th`;
       const [checkStudent] = await db.query(sql_check_user, [processedUid]);
       // ตรวจสอบ user
-      if(checkStudent.length === 0){
+      if (checkStudent.length === 0) {
         await db.query(sql_insert_user, [processedUid, name, last_active])
       }
-      else if(checkStudent[0].role_id !== 3){
-        user_failed.push({uid : uid, name : name});
-      }else{
+      else if (checkStudent[0].role_id !== 3) {
+        user_failed.push({ uid: uid, name: name });
+      } else {
         // ตรวจสอบ enrollment
         const [enrollRows] = await db.query(sql_enroll_select, [processedUid]);
-        if(enrollRows.length === 0){
+        if (enrollRows.length === 0) {
           await db.query(sql_enroll, [processedUid, class_id, last_active]);
-        }else{
-          user_failed.push({uid : uid, name : name});
+        } else {
+          user_failed.push({ uid: uid, name: name });
         }
       }
     });
@@ -1216,11 +1408,9 @@ app.put("/api/update-notification", async (req, res) => {
     // res.status(200).send({ message: "notification updated successfully" });
 
     const [result] = await db.query(sql, [report_id]);
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Report not found or already updated" });
     }
-
     res.status(200).send({ message: "Report read status updated successfully" });
     // แจ้งเตือน WebSocket Clients
     broadcastData();

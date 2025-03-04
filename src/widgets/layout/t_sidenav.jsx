@@ -33,7 +33,7 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
       >
         <Link to="/teacher/home" className="flex items-center py-3 px-1">
           <img
-            src="https://img5.pic.in.th/file/secure-sv1/DALLE-2025-01-05-14.14.45---A-bright-and-futuristic-circular-logo-design-for-a-virtual-reality-VR-application-focused-on-circuit-building.-The-logo-features-a-sleek-VR-headset.png"
+            src="https://img5.pic.in.th/file/secure-sv1/11zon_croppedba3732dd0cac4716.png"
             alt="Logo Circuit simulator in VR"
             width={60}
           />
@@ -48,13 +48,13 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
 
         <IconButton
           variant="text"
-          color="white"
+          color="gray"
           size="sm"
           ripple={false}
           className="absolute right-0 top-0 grid rounded-br-none rounded-tl-none xl:hidden"
           onClick={() => setOpenSidenav(dispatch, false)}
         >
-          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-gray-800" />
+          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-blue-gray-500" />
         </IconButton>
       </div>
 
