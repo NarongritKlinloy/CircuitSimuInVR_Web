@@ -27,7 +27,7 @@ export function Notifications() {
   /**  ฟังก์ชันดึงข้อมูล `Reports` */
   const fetchReports = async () => {
     try {
-      const response = await axios.get("http://localhost:5000/api/adminreport");
+      const response = await axios.get("http://smith11.ce.kmitl.ac.th/api/adminreport");
       setReports(response.data);
     } catch (error) {
 

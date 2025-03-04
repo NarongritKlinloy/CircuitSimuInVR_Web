@@ -2,7 +2,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 export const deleteStudentAPI = async (uid, class_id) => {
     try {
-        const response = await axios.delete(`http://localhost:5000/api/classroom/student/${uid}/${class_id}`);
+        const response = await axios.delete(`http://smith11.ce.kmitl.ac.th/api/classroom/student/${uid}/${class_id}`);
         // console.log(response.data.message);
         if(response.status === 200){
             Swal.fire({
