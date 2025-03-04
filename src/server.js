@@ -169,7 +169,7 @@ wss.on("connection", function connection(ws) {
   console.log("Client connected to WebSocket");
 
   ws.on("message", function incoming(message) {
-    console.log("📡 Received message from client:", message);
+    console.log("Received message from client:", message);
   });
 
   ws.on("close", () => {
@@ -353,31 +353,6 @@ app.get("/api/simulator/listSavesDigital", async (req, res) => {
   }
 });
 
-
-
-
-
-
-// // (ใหม่) Endpoint สำหรับ SaveCircuit
-// app.get("/api/simulator/listSavesCircuit", async (req, res) => {
-//   try {
-//     const { userId } = req.query;
-//     if (!userId) {
-//       return res.status(400).json({ error: "No userId provided" });
-//     }
-//     const sql = `
-//       SELECT circuit_id, circuit_name, circuit_date
-//       FROM savecircuit
-//       WHERE uid = ? 
-//       ORDER BY circuit_date DESC
-//     `;
-//     const [rows] = await db.query(sql, [userId]);
-//     return res.json(rows);
-//   } catch (error) {
-//     console.error("Error listing simulator data:", error);
-//     return res.status(500).json({ error: error.message });
-//   }
-// });
 
 // -----------------------------------------------------------
 // (ใหม่) Endpoint สำหรับ "โหลดตาม ID เฉพาะเจาะจง"
