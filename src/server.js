@@ -922,10 +922,6 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
                                   ON ps.uid = max_scores.uid AND ps.score = max_scores.max_score
                               WHERE cp.class_id = ? 
                                 AND cp.practice_id = ?`;
-<<<<<<< HEAD
-=======
-
->>>>>>> 2508e58 (Add Jenkinsfile and Docker)
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
