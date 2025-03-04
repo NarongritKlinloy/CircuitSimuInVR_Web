@@ -16,7 +16,7 @@ export function SignUp() {
     e.preventDefault();
 
     try {
-      const response = await fetch("http://localhost:5001/api/signup", {
+      const response = await fetch("http://smith11.ce.kmitl.ac.th/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
