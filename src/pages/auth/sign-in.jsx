@@ -120,7 +120,7 @@ export function SignIn() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="289166698407-3sivu8jo52aveuuh78kg8n17agseta42.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="536241701089-ej2lkeskgljs17a9dp6d3eeorfhb2f2e.apps.googleusercontent.com">
        
        <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300"> {/* เปลี่ยนสีพื้นหลัง */}
         <div className="w-full lg:w-1/2 p-8">
