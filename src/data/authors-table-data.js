@@ -1,7 +1,7 @@
 import axios from 'axios';
 export const authorsTableData = async () => {
   try{
-    const response = await axios.get('http://smith11.ce.kmitl.ac.th/api/student');
+    const response = await axios.get('http://localhost:3000/api/student');
     return response.data;
   }
   catch(error){
