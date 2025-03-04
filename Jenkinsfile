@@ -15,7 +15,7 @@ pipeline {
         stage('Checkout Source Code') {
             steps {
                 script {
-                    echo "Checking out source code from GitHub..."
+                    echo "📥 Checking out source code from GitHub..."
                     checkout scm
                 }
             }
@@ -24,8 +24,24 @@ pipeline {
         stage('Build and Tag Docker Image') {
             steps {
                 script {
-                    echo "Building Docker image..."
+                    echo "🔨 Building Docker image..."
                     sh "docker build -t ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Stop & Remove Existing Containers') {
+            steps {
+                script {
+                    echo "🛑 Stopping and Removing existing containers..."
+                    
+                    // หยุดและลบ container ที่มีอยู่แล้วก่อนรัน docker-compose up
+                    sh '''
+                    docker ps -aq --filter "name=circuit-db" | xargs -r docker stop
+                    docker ps -aq --filter "name=circuit-db" | xargs -r docker rm
+                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker stop
+                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker rm
+                    '''
                 }
             }
         }
@@ -33,10 +49,8 @@ pipeline {
         stage('Deploy Docker Compose') {
             steps {
                 script {
-                    echo "Stopping existing containers..."
+                    echo "🚀 Deploying new containers..."
                     sh "docker-compose down --remove-orphans"
-
-                    echo "Deploying new containers..."
                     sh "docker-compose up -d --build"
                 }
             }
@@ -52,19 +66,19 @@ pipeline {
                                 usernameVariable: 'gitlabUser'
                             )]
                         ) {
-                            echo "Logging into GitLab registry..."
+                            echo "🔑 Logging into GitLab registry..."
                             sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
 
-                            echo "Tagging and pushing Docker image..."
+                            echo "📤 Tagging and pushing Docker image..."
                             sh "docker tag ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} ${GITLAB_IMAGE_NAME}:latest"
                             sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                             sh "docker push ${GITLAB_IMAGE_NAME}:latest"
 
-                            echo "Cleaning up local images..."
+                            echo "🧹 Cleaning up local images..."
                             sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                         }
                     } catch (Exception e) {
-                        echo "Error during delivery: ${e.getMessage()}"
+                        echo "❌ Error during delivery: ${e.getMessage()}"
                         currentBuild.result = 'FAILURE'
                         error("Delivery to GitLab registry failed!")
                     }
@@ -82,19 +96,19 @@ pipeline {
                     )]
                 ) {
                     script {
-                        echo "Stopping running containers..."
+                        echo "🛑 Stopping running containers..."
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
                             sh "docker stop ${containers}"
                         } else {
-                            echo "No running containers to stop."
+                            echo "✅ No running containers to stop."
                         }
 
-                        echo "Pulling latest Docker image..."
+                        echo "📥 Pulling latest Docker image..."
                         sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
                         sh "docker pull ${GITLAB_IMAGE_NAME}:latest"
 
-                        echo "Deploying latest Docker image..."
+                        echo "🚀 Deploying latest Docker image..."
                         sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:latest"
                     }
                 }
