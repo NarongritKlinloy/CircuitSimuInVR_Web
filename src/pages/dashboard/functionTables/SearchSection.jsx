@@ -1,7 +1,7 @@
 import React from "react";
-import { Card, Input, Button } from "@material-tailwind/react";
+import { Card, Input } from "@material-tailwind/react";
 
-function searchandaddsection({ search, setSearch}) {
+function SearchSection({ search, setSearch }) {
   return (
     <Card>
       <div className="flex items-center justify-between p-4">
@@ -17,4 +17,4 @@ function searchandaddsection({ search, setSearch}) {
   );
 }
 
-export default searchandaddsection;
+export default SearchSection;

@@ -15,8 +15,7 @@ import {
     PencilSquareIcon,
     UsersIcon,
     TrashIcon,
-    UserPlusIcon,
-    PlusCircleIcon,
+    UserPlusIcon
 } from "@heroicons/react/24/solid";
 
 import React, { useState, useEffect } from "react";
@@ -26,7 +25,7 @@ import { deleteClassroomAPI } from "@/data/delete-classroom";
 import { editClassroomAPI } from "@/data/edit-classroom";
 import { countStudentAPI } from "@/data/student-count";
 
-function ClassroomTable({ classrooms, onEditClick, onDelete }) {
+function ClassroomTable({ classrooms, onEditClick, onDelete, checkStatus}) {
     const navigate = useNavigate();
     const [isEditOpen, setIsEditOpen] = useState(false);
     const [isAddTAOpen, setIsAddTAOpen] = useState(false);
@@ -71,8 +70,13 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
 
     // ฟังก์ชันยืนยันการแก้ไข
     const handleSaveEdit = async () => {
-        editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
-        closeEditModal();
+        try {
+            await editClassroomAPI(selectedClassroom.class_id, selectedClassroom);
+            checkStatus();
+            closeEditModal();
+        } catch (error) {
+            console.error("Error updating classroom: ",error)
+        }
     };
 
 
@@ -105,23 +109,11 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete",
             cancelButtonText: "Cancel",
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                deleteClassroomAPI(classroom.class_id);
+                await deleteClassroomAPI(classroom.class_id, classroom.class_name);
                 console.log(`Deleted : ${classroom.class_name}`);
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${classroom.class_name} has been deleted.`,
-                    icon: "success",
-                    confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
-                    },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.reload();
-                    }
-                });
+                checkStatus();
             }
         });
     };
@@ -171,7 +163,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                         </thead>
                         <tbody>
                             {classrooms.map(
-                                ({ class_id, class_name, sec, semester, year }, key) => {
+                                ({ class_id, class_name, sec, semester, year , role}, key) => {
                                     const isLast = key === classrooms.length - 1;
                                     const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"
                                         }`;
@@ -220,7 +212,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             {/* Add Student Button */}
                                             <td className={`${rowClassName} text-center`}>
                                                 <Link
-                                                    to={`/teacher/student_mgn/${class_name} (${sec})`}
+                                                    to={`/teacher/student/${class_name} (${sec})`}
                                                     className="text-green-500 hover:text-green-700"
                                                     onClick={() => {
                                                         sessionStorage.setItem("class_id", class_id);
@@ -231,20 +223,21 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                             </td>
 
                                             {/* Add TA Button */}
-                                            <td className={`${rowClassName} text-center`}>
-                                                <button
-                                                    onClick={() =>
-                                                        openAddTAModal({
-                                                            class_id
-                                                        })
-                                                    }
-                                                    className="text-blue-500 hover:text-blue-700"
-                                                >
-                                                    <UsersIcon className="h-5 w-5 mx-auto" />
-                                                    </button>
-                                            </td>
-
-                                            {/* Edit Classroom Button */}
+                                            {String(role) === "1" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <Link
+                                                        to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                                                        onClick={() => {
+                                                            sessionStorage.setItem("class_id", class_id);
+                                                        }}
+                                                        className="text-blue-500 hover:text-blue-700"
+                                                    >
+                                                        <UsersIcon className="h-5 w-5 mx-auto" />
+                                                    </Link>
+                                                </td>
+                                            )}
+                                            {/* Edit Classroom Button  */}
+                                            {String(role) === "1" && (
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
                                                     onClick={() =>
@@ -261,8 +254,9 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                     <PencilSquareIcon className="h-5 w-5" />
                                                 </button>
                                             </td>
-
+                                            )}
                                             {/* Delete Classroom Button */}
+                                            {String(role) === "1" && (
                                             <td className={`${rowClassName} text-center`}>
                                                 <button
                                                     onClick={() =>
@@ -276,6 +270,45 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                                     <TrashIcon className="h-5 w-5" />
                                                 </button>
                                             </td>
+                                            )}
+
+
+                                            {/* Teacher Assistant */}                                           
+                                            {/* Add TA Button */}
+                                            {String(role) === "2" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <Link
+                                                        to={`/teacher/TA_mgn/${class_name} (${sec})`}
+                                                        onClick={(e) => e.preventDefault()}
+                                                        className="text-gray-400 cursor-not-allowed"
+                                                    >
+                                                        <UsersIcon className="h-5 w-5 mx-auto" />
+                                                    </Link>
+                                                </td>
+                                            )}
+
+                                            {String(role) === "2" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <button
+                                                        className="text-gray-400 cursor-not-allowed"
+                                                        disabled
+                                                    >
+                                                        <PencilSquareIcon className="h-5 w-5" />
+                                                    </button>
+                                                </td>
+                                            )}
+                                            {/* Delete Classroom Button */}
+                                            {String(role) === "2" && (
+                                                <td className={`${rowClassName} text-center`}>
+                                                    <button
+                                                        className="text-gray-400 cursor-not-allowed"
+                                                        disabled
+                                                    >
+                                                        <TrashIcon className="h-5 w-5" />
+                                                    </button>
+                                                </td>
+                                            )}
+
                                         </tr>
                                     );
                                 }
@@ -302,8 +335,8 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                             />
                         </div>
 
-                        <div className="flex gap-4">
-                            <div className="w-1/3">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="sm:w-1/3">
                                 <Input
                                     label="sec"
                                     name="sec"
@@ -311,7 +344,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                     onChange={inputHandle}
                                 />
                             </div>
-                            <div className="w-1/3">
+                            <div className="sm:w-1/3">
                                 <Input
                                     label="semester"
                                     name="semester"
@@ -319,7 +352,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                                     onChange={inputHandle}
                                 />
                             </div>
-                            <div className="w-1/3">
+                            <div className="sm:w-1/3">
                                 <Input
                                     label="year"
                                     name="year"
@@ -339,35 +372,7 @@ function ClassroomTable({ classrooms, onEditClick, onDelete }) {
                     </Button>
                 </DialogFooter>
             </Dialog>
-
-            {/* Add TA Modal */}
-            <Dialog open={isAddTAOpen} handler={closeAddTAModal}>
-                <DialogHeader>Add Teacher Assistant</DialogHeader>
-                <DialogBody>
-                    <Typography className="mb-4">
-                        class : {selectedClassroom?.class_name}
-                    </Typography>
-                    <div className="flex flex-col gap-4">
-                        <div>
-                            <Input
-                                label="Email"
-                                name="uid"
-                                onChange={inputHandle}
-                            />
-                        </div>
-                    </div>
-                </DialogBody>
-                <DialogFooter>
-                    <Button variant="text" color="red" onClick={closeAddTAModal}>
-                        Cancel
-                    </Button>
-                    <Button variant="gradient" color="green" onClick={handleAddTA}>
-                        Add
-                    </Button>
-                </DialogFooter>
-            </Dialog>
         </div>
     );
 }
-
 export default ClassroomTable;

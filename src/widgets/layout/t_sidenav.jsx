@@ -3,7 +3,6 @@ import {useEffect} from "react";
 import { Link, NavLink } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import {
-  Avatar,
   Button,
   IconButton,
   Typography,
@@ -19,7 +18,10 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
     transparent: "bg-transparent",
   };
 
-  routes[0].pages = routes[0].pages.filter(({name}) => (name != "Student"));
+  // useEffect (() => {
+  //   const StudentPath = document.getElementById("Student");
+  //   StudentPath.className = "hidden";
+  // }, []);
   
   return (
     <aside
@@ -46,19 +48,19 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
 
         <IconButton
           variant="text"
-          color="white"
+          color="gray"
           size="sm"
           ripple={false}
           className="absolute right-0 top-0 grid rounded-br-none rounded-tl-none xl:hidden"
           onClick={() => setOpenSidenav(dispatch, false)}
         >
-          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-white" />
+          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-blue-gray-500" />
         </IconButton>
       </div>
 
 
       <div className="m-4">
-         { routes.map(({ layout, title, pages }, key) => (
+         { routes.map(({ layout, title, pages}, key) => (
           <ul key={key} className="mb-4 flex flex-col gap-1">
             {title && (
               <li className="mx-3.5 mt-4 mb-2">
@@ -72,35 +74,39 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
               </li>
             )}
 
-            { pages.map(({ icon, label, name, path }) => (
+          { pages
+            .filter(({ name }) => name !== "Student" && 
+            name !== "Teacher Assistant" && 
+            name !== "Practice Classroom" && 
+            name !== "Practice Score")
+            .map(({ icon, label, name, path }) => (
               <li key={name}>
-              <NavLink to={`/${layout}${path}`}>
-                {({ isActive }) => (
-                  <Button
-                    variant={isActive ? "gradient" : "text"}
-                    color={
-                      isActive
-                        ? sidenavColor
-                        : sidenavType === "dark"
-                          ? "white"
-                          : "blue-gray"
-                    }
-                    
-                    className="flex items-center gap-4 px-4 capitalize"
-                    fullWidth
-                  >
-                    {icon}
-                    <Typography
-                      color="inherit"
-                      className="font-medium capitalize"
+                <NavLink to={`/${layout}${path}`}>
+                  {({ isActive }) => (
+                    <Button
+                      variant={isActive ? "gradient" : "text"}
+                      color={
+                        isActive
+                          ? sidenavColor
+                          : sidenavType === "dark"
+                            ? "white"
+                            : "blue-gray"
+                      }
+                      id={name}
+                      className="flex items-center gap-4 px-4 capitalize"
+                      fullWidth
                     >
-                      {name}
-                    </Typography>
-                  </Button>
-                )}
-
-              </NavLink>
-            </li>
+                      {icon}
+                      <Typography
+                        color="inherit"
+                        className="font-medium capitalize"
+                      >
+                        {name}
+                      </Typography>
+                    </Button>
+                  )}
+                </NavLink>
+              </li>
             ))}
           </ul>
         ))}

@@ -4,9 +4,9 @@ import SearchAndAddStudent from "./functionTables/SearchAndAddStudent";
 import StudentTable from "./functionTables/StudentTable";
 import StudentModal from "./functionTables/StudentModal";
 import { studentTableData } from "@/data/student-table-data";
-import { addStudentAPI } from "@/data/add-student-classroom";
+import { addStudentAPI, addMultiStudentAPI } from "@/data/add-student-classroom";
+import { countStudentAPI } from "@/data/student-count";
 import { useNavigate } from "react-router-dom";
-
 
 export function StudentMgn() {
   const navigate = useNavigate();
@@ -26,13 +26,30 @@ export function StudentMgn() {
 
   const [search, setSearch] = useState("");
   const [students, setStudent] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+
+  const getStudent = async () => {
+    const data = await studentTableData(sessionStorage.getItem("class_id"));
+    setStudent(data);
+  };
+
+  const [totalStudent, setTotalStudent] = useState(0);
+  const fetchStudentCount = async () => {
+      const count = await countStudentAPI(sessionStorage.getItem("class_id"));
+      setTotalStudent(count);
+  };
+
+  // toggle refresh status
+  const handleRefresh = () => {
+    setRefresh(prev => !prev);
+  };
+
+  // auto refresh page after data change
   useEffect(() => {
-    const getStudent = async () => {
-      const data = await studentTableData(sessionStorage.getItem("class_id"));
-      setStudent(data);
-    };
     getStudent();
-  }, [students]);
+    fetchStudentCount();
+  }, [refresh]);
 
   // Modal State
   const [isAddStudentOpen, setIsAddStudentOpen] = useState(false);
@@ -41,22 +58,27 @@ export function StudentMgn() {
   const [newStudent, setNewStudent] = useState({
     uid: "",
     class_id: sessionStorage.getItem("class_id"),
+    data: [],
   });
 
   // seach 
-  const filteredStudent = students.filter(({ uid , class_id}) =>
-    [uid, class_id ].some((field) =>
-      field.toLowerCase().includes(search.toLowerCase())
+  const filteredStudent = students.filter(({ uid , class_id , sec}) =>
+    [uid, class_id , sec].some((field) =>
+      String(field).toLowerCase().includes(search.toLowerCase())
     )
   );
 
   // add
   const handleAddStudent = () => {
     //console.log(newStudent);
-    addStudentAPI(newStudent);
-    setStudent([...students, newStudent]);
-    setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id")});
+    if(newStudent.data.length > 0){
+      addMultiStudentAPI(newStudent);
+    }else{
+      addStudentAPI(newStudent);
+    }
+    setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id"), data: []});
     setIsAddStudentOpen(false);
+    handleRefresh();
   };
 
 
@@ -80,10 +102,8 @@ export function StudentMgn() {
 
       <StudentTable
         students={filteredStudent}
-        onEditClick={(student) => {
-          setEditingStudent(student);
-          setIsEditStudentOpen(true);
-        }}
+        TotalStudent={totalStudent}
+        checkStatus={handleRefresh}
       />
       
       <StudentModal

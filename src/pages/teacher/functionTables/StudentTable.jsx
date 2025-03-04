@@ -1,15 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/solid";
-import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button } from "@material-tailwind/react";
+import { Select, Option, Card, Input, CardHeader, CardBody, Typography, Dialog, DialogHeader, DialogBody, DialogFooter, Button, select } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import { deleteStudentAPI } from "@/data/delete-student-classroom";
+import { editStudentAPI } from "@/data/edit-student-classroom";
+import { ClassroomSecAPI } from "@/data/classroom_sec";
+import { countStudentAPI } from "@/data/student-count";
+import { string } from "prop-types";
 
-function StudentTable({ students, onEditClick, onDelete }) {
+function StudentTable({ students, onEditClick, onDelete, checkStatus,TotalStudent }) {
     const [isEditOpen, setIsEditOpen] = useState(false);
     const { classname } = useParams();
     const [selectedStudent, setSelectedStudent] = useState(null);
-    
+
+    const [sec, setSec] = useState([]);
+    useEffect(() => {
+        const getSec = async () => {
+            const data = await ClassroomSecAPI(sessionStorage.getItem("class_id"));
+            setSec(data);
+        };
+        getSec();
+    }, []);
+
+    const [newClassroom, setNewClassroom] = useState({
+        class_id: sessionStorage.getItem("class_id"),
+    });
+
     // handle data change
     const inputHandle = (event) => {
         setSelectedStudent((prev) => ({
@@ -30,19 +47,16 @@ function StudentTable({ students, onEditClick, onDelete }) {
     };
 
     // ฟังก์ชันยืนยันการแก้ไข
-    const handleSaveEdit = () => {
-        console.log(`Updated ${selectedStudent.name}`);
-        Swal.fire({
-            title: "Updated!",
-            text: `${selectedStudent.name} has been updated`,
-            icon: "success",
-            confirmButtonText: "OK",
-            customClass: {
-                confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-            },
-        });
+    const handleSaveEdit = async () => {
+        try {
+            await editStudentAPI(selectedStudent.uid, newClassroom);
+            checkStatus();
+        } catch (error) {
+            console.error("Error updating student : ", error)
+        }
         closeEditModal();
     };
+
 
     // ฟังก์ชันยืนยันการลบ
     const confirmDelete = (uid) => {
@@ -55,18 +69,11 @@ function StudentTable({ students, onEditClick, onDelete }) {
             cancelButtonColor: "#3085d6",
             confirmButtonText: "Delete",
             cancelButtonText: "Cancel",
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
-                deleteStudentAPI(uid, sessionStorage.getItem("class_id"));
+                await deleteStudentAPI(uid, sessionStorage.getItem("class_id"));
                 console.log(`Deleted : ${uid}`);
-                Swal.fire({
-                    title: "Deleted!",
-                    text: `${uid} has been deleted.`,
-                    icon: "success", confirmButtonText: "OK",
-                    customClass: {
-                        confirmButton: 'bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600',
-                    }
-                });
+                checkStatus();
             }
         });
     };
@@ -74,9 +81,12 @@ function StudentTable({ students, onEditClick, onDelete }) {
     return (
         <div className="flex flex-col gap-8">
             <Card>
-                <CardHeader variant="gradient" color="gray" className="mb-8 p-6">
+                <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
                     <Typography variant="h6" color="white">
-                        Student Table : { classname }
+                        Student Table : {classname}
+                    </Typography>
+                    <Typography variant="h6" color="white" className="text-right">
+                        Total Student : {TotalStudent}
                     </Typography>
                 </CardHeader>
 
@@ -85,7 +95,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["no.", "uid", "name", "last active","edit", "delete"].map((header) => (
+                                {["no.", "uid", "name", "last active", "edit", "delete"].map((header) => (
                                     <th
                                         key={header}
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${header === "name" ? "text-left" : "text-center"}`}
@@ -101,7 +111,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
                             </tr>
                         </thead>
                         <tbody>
-                            {students.map(({ uid, name, last_active}, key) => {
+                            {students.map(({ uid, name, last_active, sec, class_id }, key) => {
                                 const isLast = key === students.length - 1;
                                 const rowClassName = `py-3 px-5 align-middle ${isLast ? "" : "border-b border-blue-gray-50"}`;
 
@@ -109,7 +119,7 @@ function StudentTable({ students, onEditClick, onDelete }) {
                                     <tr key={uid}>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal font-semibold">
-                                                {key+1}
+                                                {key + 1}
                                             </Typography>
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
@@ -122,15 +132,28 @@ function StudentTable({ students, onEditClick, onDelete }) {
                                                 {name}
                                             </Typography>
                                         </td>
-                                        <td className={`${rowClassName} text-left`}>
+                                        <td className={`${rowClassName} text-center`}>
+                                            <Typography className="text-s font-normal text-blue-gray-500">
+                                                {new Date(last_active).toLocaleString("en-GB", {
+                                                    day: '2-digit',
+                                                    month: '2-digit',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    second: '2-digit',
+                                                    hour12: false
+                                                }).replace(',', '')}
+                                            </Typography>
+                                        </td>
+                                        {/* <td className={`${rowClassName} text-left`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
                                                 {last_active}
                                             </Typography>
-                                        </td>
+                                        </td> */}
                                         {/* Edit Button */}
                                         <td className={`${rowClassName} text-center`}>
                                             <button
-                                                onClick={() => openEditModal({ uid })}
+                                                onClick={() => openEditModal({ uid, name, sec, class_id })}
                                                 className="text-blue-500 hover:text-blue-700"
                                             >
                                                 <PencilSquareIcon className="h-5 w-5" />
@@ -164,15 +187,17 @@ function StudentTable({ students, onEditClick, onDelete }) {
                     <div className="flex flex-col gap-4">
                         <div className="flex gap-4">
                             <div className="w-1/2">
-                                <Input readOnly
+                                <Input
+                                    readOnly
                                     label="student id"
                                     name="stdid"
-                                    value={selectedStudent?.id}
+                                    value={selectedStudent?.uid}
                                     onChange={inputHandle}
                                 />
                             </div>
                             <div className="w-1/2">
-                                <Input  readOnly
+                                <Input
+                                    readOnly
                                     label="name"
                                     name="name"
                                     value={selectedStudent?.name}
@@ -180,39 +205,22 @@ function StudentTable({ students, onEditClick, onDelete }) {
                                 />
                             </div>
                         </div>
-                        <div className="flex gap-4">
-                            <div className="w-1/2">
-                                <Input readOnly
-                                    label="semester"
-                                    name="semester"
-                                    value={selectedStudent?.semester}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                            <div className="w-1/2">
-                                <Input  readOnly
-                                    label="year"
-                                    name="year"
-                                    value={selectedStudent?.year}
-                                    onChange={inputHandle}
-                                />
-                            </div>
-                        </div>
-                        
+
                         <div>
-                            <Select 
+                            <Select
                                 label="Select Sec"
                                 name="sec"
-                                value={selectedStudent?.sec} 
-                                onChange={(e) =>
+                                value={selectedStudent?.class_id ? String(selectedStudent.class_id) : (sec?.length > 0 ? String(sec[0].class_id) : "")}
+                                onChange={(e) => {
                                     setSelectedStudent((prev) => ({
-                                        ...prev, sec: e
-                                    }))
-                                }
+                                        ...prev, class_id: e,
+                                    }));
+                                    setNewClassroom({ class_id: e });
+                                }}
                             >
-                                <Option value="101">101</Option>
-                                <Option value="102">102</Option>
-                                <Option value="103">103</Option>
+                                {sec?.map((item, index) => (
+                                    <Option key={index} value={String(item.class_id)}>{item.sec}</Option>
+                                ))}
                             </Select>
                         </div>
                     </div>

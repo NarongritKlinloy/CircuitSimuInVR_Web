@@ -6,6 +6,7 @@ import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
 import { signInAPI } from "@/data/sign-in-user";
 import { useEffect } from "react";
+import { addLogAPI } from "@/data/log";
 
 export function SignIn() {
   const navigate = useNavigate();
@@ -63,10 +64,12 @@ export function SignIn() {
           if (role === "admin") {
             const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
             signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 2, date);
+            addLogAPI(sessionStorage.getItem("email"), 0, 0);
             navigate("/dashboard/home"); // Redirect ไปหน้า Admin
           } else if (role === "teacher") {
             const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
             signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
+            addLogAPI(sessionStorage.getItem("email"), 0, 0);
             navigate("/teacher/home"); // Redirect ไปหน้า Teacher
           }
         }
@@ -101,6 +104,7 @@ export function SignIn() {
         sessionStorage.setItem("role", "teacher");
         const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
         signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
+        addLogAPI(sessionStorage.getItem("email"), 0, 0);
         navigate("/teacher/home");
       });
     }

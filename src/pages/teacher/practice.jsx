@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import SearchAndAddSection from "./functionTables/searchpractice";
+import SearchSection from "./functionTables/SearchSection";
 import PracticeTable from "./functionTables/PracticeTable";
 import { practiceTableData } from "@/data/practice-table-data";
 import { useNavigate } from "react-router-dom";
@@ -22,13 +22,22 @@ export function PracticeMgn() {
   }, [navigate]);
   const [search, setSearch] = useState(""); // คำค้นหา
   const [practice, setPractice] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+  const getPractice = async () => {
+    const data = await practiceTableData();
+    setPractice(data);
+  };
+
+  // toggle refresh status
+  const handleRefresh = () => {
+    setRefresh(prev => !prev);
+  };
+
+  // auto refresh page after data change
   useEffect(() => {
-    const getPractice = async () => {
-      const data = await practiceTableData();
-      setPractice(data);
-    };
     getPractice();
-  }, [practice]);
+  }, [refresh]);
 
   // ฟังก์ชันกรองข้อมูล Practice Table
   const filteredPractice = practice.filter(({ practice_name, practice_detail}) =>
@@ -41,7 +50,7 @@ export function PracticeMgn() {
   return (
     <div className="mt-12 mb-8 flex flex-col gap-12">
       {/* Section การค้นหา */}
-      <SearchAndAddSection
+      <SearchSection
         search={search}
         setSearch={setSearch}
         toggleAddModal={() => setIsAddPracticeOpen(true)}
@@ -53,6 +62,7 @@ export function PracticeMgn() {
           setEditingPractice(practice);
           setIsEditPracticeOpen(true);
         }}
+        checkStatus={handleRefresh}
       />
 
     </div>

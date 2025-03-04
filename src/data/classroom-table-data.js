@@ -1,7 +1,7 @@
 import axios from "axios";
-export const classroomTableData = async (uid) => {
+export const classroomTableData = async () => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/classroom/${uid}`);
+    const response = await axios.get(`http://localhost:5000/api/classroom`);
     return response.data;
   } catch (error) {
     console.error('Error fetching classroom', error);

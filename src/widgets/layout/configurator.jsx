@@ -7,7 +7,7 @@ import {
   Switch,
   Typography,
 } from "@material-tailwind/react";
-import { useNavigate } from "react-router-dom"; // Import useNavigate
+import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
 import {
   useMaterialTailwindController,
   setOpenConfigurator,
@@ -42,10 +42,10 @@ function formatNumber(number, decPlaces) {
 
 export function Configurator() {
   const [controller, dispatch] = useMaterialTailwindController();
-  const { openConfigurator, sidenavColor, sidenavType, fixedNavbar } =
-    controller;
+  const { openConfigurator, sidenavColor, sidenavType, fixedNavbar } = controller;
   const [stars, setStars] = React.useState(0);
-  const navigate = useNavigate(); // Declare navigate function
+  const navigate = useNavigate();
+  const location = useLocation(); // ใช้ useLocation เพื่อติดตาม URL
 
   const sidenavColors = {
     white: "from-gray-100 to-gray-100 border-gray-200",
@@ -64,10 +64,16 @@ export function Configurator() {
       .then((data) => setStars(formatNumber(data.stargazers_count, 1)));
   }, []);
 
+  // เมื่อ URL เปลี่ยนให้ปิด Configurator
+  React.useEffect(() => {
+    setOpenConfigurator(dispatch, false);
+  }, [location, dispatch]);
+
   return (
     <aside
-      className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${openConfigurator ? "translate-x-0" : "translate-x-96"
-        }`}
+      className={`fixed top-0 right-0 z-50 h-screen w-96 bg-white px-2.5 shadow-lg transition-transform duration-300 ${
+        openConfigurator ? "translate-x-0" : "translate-x-96"
+      }`}
     >
       <div className="flex items-start justify-between px-6 pt-8 pb-6">
         <div>
@@ -97,9 +103,9 @@ export function Configurator() {
             {Object.keys(sidenavColors).map((color) => (
               <span
                 key={color}
-                className={`h-6 w-6 cursor-pointer rounded-full border bg-gradient-to-br transition-transform hover:scale-105 ${sidenavColors[color]
-                  } ${sidenavColor === color ? "border-black" : "border-transparent"
-                  }`}
+                className={`h-6 w-6 cursor-pointer rounded-full border bg-gradient-to-br transition-transform hover:scale-105 ${sidenavColors[color]} ${
+                  sidenavColor === color ? "border-black" : "border-transparent"
+                }`}
                 onClick={() => setSidenavColor(dispatch, color)}
               />
             ))}
@@ -152,8 +158,6 @@ export function Configurator() {
           <hr />
         </div>
 
-
-
         {/* Logout Button */}
         <div className="p-7">
           <Button
@@ -169,17 +173,17 @@ export function Configurator() {
                 showCancelButton: true,
                 confirmButtonText: "Yes",
                 cancelButtonText: "Cancel",
-                buttonsStyling: false, // ใช้ customClass สำหรับกำหนดสีและระยะห่าง
+                buttonsStyling: false,
                 customClass: {
                   confirmButton:
-                    "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mx-2", // เพิ่ม mx-2
+                    "bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mx-2",
                   cancelButton:
-                    "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mx-2", // เพิ่ม mx-2
+                    "bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mx-2",
                 },
               }).then((result) => {
                 if (result.isConfirmed) {
                   sessionStorage.clear();
-                  navigate("/auth/sign-in"); // เปลี่ยนหน้าไปที่ /auth/sign-in
+                  navigate("/auth/sign-in");
                 }
               });
             }}
@@ -187,14 +191,8 @@ export function Configurator() {
             Logout
           </Button>
         </div>
-
-
-
-
       </div>
     </aside>
-
-
   );
 }
 

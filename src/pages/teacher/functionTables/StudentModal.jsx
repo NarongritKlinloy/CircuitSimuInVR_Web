@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import readXlsxFile from 'read-excel-file';
+import Papa from 'papaparse';
 import {
   Select, Option,
   Dialog,
@@ -13,6 +15,9 @@ import { studentTableData } from "@/data/student-table-data";
  
 function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnStatus, onSave }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
+  const [fileUploaded, setFileUploaded] = useState(false);
+  const [excelData, setExcelData] = useState([]);
+  const [showExample, setShowExample] = useState(false); // สร้าง State ควบคุม Modal รูปภาพ
 
   // declare user id
   const userId = studentTableData.length + 1;
@@ -26,6 +31,9 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
   // ฟังก์ชันรีเซ็ต Error และข้อมูล
   const resetState = () => {
     setErrors({}); // รีเซ็ต Error ให้เป็นค่าว่าง
+    setFileUploaded(false);
+    setShowExample(false);
+    setExcelData([]);
   };
 
   // ฟังก์ชันจัดการปิด Modal พร้อมรีเซ็ต
@@ -39,7 +47,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
   const validateFields = () => {
     const newErrors = {};
 
-    if (!studentData.uid) newErrors.uid = "ID Student is required";
+    if (!studentData.uid && !fileUploaded) newErrors.uid = "ID Student is required";
     
     setErrors(newErrors);
     
@@ -49,13 +57,72 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
   // ฟังก์ชันบันทึกข้อมูล
   const handleSave = () => {
     if (validateFields()) {
-      onSave();
-      resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
+        onSave();
+        resetState(); // รีเซ็ต Error เมื่อบันทึกสำเร็จ
     }
   };
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      if (file.type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+        // ไฟล์ Excel
+        readXlsxFile(file).then((rows) => {
+          // เริ่มอ่านข้อมูลจากแถวแรกสุด
+          const dataRows = rows;
+  
+          // กรองข้อมูลและแปลงเป็น formattedData
+          const formattedData = dataRows
+            .filter((item) => {
+              // ตรวจสอบว่ามีข้อมูลในคอลัมน์ที่ 1 และ 2 และคอลัมน์ที่ 1 เป็นตัวเลข 8 หลัก
+              return item[1] && item[2] && /^\d{8}$/.test(String(item[1]));
+            })
+            .map((item) => ({
+              id: item[1],
+              name: item[2],
+            }));
+  
+          setExcelData(formattedData);
+          setFileUploaded(true);
+        });
+      } else if (file.type === 'text/csv') {
+        // ไฟล์ CSV
+        Papa.parse(file, {
+          header: false,
+          delimiter: ',',
+          complete: (results) => {
+            const rows = results.data;
+            // เริ่มอ่านข้อมูลจากแถวแรกสุด
+            const dataRows = rows;
+  
+            // กรองข้อมูลและแปลงเป็น formattedData
+            const formattedData = dataRows
+              .filter((item) => {
+                // ตรวจสอบว่ามีข้อมูลในคอลัมน์ที่ 1 และ 2 และคอลัมน์ที่ 1 เป็นตัวเลข 8 หลัก
+                return item[1] && item[2] && /^\d{8}$/.test(String(item[1]));
+              })
+              .map((item) => ({
+                id: item[1],
+                name: item[2],
+              }));
+  
+            setExcelData(formattedData);
+            setFileUploaded(true);
+          },
+          error: (error) => {
+            console.error('Error parsing CSV:', error);
+            // แสดงข้อความแจ้งเตือนผู้ใช้
+          },
+        });
+      } else {
+        console.error('Error: Invalid file type.');
+        // แสดงข้อความแจ้งเตือนผู้ใช้
+      }
+    }
+  };
 
   return (
+    <>
     <Dialog open={isOpen} handler={handleClose}>
       <DialogHeader>{btnStatus} Student</DialogHeader>
       <DialogBody>
@@ -64,17 +131,8 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
             <label className="block text-sm font-medium text-gray-700">Add File</label>
             <input
               type="file"
-              accept="csv/*"
-              onChange={(e) => {
-                const file = e.target.files[0];
-                if (file) {
-                  const reader = new FileReader();
-                  reader.onloadend = () => {
-                    setStudentData({ ...studentData, picture: reader.result });
-                  };
-                  reader.readAsDataURL(file);
-                }
-              }}
+              accept=".csv, .xlsx"
+              onChange={handleFileChange}
               className="mt-1 block w-full text-sm text-gray-500
                          file:mr-4 file:py-2 file:px-4
                          file:rounded-lg file:border-0
@@ -83,84 +141,83 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
                          hover:file:bg-blue-100"
             />
           </div>
-          <div>
-            <Input
-              label="Student ID"
-              value={studentData.uid || ""}
-              onChange={(e) =>
-                setStudentData({ ...studentData, uid: e.target.value })
-              }
-              error={!!errors.uid}
-            />
-            {errors.uid && (
-              <Typography variant="small" color="red" className="mt-1">
-                {errors.uid}
-              </Typography>
-            )}
-          </div>
-
-          {/* <div className="flex gap-4">
-            <div className="w-1/3">
-              <Select
-                label="Select Sec"
-                value={studentData.sec}
-                onChange={(e) => setStudentData({ ...studentData, sec: e })}
-              >
-                <Option value="101">101</Option>
-                <Option value="102">102</Option>
-                <Option value="103">103</Option>
-              </Select>
-
-              {errors.sec && (
-                <Typography variant="small" color="red" className="mt-1">
-                  {errors.sec}
-                </Typography>
-              )}
+          {/* แสดงข้อมูลจาก Excel */}
+          {fileUploaded && excelData.length > 0 && (
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              <Typography variant="h6">Student Data from Excel ({excelData.length} records) :</Typography>
+              <table className="w-full table-auto border-collapse">
+                <thead>
+                  <tr>
+                    {["รหัส น.ศ.", "ชื่อ-นามสกุล"].map((header) => (
+                      <th
+                        key={header}
+                        className={`border-b border-blue-gray-50 px-5 py-2 ${header === "name" ? "text-left" : "text-center"}`}
+                      >
+                        <Typography
+                          variant="small"
+                          className="font-bold uppercase text-blue-gray-400"
+                        >
+                        {header}
+                      </Typography>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {excelData.map((item, index) => (
+                    <tr key={index}>
+                      <td className={`py-3 px-5 align-middle border-b border-blue-gray-50 text-center`}>
+                        <Typography className="text-s font-normal text-blue-gray-500">{item.id}</Typography>
+                      </td>
+                      <td className={`py-3 px-5 align-middle border-b border-blue-gray-50 text-center`}>
+                        <Typography className="text-s font-normal text-blue-gray-500">{item.name}</Typography>
+                      </td>
+                    </tr>
+                  ))}
+                  {setStudentData({...studentData, data : excelData})}
+                </tbody>
+              </table>
             </div>
-            <div className="w-1/3">
+          )}
+          {/* ซ่อนช่อง Student ID ถ้ามีไฟล์แล้ว */}
+          {!fileUploaded && (
+            <div>
               <Input
-                label="semester"
-                value={studentData.semester || ""}
+                label="Student ID"
+                value={studentData.uid || ""}
                 onChange={(e) =>
-                  setStudentData({ ...studentData, semester: e.target.value })
+                  setStudentData({ ...studentData, uid: e.target.value })
                 }
-                error={!!errors.semester}
+                error={!!errors.uid}
               />
-              {errors.semester && (
+              {errors.uid && (
                 <Typography variant="small" color="red" className="mt-1">
-                  {errors.semester}
+                  {errors.uid}
                 </Typography>
               )}
             </div>
-
-            <div className="w-1/3">
-              <Input
-                label="year"
-                value={studentData.year || ""}
-                onChange={(e) =>
-                  setStudentData({ ...studentData, year: e.target.value })
-                }
-
-                error={!!errors.year}
-              />
-              {errors.year && (
-                <Typography variant="small" color="red" className="mt-1">
-                  {errors.year}
-                </Typography>
-              )}
+          )}
+          {/* ซ่อนช่อง Student ID ถ้ามีไฟล์แล้ว */}
+          {showExample && (
+            <div>
+              <img src="https://img5.pic.in.th/file/secure-sv1/example4847e0fccad783e0.png" alt="Example Excel" className="w-full rounded-lg" />
             </div>
-          </div> */}
+          )}
         </div>
       </DialogBody>
       <DialogFooter>
         <Button variant="text" color="red" onClick={handleClose}>
           Cancel
         </Button>
+        <Button variant="text" color="orange" onClick={() => setShowExample(!showExample)}>
+          Show Example Excel
+        </Button>
         <Button variant="gradient" color="green" onClick={handleSave}>
           {btnStatus}
         </Button>
       </DialogFooter>
     </Dialog>
+    </>
   );
 }
 
