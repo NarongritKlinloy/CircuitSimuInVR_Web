@@ -25,11 +25,11 @@ const WS_PORT = 5050;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "",
-  database: "project_circuit",
-
+  host: "mysql_db",
+  user: "node_user",
+  password: "Admin123!",
+  // password: "123456789",
+  database: "Project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -169,7 +169,7 @@ wss.on("connection", function connection(ws) {
   console.log("Client connected to WebSocket");
 
   ws.on("message", function incoming(message) {
-    console.log("📡 Received message from client:", message);
+    console.log("Received message from client:", message);
   });
 
   ws.on("close", () => {
@@ -353,31 +353,6 @@ app.get("/api/simulator/listSavesDigital", async (req, res) => {
   }
 });
 
-
-
-
-
-
-// // (ใหม่) Endpoint สำหรับ SaveCircuit
-// app.get("/api/simulator/listSavesCircuit", async (req, res) => {
-//   try {
-//     const { userId } = req.query;
-//     if (!userId) {
-//       return res.status(400).json({ error: "No userId provided" });
-//     }
-//     const sql = `
-//       SELECT circuit_id, circuit_name, circuit_date
-//       FROM savecircuit
-//       WHERE uid = ? 
-//       ORDER BY circuit_date DESC
-//     `;
-//     const [rows] = await db.query(sql, [userId]);
-//     return res.json(rows);
-//   } catch (error) {
-//     console.error("Error listing simulator data:", error);
-//     return res.status(500).json({ error: error.message });
-//   }
-// });
 
 // -----------------------------------------------------------
 // (ใหม่) Endpoint สำหรับ "โหลดตาม ID เฉพาะเจาะจง"
@@ -890,7 +865,15 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
+<<<<<<< HEAD
                         LEFT JOIN PracticeSave ps
+=======
+<<<<<<< HEAD
+                        LEFT JOIN practice_save ps
+=======
+                        LEFT JOIN PracticeSave ps
+>>>>>>> 7dd9ce61233083a6dc349131f5debe0645faf130
+>>>>>>> 2508e58 (Add Jenkinsfile and Docker)
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
