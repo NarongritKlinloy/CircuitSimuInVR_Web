@@ -3,7 +3,7 @@ import axios from 'axios';
 
 export const ShowVisitAPI = async () => {
   try {
-    const result = await axios.get(`http://localhost:3000/api/log/visits/7days`);
+    const result = await axios.get(`http://localhost:5001/api/log/visits/7days`);
     return result.data;
   } catch (err) {
     console.error('Error select log', err);

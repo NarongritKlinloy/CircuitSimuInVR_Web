@@ -75,7 +75,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://localhost:3000/register", {
+          fetch("http://localhost:5001/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -95,10 +95,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://localhost:3000/error";
+              window.location.href = "http://localhost:5001/error";
           });
       } else {
-          window.location.href = "http://localhost:3000/error";
+          window.location.href = "http://localhost:5001/error";
       }
     </script>
   `);

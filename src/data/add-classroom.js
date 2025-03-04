@@ -2,7 +2,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 export const addClassroomAPI = async (data) => {
   try {
-    const result = await axios.post(`http://localhost:3000/api/classroom`, data);
+    const result = await axios.post(`http://localhost:5001/api/classroom`, data);
     if (result.status == 200) {
       Swal.fire({
         title: "Added!",
