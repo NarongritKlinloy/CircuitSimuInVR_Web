@@ -28,7 +28,7 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
   const [selectedPractice, setSelectedPractice] = useState(null);
 
   // handle data change
-  const inputHandle = (event) => {
+  const inputScoreHandle = (event) => {
     let { name, value } = event.target;
     value = value.replace(/\D/g, "");
     if (value !== "" && Number(value) > 100) {
@@ -38,6 +38,13 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
     setSelectedPractice((prev) => ({
       ...prev,
       [name]: value,
+    }));
+  };
+
+  const inputHandle = (event) => {
+    setSelectedPractice((prev) => ({
+      ...prev,
+      [event.target.name]: event.target.value,
     }));
   };
 
@@ -220,7 +227,7 @@ function ExamTable({ practice, checkStatus, toggleModal }) {
                   name="practice_score"
                   maxLength={3}
                   value={selectedPractice?.practice_score || ""}
-                  onChange={inputHandle}
+                  onChange={inputScoreHandle}
                 />
               </div>
             </div>
