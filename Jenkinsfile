@@ -101,67 +101,6 @@ pipeline {
             }
         }
 
-        stage('Delivery to GitLab Registry') {
-            steps {
-                script {
-                    try {
-                        withCredentials([usernamePassword(
-                            credentialsId: 'gitlab-cred',
-                            passwordVariable: 'gitlabPassword',
-                            usernameVariable: 'gitlabUser'
-                        )]) {
-                            echo "Logging into GitLab registry..."
-                            sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-
-                            echo "Tagging and pushing Docker image..."
-                            sh "docker tag ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} ${GITLAB_IMAGE_NAME}:latest"
-                            sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                            sh "docker push ${GITLAB_IMAGE_NAME}:latest"
-
-                            echo "Cleaning up local images..."
-                            sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} || true"
-                        }
-                    } catch (Exception e) {
-                        echo "Error during delivery: ${e.getMessage()}"
-                        currentBuild.result = 'FAILURE'
-                        error("Delivery to GitLab registry failed!")
-                    }
-                }
-            }
-        }
-
-        stage('Pull from GitLab Registry') {
-            steps {
-                withCredentials([usernamePassword(
-                    credentialsId: 'gitlab-cred',
-                    passwordVariable: 'gitlabPassword',
-                    usernameVariable: 'gitlabUser'
-                )]) {
-                    script {
-                        echo "Stopping running containers..."
-
-                        def containers = sh(script: "docker ps -q", returnStdout: true).trim()
-                        if (containers) {
-                            sh '''
-                            for container in $(docker ps -q); do
-                                docker rm -f $container || true
-                            done
-                            '''
-                        } else {
-                            echo "No running containers to stop."
-                        }
-
-                        echo "Pulling latest Docker image..."
-                        sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                        sh "docker pull ${GITLAB_IMAGE_NAME}:latest"
-
-                        echo "Deploying latest Docker image..."
-                        sh "docker run -p 3000:3000 -d ${GITLAB_IMAGE_NAME}:latest"
-                    }
-                }
-            }
-        }
-    }
 
     post {
         success {
