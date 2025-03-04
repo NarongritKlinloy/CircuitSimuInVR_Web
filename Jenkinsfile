@@ -156,7 +156,7 @@ pipeline {
                         sh "docker pull ${GITLAB_IMAGE_NAME}:latest"
 
                         echo "Deploying latest Docker image..."
-                        sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:latest"
+                        sh "docker run -p 3000:5000 -d ${GITLAB_IMAGE_NAME}:latest"
                     }
                 }
             }
