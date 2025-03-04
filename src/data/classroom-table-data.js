@@ -1,7 +1,7 @@
 import axios from "axios";
 export const classroomTableData = async () => {
   try {
-    const response = await axios.get(`http://localhost:5001/api/classroom`);
+    const response = await axios.get(`http://smith11.ce.kmitl.ac.th/api/classroom`);
     return response.data;
   } catch (error) {
     console.error('Error fetching classroom', error);

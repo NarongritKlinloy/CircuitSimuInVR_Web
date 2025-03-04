@@ -29,7 +29,7 @@ import axios from "axios";
 export const ReportTableData = async () => {
   // const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
   try {
-    const response = await axios.get(`http://localhost:5001/api/adminreport`);
+    const response = await axios.get(`http://smith11.ce.kmitl.ac.th/api/adminreport`);
     // headers: { "x-uid": email } // ส่งค่า uid ไปใน Query Parameters
     return response.data;
   } catch (error) {

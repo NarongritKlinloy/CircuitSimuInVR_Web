@@ -93,7 +93,7 @@ const [newReport, setNewReport] = useState({
   }, []); // ทำงานครั้งเดียวตอน component ถูก mount
 
 const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
-const API_URL = (`http://localhost:5001/api/report?email=${email}`);
+const API_URL = (`http://smith11.ce.kmitl.ac.th/api/report?email=${email}`);
 // console.log(API_URL)
  // ฟังก์ชันดึงข้อมูลจาก API
  const fetchUsers = async () => {
@@ -188,7 +188,7 @@ useEffect(() => {
     }
   
     try {
-      const response = await axios.post(`http://localhost:5001/api/addreport`, newReport);
+      const response = await axios.post(`http://smith11.ce.kmitl.ac.th/api/addreport`, newReport);
   
       if (response.status === 200) {
         Swal.fire({

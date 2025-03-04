@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const countStudentAPI = async (class_id) => {
     try {
-        const response = await axios.get(`http://localhost:5001/api/classroom/student/count/${class_id}`);
+        const response = await axios.get(`http://smith11.ce.kmitl.ac.th/api/classroom/student/count/${class_id}`);
         // console.log(response.data);
         return response.data;
     } catch (error) {
