@@ -257,9 +257,9 @@ app.delete("/api/user/:uid", async (req, res) => {
   }
 });
 
-// นับจำนวน user (ยกเว้น role_id = 2)
-app.get("/api/user/count", async (req, res) => {
-  const sql = "SELECT COUNT(*) AS userCount FROM user WHERE role_id != 2";
+// นับจำนวน student
+app.get("/api/student/count", async (req, res) => {
+  const sql = "SELECT COUNT(*) AS userCount FROM user WHERE role_id = 3";
   try {
     const [rows] = await db.query(sql);
     const userCount = rows[0].userCount;
@@ -270,29 +270,113 @@ app.get("/api/user/count", async (req, res) => {
   }
 });
 
-// นับจำนวน admin (role_id = 2)
-app.get("/api/admin/count", async (req, res) => {
-  const sql = "SELECT COUNT(*) AS adminCount FROM user WHERE role_id = 2";
+// นับจำนวน teacher
+app.get("/api/teacher/count", async (req, res) => {
+  const sql = "SELECT COUNT(*) AS userCount FROM user WHERE role_id = 1";
   try {
     const [rows] = await db.query(sql);
-    const adminCount = rows[0].adminCount;
-    res.status(200).json({ count: adminCount });
+    const userCount = rows[0].userCount;
+    res.status(200).json({ count: userCount });
   } catch (err) {
-    console.error("Error counting admin:", err);
-    res.status(500).json({ error: "Count admin failed" });
+    console.error("Error counting user:", err);
+    res.status(500).json({ error: "Count user failed" });
   }
 });
 
 // นับจำนวน report
 app.get("/api/report/count", async (req, res) => {
   try {
-    const sql = "SELECT COUNT(*) AS reportCount FROM report";
+    const sql = "SELECT COUNT(*) AS reportCount FROM report WHERE report_isread = 0";
     const [rows] = await db.query(sql);
     const reportCount = rows[0].reportCount;
     res.status(200).json({ count: reportCount });
   } catch (err) {
     console.error("Error counting report:", err);
     res.status(500).json({ error: "Count report failed" });
+  }
+});
+
+// นับจำนวน classroom
+app.get("/api/classroom/count", async (req, res) => {
+  try {
+    const sql = "SELECT COUNT(*) AS classroomCount FROM classroom";
+    const [rows] = await db.query(sql);
+    const classroomCount = rows[0].classroomCount;
+    res.status(200).json({ count: classroomCount });
+  } catch (err) {
+    console.error("Error counting classroom:", err);
+    res.status(500).json({ error: "Count classroom failed" });
+  }
+});
+
+// นับจำนวน practice
+app.get("/api/practices/count", async (req, res) => {
+  try {
+    const sql = "SELECT COUNT(*) AS practiceCount FROM practice";
+    const [rows] = await db.query(sql);
+    const practiceCount = rows[0].practiceCount;
+    res.status(200).json({ count: practiceCount });
+  } catch (err) {
+    console.error("Error counting practice:", err);
+    res.status(500).json({ error: "Count practice failed" });
+  }
+});
+
+// -------------------------- ส่วน Log -------------------------- //
+// เพิ่ม log
+app.post("/api/log/visit", async (req, res) => {
+  const { uid, log_type, practice_id } = req.body;
+  const sql = "INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, ?, ?, ?)";
+  try {
+    const now = new Date();
+    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    const date = now.toISOString().slice(0, 19).replace("T", " ");
+    await db.query(sql, [uid, date, log_type, practice_id]);
+    return res.status(200).json({message: "Added log successfully"});
+  } catch (err) {
+    console.error("Error adding log:", err);
+    res.status(500).json({ error: "Add log failed" });
+  }
+});
+// ดึงข้อมูลการเข้าใช้งานย้อนหลัง 7 วัน
+app.get("/api/log/visits/7days", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DATE(log_time) AS date, COUNT(*) AS count
+      FROM log
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE()
+      GROUP BY DATE(log_time)
+      ORDER BY date ASC;
+    `);
+
+    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      dates.push(date.toISOString().split('T')[0]);
+    }
+
+    // สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
+    const formattedData = {};
+    dates.forEach((date) => {
+      let foundRow = null;
+      for (const row of rows) {
+        const rowDate = new Date(row.date);
+        // แปลง UTC เป็น +07:00 (โดยประมาณ)
+        rowDate.setHours(rowDate.getHours() + 7);
+        if (rowDate.toISOString().split('T')[0] === date) {
+          foundRow = row;
+          break;
+        }
+      }
+      formattedData[date] = foundRow ? foundRow.count : 0;
+    });
+
+    return res.status(200).json(formattedData);
+  } catch (error) {
+    console.error('Error fetching log data:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -970,7 +1054,7 @@ app.get("/api/report", async (req, res) => {
     return res.status(400).json({ error: "Missing 'email' query parameter" });
   }
   // only user
-  const sql = "SELECT * FROM report WHERE report_uid = ? ORDER BY report_create_date DESC";
+  const sql = "SELECT * FROM report WHERE uid = ? ORDER BY report_create_date DESC";
   try {
     const [rows] = await db.query(sql, [email]);
     res.status(200).json(rows);
@@ -1207,11 +1291,9 @@ app.put("/api/update-notification", async (req, res) => {
     // res.status(200).send({ message: "notification updated successfully" });
 
     const [result] = await db.query(sql, [report_id]);
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Report not found or already updated" });
     }
-
     res.status(200).send({ message: "Report read status updated successfully" });
     // แจ้งเตือน WebSocket Clients
     broadcastData();
