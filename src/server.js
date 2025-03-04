@@ -313,12 +313,12 @@ app.get("/api/practice", async (req, res) => {
 app.get("/api/practice/classroom/:class_id", async (req, res) => {
   const { class_id } = req.params;
   const sql = `SELECT p.*, 
-                    CASE 
-                      WHEN cp.practice_id IS NOT NULL THEN 1 
-                      ELSE 0 
-                    END AS is_assigned
+               CASE 
+                WHEN cp.practice_id IS NOT NULL THEN 1 
+                ELSE 0 
+                END AS is_assigned
               FROM practice p
-              LEFT JOIN classroom_practice cp 
+              LEFT JOIN ClassroomPractice cp 
                   ON p.practice_id = cp.practice_id 
                   AND cp.class_id = ?`;
   try {
@@ -365,32 +365,17 @@ app.post("/api/practice", async (req, res) => {
 });
 
 // ลบ practice
-// app.delete("/api/practice/:practice_id", async (req, res) => {
-//   const { practice_id } = req.params;
-//   const sql = "DELETE FROM practice WHERE practice_id = ?";
-//   try {
-//     const [result] = await db.query(sql, [practice_id]);
-//     if (result.affectedRows === 0) {
-//       return res.status(404).json({ error: "Practice not found" });
-//     }
-//     res.status(200).json({ message: "Practice deleted successfully" });
-//   } catch (err) {
-//     console.error("Error deleting practice:", err);
-//     return res.status(500).json({ error: "Delete failed" });
-//   }
-// });
-
 app.delete("/api/practice/:practice_id", async (req, res) => {
   const { practice_id } = req.params;
   const sql = `
     DELETE FROM practice 
     WHERE practice_id = ? 
-      AND practice_id NOT IN (SELECT practice_id FROM classroom_practice)
+      AND practice_id NOT IN (SELECT practice_id FROM ClassroomPractice)
   `;
   try {
     const [result] = await db.query(sql, [practice_id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Practice not found or is assigned in classroom_practice" });
+      return res.status(404).json({ error: "Practice not found or is assigned in ClassroomPractice" });
     }
     res.status(200).json({ message: "Practice deleted successfully" });
   } catch (err) {
@@ -443,7 +428,7 @@ app.post("/api/classroom/practice", async (req, res) => {
   const { class_id, practice_ids } = req.body;
   try {
     for (const pid of practice_ids) {
-      const sql_insert = `INSERT INTO classroom_practice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
+      const sql_insert = `INSERT INTO ClassroomPractice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
       await db.query(sql_insert, [class_id, pid]);
     }
     res.status(200).json({ message: "Insert classroom practices successfully" });
@@ -460,7 +445,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
   }
   try {
     for (const pid of practice_ids) {
-      const sql_delete = "DELETE FROM classroom_practice WHERE class_id = ? AND practice_id = ?";
+      const sql_delete = "DELETE FROM ClassroomPractice WHERE class_id = ? AND practice_id = ?";
       await db.query(sql_delete, [class_id, pid]);
     }
     res.status(200).json({ message: "Classroom practices removed successfully" });
@@ -475,7 +460,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
 // เปลี่ยน status practice 
 app.put("/api/update-status-practice", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
-  const sql_toggle = `update classroom_practice set practice_status = ? 
+  const sql_toggle = `update ClassroomPractice set practice_status = ? 
                       where class_id = ? and practice_id = ?`;
   try {
     await db.query(sql_toggle, [new_status, class_id, practice_id]);
@@ -495,7 +480,7 @@ app.get("/api/classroom/:uid", async (req, res) => {
                 SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
                 FROM classroom c
                 JOIN teach t ON c.class_id = t.class_id
-                LEFT JOIN classroom_practice cp ON c.class_id = cp.class_id
+                LEFT JOIN ClassroomPractice cp ON c.class_id = cp.class_id
                 WHERE t.uid = ?
                 GROUP BY c.class_id`;
   try {
@@ -520,14 +505,14 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             c.sec,
                             COUNT(DISTINCT e.uid) AS enrolled_count,
                             COUNT(DISTINCT CASE WHEN ps.score IS NOT NULL THEN e.uid END) AS submit_total
-                        FROM classroom_practice cp
+                        FROM ClassroomPractice cp
                         JOIN practice p 
                             ON p.practice_id = cp.practice_id
                         JOIN classroom c 
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
-                        LEFT JOIN practice_save ps
+                        LEFT JOIN PracticeSave ps
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
@@ -554,19 +539,28 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
   const { class_id, practice_id } = req.params;
   const sql_practice_score = `SELECT 
-                            u.uid,
-                            u.name,
-                            ps.score,
-                            ps.submit_date
-                        FROM classroom_practice cp
-                        JOIN classroom c 
-                            ON cp.class_id = c.class_id
-                        JOIN practice_save ps 
-                            ON cp.practice_id = ps.practice_id
-                        JOIN user u
-                            ON ps.uid = u.uid
-                        WHERE cp.class_id = ?
-                          AND cp.practice_id = ?`;
+                                  u.uid,
+                                  u.name,
+                                  ps.score AS max_score,
+                                  ps.submit_date,
+                                  p.practice_score
+                              FROM ClassroomPractice cp
+                              JOIN classroom c 
+                                  ON cp.class_id = c.class_id
+                              JOIN PracticeSave ps 
+                                  ON cp.practice_id = ps.practice_id
+                              JOIN user u
+                                  ON ps.uid = u.uid
+                              JOIN practice p  
+                                  ON cp.practice_id = p.practice_id
+                              JOIN (
+                                  SELECT uid, MAX(score) AS max_score
+                                  FROM PracticeSave
+                                  GROUP BY uid
+                              ) AS max_scores
+                                  ON ps.uid = max_scores.uid AND ps.score = max_scores.max_score
+                              WHERE cp.class_id = ? 
+                                AND cp.practice_id = ?`;
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
@@ -651,10 +645,7 @@ app.delete("/api/classroom/:class_id", async (req, res) => {
     if (delTeach.affectedRows === 0) {
       return res.status(404).json({ error: "Teach not found" });
     }
-    const [delEnroll] = await db.query(sql_enroll, [class_id]);
-    if (delEnroll.affectedRows === 0) {
-      return res.status(404).json({ error: "Enrollment not found" });
-    }
+    await db.query(sql_enroll, [class_id]);
     res.status(200).json({ message: "Classroom and teach deleted successfully" });
   } catch (err) {
     console.error("Error deleting classroom/teach:", err);
@@ -776,10 +767,10 @@ app.post("/api/classroom/student", async (req, res) => {
 
 // เพิ่ม student เข้า classroom แบบข้อมูล Excel
 app.post("/api/classroom/student/multidata", async (req, res) => {
-  const {uid, class_id} = req.body.data;
+  const { uid, class_id } = req.body.data;
   const data = req.body.data.data;
   const user_failed = [];
-  if(data.length === 0){
+  if (data.length === 0) {
     return res.status(404).json({ error: "No data user" });
   }
   try {
@@ -798,18 +789,18 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
       let processedUid = uid.endsWith("@kmitl.ac.th") ? uid : `${uid}@kmitl.ac.th`;
       const [checkStudent] = await db.query(sql_check_user, [processedUid]);
       // ตรวจสอบ user
-      if(checkStudent.length === 0){
+      if (checkStudent.length === 0) {
         await db.query(sql_insert_user, [processedUid, name, last_active])
       }
-      else if(checkStudent[0].role_id !== 3){
-        user_failed.push({uid : uid, name : name});
-      }else{
+      else if (checkStudent[0].role_id !== 3) {
+        user_failed.push({ uid: uid, name: name });
+      } else {
         // ตรวจสอบ enrollment
         const [enrollRows] = await db.query(sql_enroll_select, [processedUid]);
-        if(enrollRows.length === 0){
+        if (enrollRows.length === 0) {
           await db.query(sql_enroll, [processedUid, class_id, last_active]);
-        }else{
-          user_failed.push({uid : uid, name : name});
+        } else {
+          user_failed.push({ uid: uid, name: name });
         }
       }
     });

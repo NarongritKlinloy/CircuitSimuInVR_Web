@@ -48,13 +48,13 @@ export function T_Sidenav({ brandImg, brandName, routes }) {
 
         <IconButton
           variant="text"
-          color="white"
+          color="gray"
           size="sm"
           ripple={false}
           className="absolute right-0 top-0 grid rounded-br-none rounded-tl-none xl:hidden"
           onClick={() => setOpenSidenav(dispatch, false)}
         >
-          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-gray-800" />
+          <XMarkIcon strokeWidth={2.5} className="h-5 w-5 text-blue-gray-500" />
         </IconButton>
       </div>
 
