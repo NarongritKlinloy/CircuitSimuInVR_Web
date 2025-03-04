@@ -11,10 +11,10 @@ export default defineConfig({
   },
   server: {
     host: true,   // เปิดให้เข้าถึงจากภายนอก (เช่นผ่าน IP)
-    port: 5173    // กำหนดให้ใช้พอร์ต 5173
+    port: 3000    // กำหนดให้ใช้พอร์ต 5173
   },
   preview: {
     host: true,   // เปิดให้เข้าถึงจากภายนอกในโหมด preview
-    port: 5173    // กำหนดพอร์ตให้ตรงกับ `docker-compose.yml`
+    port: 3000   // กำหนดพอร์ตให้ตรงกับ `docker-compose.yml`
   }
 });
