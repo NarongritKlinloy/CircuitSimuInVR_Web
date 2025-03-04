@@ -12,8 +12,8 @@ pipeline {
         stage('Deploy Docker Compose') {
             agent { label 'connect-admin3940' }
             steps {
-                
-                sh "docker compose up -d --build"
+                sh "docker-compose down"
+                sh "docker-compose up -d --build"
             }
         }
 
