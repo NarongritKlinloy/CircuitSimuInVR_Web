@@ -27,9 +27,8 @@ const WS_PORT = 5050;
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  // password: "Dream241244",
-  password: "123456789",
-  database: "project_circuit",
+  password: "Dream241244",
+  database: "test_project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -1081,10 +1080,10 @@ app.get("/api/report", async (req, res) => {
 /********************************************************************************* */
 //  API: เพิ่ม Report 
 app.post("/api/addreport", async (req, res) => {
-  const { report_uid, report_name, report_detail, report_create_date } = req.body;
+  const { uid, report_name, report_detail, report_create_date } = req.body;
 
   
-  if (!report_uid || !report_name || !report_detail || !report_create_date) {
+  if (!uid || !report_name || !report_detail || !report_create_date) {
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
   }
 
@@ -1096,9 +1095,9 @@ app.post("/api/addreport", async (req, res) => {
     // เพิ่ม Report
 
     const [reportResult] = await connection.execute(
-      `INSERT INTO report (report_uid, report_name, report_detail, report_create_date, report_isread) 
+      `INSERT INTO report (uid, report_name, report_detail, report_create_date, report_isread) 
       VALUES (?, ?, ?, ?, ?)`,
-      [report_uid, report_name, report_detail, report_create_date, 0]
+      [uid, report_name, report_detail, report_create_date, 0]
     );
 
 
