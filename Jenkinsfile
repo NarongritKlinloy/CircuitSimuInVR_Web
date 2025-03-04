@@ -1,7 +1,6 @@
 pipeline {
     triggers {
-        // ตรวจ Git ทุก 1 นาที
-        pollSCM('H/1 * * * *')
+        pollSCM('H/1 * * * *') // ตรวจ Git ทุก 1 นาที
     }
 
     agent { label 'connect-admin3940' }
@@ -34,7 +33,6 @@ pipeline {
             steps {
                 script {
                     echo "Stopping and Removing existing containers..."
-                    // ใช้ docker rm -f เพื่อบังคับหยุดและลบ
                     sh '''
                     for container_name in circuit-db circuit-backend circuit-frontend; do
                       docker ps -aq --filter "name=$container_name" | xargs -r docker rm -f || true
@@ -48,8 +46,6 @@ pipeline {
             steps {
                 script {
                     echo "Checking and Freeing Port ${DOCKER_PORT}..."
-
-                    // ลบ container ที่อาจจะครอบครอง port 5000 อยู่
                     sh '''
                     CONTAINER_ID=$(docker ps -q --filter "publish=5000") || true
                     if [ ! -z "$CONTAINER_ID" ]; then
@@ -144,7 +140,6 @@ pipeline {
                     script {
                         echo "Stopping running containers..."
 
-                        // ดึง ID container ทั้งหมดแล้วลบด้วย -f
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
                             sh '''
