@@ -48,19 +48,28 @@ pipeline {
         }
 
         stage('Check and Free Port') {
-            steps {
-                script {
-                    echo "Checking and Freeing Port ${DOCKER_PORT}..."
-                    sh '''
-                    PID=$(sudo lsof -ti :5000) || true
-                    if [ ! -z "$PID" ]; then
-                        echo "Stopping process using port 5000 (PID: $PID)..."
-                        sudo kill -9 $PID || true
-                    fi
-                    '''
-                }
-            }
+    steps {
+        script {
+            echo "Checking and Freeing Port ${DOCKER_PORT}..."
+            sh '''
+            PID=$(sudo lsof -ti :5000) || true
+            if [ ! -z "$PID" ]; then
+                echo "Stopping process using port 5000 (PID: $PID)..."
+                sudo kill -9 $PID || true
+            fi
+
+            # ตรวจสอบและหยุด container ที่ใช้พอร์ต 5000
+            CONTAINER_ID=$(docker ps -q --filter "publish=5000") || true
+            if [ ! -z "$CONTAINER_ID" ]; then
+                echo "Stopping container using port 5000 (Container: $CONTAINER_ID)..."
+                docker stop $CONTAINER_ID || true
+                docker rm $CONTAINER_ID || true
+            fi
+            '''
         }
+    }
+}
+
 
         stage('Deploy Docker Compose') {
             steps {
