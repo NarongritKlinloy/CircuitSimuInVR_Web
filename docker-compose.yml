@@ -6,7 +6,7 @@ services:
     image: circuit-frontend:latest
     build: .
     ports:
-      - "3000:3000"
+      - "80:3000"
     volumes:
       - .:/app
       - /app/node_modules
@@ -22,7 +22,7 @@ services:
     image: circuit-backend:latest
     build: .
     ports:
-      - "5000:5000"
+      - "5001:5000"
     volumes:
       - .:/app
       - /app/node_modules
