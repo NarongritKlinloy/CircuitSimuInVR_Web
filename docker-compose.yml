@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: circuit-simu-vr
+    image: circuit-simu-vr:latest
+    build: .
+    ports:
+      - "5173:5173"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=mysql_db
+      - DB_PORT=3306
+      - DB_USER=node_user
+      - DB_PASSWORD=Admin123!
+      - DB_NAME=Project_circuit
+    command: ["npm", "run", "preview"]
+    depends_on:
+      - db
+    restart: unless-stopped
+
+  db:
+    container_name: circuit-db
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: Project_circuit
+      MYSQL_USER: node_user
+      MYSQL_PASSWORD: Admin123!
+    volumes:
+      - db_data:/var/lib/mysql
+
+volumes:
+  db_data:
