@@ -131,7 +131,7 @@ const NotificationBellAdmin = ({ isOpen, toggleMenu }) => {
                       <strong>รายงาน: {notification.report_name}</strong>
                     </Typography>
                     <Typography variant="small" color="blue-gray" className="mb-1 font-normal">
-                      <strong>From: {notification.report_uid}</strong>
+                      <strong>From: {notification.uid}</strong>
                     </Typography>
                     <Typography variant="small" color="gray" className="flex items-center gap-1 text-xs font-normal opacity-60">
                       <ClockIcon className="h-3.5 w-3.5" /> {new Date(notification.report_create_date).toLocaleString("en-GB")}

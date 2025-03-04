@@ -73,7 +73,7 @@ export function DashboardNavbar() {
 /****************************************************************************************************** */
 const [notificationCount, setNotificationCount] = useState(0); // เก็บจำนวนแจ้งเตือน
 const [isMenuOpen, setIsMenuOpen] = useState(false); // ควบคุมการเปิด/ปิดเมนูแจ้งเตือน
-console.log("isMenuOpen -- "+isMenuOpen)
+// console.log("isMenuOpen -- "+isMenuOpen)
 const menuRef = useRef(null); // ใช้ ref เพื่อตรวจจับการคลิกนอกเมนู
 let pollingInterval = null;
 
@@ -100,7 +100,7 @@ useEffect(() => {
 
     ws.onopen = () => {
 
-      console.log("WebSocket Connected to 5050");
+      // console.log("WebSocket Connected to 5050");
 
       // **ถ้า WebSocket กลับมา → หยุด API Polling**
       if (pollingInterval) {

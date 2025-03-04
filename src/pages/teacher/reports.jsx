@@ -41,7 +41,7 @@ const filteredReports = reports.filter((report) => {
 
   return (
     report.report_name.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากชื่อ
-    report.report_uid.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากผู้ใช้
+    report.uid.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากผู้ใช้
     reportDate.includes(lowerSearchTerm) // ค้นหาจากวันที่
   );
 });
@@ -61,7 +61,7 @@ const getCurrentDateTime = () => {
 };
 
 const [newReport, setNewReport] = useState({
-    report_uid:sessionStorage.getItem("email"),
+    uid:sessionStorage.getItem("email"),
     report_name: "",
     report_detail: "",
     report_create_date: getCurrentDateTime(), // เพิ่มฟิลด์สำหรับวันที่
@@ -138,7 +138,7 @@ useEffect(() => {
   //   setNewReport({ report_name: "", report_detail: "", report_create_date: "" }); // รีเซ็ตข้อมูลใหม่
   //   console.log("Form state reset.");
   // };
-  const resetState = (defaultState = { report_uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_create_date: getCurrentDateTime() }) => {
+  const resetState = (defaultState = { uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_create_date: getCurrentDateTime() }) => {
     console.log("Resetting form state...");
     setErrors({});
     setNewReport(defaultState);
@@ -170,10 +170,10 @@ useEffect(() => {
     
 
     // ตรวจสอบว่า report_uid มีค่าหรือไม่
-    if (!newReport.report_uid) {
+    if (!newReport.uid) {
       Swal.fire({
         title: "Error!",
-        text: "เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ส่ง (report_uid)",
+        text: "เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ส่ง (uid)",
         icon: "error",
         confirmButtonText: "OK",
       });

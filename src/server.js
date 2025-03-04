@@ -979,7 +979,7 @@ app.get("/api/report", async (req, res) => {
     return res.status(400).json({ error: "Missing 'email' query parameter" });
   }
   // only user
-  const sql = "SELECT * FROM report WHERE report_uid = ? ORDER BY report_create_date DESC";
+  const sql = "SELECT * FROM report WHERE uid = ? ORDER BY report_create_date DESC";
   try {
     const [rows] = await db.query(sql, [email]);
     res.status(200).json(rows);
@@ -1006,10 +1006,10 @@ app.get("/api/report", async (req, res) => {
 /********************************************************************************* */
 //  API: เพิ่ม Report 
 app.post("/api/addreport", async (req, res) => {
-  const { report_uid, report_name, report_detail, report_create_date } = req.body;
+  const { uid, report_name, report_detail, report_create_date } = req.body;
 
   
-  if (!report_uid || !report_name || !report_detail || !report_create_date) {
+  if (!uid || !report_name || !report_detail || !report_create_date) {
     return res.status(400).json({ error: "กรุณากรอกข้อมูลให้ครบทุกฟิลด์" });
   }
 
@@ -1021,9 +1021,9 @@ app.post("/api/addreport", async (req, res) => {
     // เพิ่ม Report
 
     const [reportResult] = await connection.execute(
-      `INSERT INTO report (report_uid, report_name, report_detail, report_create_date, report_isread) 
+      `INSERT INTO report (uid, report_name, report_detail, report_create_date, report_isread) 
       VALUES (?, ?, ?, ?, ?)`,
-      [report_uid, report_name, report_detail, report_create_date, 0]
+      [uid, report_name, report_detail, report_create_date, 0]
     );
 
 
