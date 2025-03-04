@@ -865,7 +865,15 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
+<<<<<<< HEAD
                         LEFT JOIN PracticeSave ps
+=======
+<<<<<<< HEAD
+                        LEFT JOIN practice_save ps
+=======
+                        LEFT JOIN PracticeSave ps
+>>>>>>> 7dd9ce61233083a6dc349131f5debe0645faf130
+>>>>>>> 2508e58 (Add Jenkinsfile and Docker)
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
@@ -914,6 +922,10 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
                                   ON ps.uid = max_scores.uid AND ps.score = max_scores.max_score
                               WHERE cp.class_id = ? 
                                 AND cp.practice_id = ?`;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 2508e58 (Add Jenkinsfile and Docker)
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
