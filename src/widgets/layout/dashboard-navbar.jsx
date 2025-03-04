@@ -82,7 +82,7 @@ let pollingInterval = null;
 
  const fetchNotifications = async () => {
   try {
-    const response = await axios.get("http://localhost:3000/api/countnotifications");
+    const response = await axios.get("http://localhost:5001/api/countnotifications");
     if (typeof response.data.unread_count === "number") {
       setNotificationCount(response.data.unread_count);
     }

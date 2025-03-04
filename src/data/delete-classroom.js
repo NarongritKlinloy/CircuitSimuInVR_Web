@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 
 export const deleteClassroomAPI = async (class_id, class_name) => {
     try {
-        const result = await axios.delete(`http://localhost:3000/api/classroom/${class_id}`);
+        const result = await axios.delete(`http://localhost:5001/api/classroom/${class_id}`);
         console.log(result);
         if (result.status === 200) {
             Swal.fire({

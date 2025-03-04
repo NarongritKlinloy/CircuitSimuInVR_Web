@@ -1,7 +1,7 @@
 import axios from 'axios';
 export const updateRoleAPI = async (uid, newrole) => {
     try {
-      const response = await axios.put(`http://localhost:3000/api/user/${uid}`, { newrole });
+      const response = await axios.put(`http://localhost:5001/api/user/${uid}`, { newrole });
       console.log(response.data.message);
     } catch (error) {
       console.error("Error updating role:", error);
