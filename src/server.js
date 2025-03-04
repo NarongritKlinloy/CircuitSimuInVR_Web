@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 5000;
+const PORT = 5001;
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
