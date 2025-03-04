@@ -100,7 +100,7 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["Name", "Email", "Status", "Last Active", "Edit", "Delete"].map((header, index) => (
+                                {["Name", "Email", "Last Active", "Edit", "Delete"].map((header, index) => (
                                     <th
                                         key={index}
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${
@@ -146,19 +146,10 @@ function TeacherTable({ teachers, onEditClick, onDelete }) {
                                             </div>
                                         </td>
 
-                                        <td className={`${rowClassName} text-left`}>
+                                        <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {teachers.uid}
                                             </Typography>
-                                        </td>
-
-                                        <td className={`${rowClassName} text-center`}>
-                                            <Chip
-                                                variant="gradient"
-                                                color={teachers.online ? "green" : "blue-gray"}
-                                                value={teachers.online ? "ONLINE" : "OFFLINE"}
-                                                className="py-0.5 px-2 text-[11px] font-medium w-fit mx-auto"
-                                            />
                                         </td>
 
                                         <td className={`${rowClassName} text-center`}>
