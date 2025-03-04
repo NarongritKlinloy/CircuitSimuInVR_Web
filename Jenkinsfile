@@ -35,8 +35,8 @@ pipeline {
                 script {
                     echo "Stopping and Removing existing containers..."
                     
-                    // หยุดและลบ container ที่มีอยู่แล้วก่อนรัน docker-compose up
                     sh '''
+                    # หยุดและลบ container ที่มีอยู่แล้วก่อนรัน docker-compose up
                     docker ps -aq --filter "name=circuit-db" | xargs -r docker stop || true
                     docker ps -aq --filter "name=circuit-db" | xargs -r docker rm || true
                     docker ps -aq --filter "name=circuit-backend" | xargs -r docker stop || true
@@ -52,8 +52,16 @@ pipeline {
             steps {
                 script {
                     echo "Deploying new containers..."
-                    sh "docker compose down --remove-orphans || true"
-                    sh "docker compose up -d --build"
+
+                    // ตรวจสอบว่าต้องใช้ docker หรือ docker-compose
+                    def dockerComposeCommand = sh(script: "which docker-compose || echo ''", returnStdout: true).trim()
+                    if (dockerComposeCommand) {
+                        sh "docker-compose down || true"
+                        sh "docker-compose up -d --build"
+                    } else {
+                        sh "docker compose down || true"
+                        sh "docker compose up -d --build"
+                    }
                 }
             }
         }
