@@ -11,7 +11,7 @@
 //       const response = await axios.get("http://localhost:5000/api/adminreport");
 //       setReports(response.data);
 //     } catch (error) {
-//       console.error("❌ Error fetching reports:", error);
+//       console.error("Error fetching reports:", error);
 //     }
 //   };
 

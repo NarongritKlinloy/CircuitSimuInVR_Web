@@ -145,9 +145,9 @@ export function Notifications() {
   //   }
   // };
   const handleReadReport = async (report) => {
-    // ✅ ตรวจสอบว่ารายงานนี้เคยถูกอ่านแล้วหรือไม่
+    // ตรวจสอบว่ารายงานนี้เคยถูกอ่านแล้วหรือไม่
     if (updatedReports.includes(report.report_id)) {
-      console.log("📌 รายงานนี้ถูกอ่านแล้ว");
+      console.log("รายงานนี้ถูกอ่านแล้ว");
       return;
     }
   
@@ -159,7 +159,7 @@ export function Notifications() {
       const response = await updateNotificationAPI(report.report_id);
   
       if (response.error) {
-        console.error("❌ Error updating report read status:", response.error);
+        console.error("Error updating report read status:", response.error);
         return;
       }
   
@@ -169,7 +169,7 @@ export function Notifications() {
       //  รีเฟรชข้อมูลรายงานใหม่
       fetchReports();
     } catch (error) {
-      console.error("❌ Error updating notification:", error);
+      console.error("Error updating notification:", error);
     }
   };
   
