@@ -37,12 +37,12 @@ pipeline {
                     
                     // หยุดและลบ container ที่มีอยู่แล้วก่อนรัน docker-compose up
                     sh '''
-                    docker ps -aq --filter "name=circuit-db" | xargs -r docker stop
-                    docker ps -aq --filter "name=circuit-db" | xargs -r docker rm
-                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker stop
-                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker rm
-                    docker ps -aq --filter "name=circuit-frontend" | xargs -r docker stop
-                    docker ps -aq --filter "name=circuit-frontend" | xargs -r docker rm
+                    docker ps -aq --filter "name=circuit-db" | xargs -r docker stop || true
+                    docker ps -aq --filter "name=circuit-db" | xargs -r docker rm || true
+                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker stop || true
+                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker rm || true
+                    docker ps -aq --filter "name=circuit-frontend" | xargs -r docker stop || true
+                    docker ps -aq --filter "name=circuit-frontend" | xargs -r docker rm || true
                     '''
                 }
             }
@@ -52,8 +52,8 @@ pipeline {
             steps {
                 script {
                     echo "Deploying new containers..."
-                    sh "docker-compose down --remove-orphans"
-                    sh "docker-compose up -d --build"
+                    sh "docker compose down --remove-orphans || true"
+                    sh "docker compose up -d --build"
                 }
             }
         }
@@ -77,7 +77,7 @@ pipeline {
                             sh "docker push ${GITLAB_IMAGE_NAME}:latest"
 
                             echo "Cleaning up local images..."
-                            sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                            sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} || true"
                         }
                     } catch (Exception e) {
                         echo "Error during delivery: ${e.getMessage()}"
@@ -101,8 +101,12 @@ pipeline {
                         echo "Stopping running containers..."
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
-                            sh "docker stop ${containers}"
-                            sh "docker rm ${containers}"
+                            sh '''
+                            for container in $(docker ps -q); do
+                                docker stop $container || true
+                                docker rm $container || true
+                            done
+                            '''
                         } else {
                             echo "No running containers to stop."
                         }
