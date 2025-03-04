@@ -40,7 +40,7 @@ export function SignIn() {
     }
  
      // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
-    if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th") {
+    if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th"||email==="boomza53214@gmail.com") {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
