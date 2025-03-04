@@ -1,13 +1,14 @@
 pipeline {
     triggers {
-        pollSCM('H/1 * * * *') // เช็คการเปลี่ยนแปลงจาก GitHub ทุกๆ 1 นาที
+        // ตรวจ Git ทุก 1 นาที
+        pollSCM('H/1 * * * *')
     }
-    
+
     agent { label 'connect-admin3940' }
 
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/deployprojectcircuitregistry"
-        DOCKER_PORT = "5000"
+        DOCKER_PORT       = "5000"
     }
 
     stages {
@@ -33,62 +34,48 @@ pipeline {
             steps {
                 script {
                     echo "Stopping and Removing existing containers..."
-                    
+                    // ใช้ docker rm -f เพื่อบังคับหยุดและลบ
                     sh '''
-                    # หยุดและลบ container ที่มีอยู่แล้วก่อนรัน docker-compose up
-                    docker ps -aq --filter "name=circuit-db" | xargs -r docker stop || true
-                    docker ps -aq --filter "name=circuit-db" | xargs -r docker rm || true
-                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker stop || true
-                    docker ps -aq --filter "name=circuit-backend" | xargs -r docker rm || true
-                    docker ps -aq --filter "name=circuit-frontend" | xargs -r docker stop || true
-                    docker ps -aq --filter "name=circuit-frontend" | xargs -r docker rm || true
+                    for container_name in circuit-db circuit-backend circuit-frontend; do
+                      docker ps -aq --filter "name=$container_name" | xargs -r docker rm -f || true
+                    done
                     '''
                 }
             }
         }
 
         stage('Check and Free Port') {
-    steps {
-        script {
-            echo "Checking and Freeing Port ${DOCKER_PORT}..."
-            sh '''
-            PID=$(sudo lsof -ti :5000) || true
-            if [ ! -z "$PID" ]; then
-                echo "Stopping process using port 5000 (PID: $PID)..."
-                sudo kill -9 $PID || true
-            fi
+            steps {
+                script {
+                    echo "Checking and Freeing Port ${DOCKER_PORT}..."
 
-            # ตรวจสอบและหยุด container ที่ใช้พอร์ต 5000
-            CONTAINER_ID=$(docker ps -q --filter "publish=5000") || true
-            if [ ! -z "$CONTAINER_ID" ]; then
-                echo "Stopping container using port 5000 (Container: $CONTAINER_ID)..."
-                docker stop $CONTAINER_ID || true
-                docker rm $CONTAINER_ID || true
-            fi
-            '''
+                    // ลบ container ที่อาจจะครอบครอง port 5000 อยู่
+                    sh '''
+                    CONTAINER_ID=$(docker ps -q --filter "publish=5000") || true
+                    if [ ! -z "$CONTAINER_ID" ]; then
+                        echo "Stopping container using port 5000 (Container: $CONTAINER_ID)..."
+                        docker rm -f $CONTAINER_ID || true
+                    fi
+                    '''
+                }
+            }
         }
-    }
-}
-
 
         stage('Deploy Docker Compose') {
             steps {
                 script {
                     echo "Deploying new containers..."
                     sh '''
-                    # ตรวจสอบว่าใช้ docker หรือ docker-compose
                     DOCKER_COMPOSE_CMD=$(which docker-compose || which docker compose || echo "")
-                    
                     if [ -z "$DOCKER_COMPOSE_CMD" ]; then
                         echo "❌ ERROR: Docker Compose is not installed!"
                         exit 1
                     fi
-                    
-                    # ล้าง container และ volumes ที่ไม่ได้ใช้
+
                     docker system prune -f || true
                     docker volume prune -f || true
-                    
-                    # ปิด service เก่าก่อนเริ่มใหม่
+
+                    # ปิด service เก่าก่อน
                     $DOCKER_COMPOSE_CMD down || true
                     $DOCKER_COMPOSE_CMD up -d --build
                     '''
@@ -123,11 +110,10 @@ pipeline {
                 script {
                     try {
                         withCredentials([usernamePassword(
-                                credentialsId: 'gitlab-cred',
-                                passwordVariable: 'gitlabPassword',
-                                usernameVariable: 'gitlabUser'
-                            )]
-                        ) {
+                            credentialsId: 'gitlab-cred',
+                            passwordVariable: 'gitlabPassword',
+                            usernameVariable: 'gitlabUser'
+                        )]) {
                             echo "Logging into GitLab registry..."
                             sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
 
@@ -148,23 +134,22 @@ pipeline {
             }
         }
 
-        stage("Pull from GitLab Registry") {
+        stage('Pull from GitLab Registry') {
             steps {
-                withCredentials(
-                    [usernamePassword(
-                        credentialsId: 'gitlab-cred',
-                        passwordVariable: 'gitlabPassword',
-                        usernameVariable: 'gitlabUser'
-                    )]
-                ) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'gitlab-cred',
+                    passwordVariable: 'gitlabPassword',
+                    usernameVariable: 'gitlabUser'
+                )]) {
                     script {
                         echo "Stopping running containers..."
+
+                        // ดึง ID container ทั้งหมดแล้วลบด้วย -f
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
                             sh '''
                             for container in $(docker ps -q); do
-                                docker stop $container || true
-                                docker rm $container || true
+                                docker rm -f $container || true
                             done
                             '''
                         } else {
@@ -191,4 +176,4 @@ pipeline {
             echo "❌ Deployment failed. Please check the logs."
         }
     }
-} 
+}
