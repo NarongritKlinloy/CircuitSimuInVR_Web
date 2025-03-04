@@ -7,7 +7,7 @@ pipeline {
 
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/deployprojectcircuitregistry"
-        DOCKER_PORT       = "5000"
+        DOCKER_PORT       = "3000"
     }
 
     stages {
@@ -156,7 +156,7 @@ pipeline {
                         sh "docker pull ${GITLAB_IMAGE_NAME}:latest"
 
                         echo "Deploying latest Docker image..."
-                        sh "docker run -p 3000:5000 -d ${GITLAB_IMAGE_NAME}:latest"
+                        sh "docker run -p 3000:3000 -d ${GITLAB_IMAGE_NAME}:latest"
                     }
                 }
             }
