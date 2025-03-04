@@ -1,25 +1,48 @@
 pipeline {
     triggers {
-        pollSCM('H/1 * * * *') // Check every 1 minutes
+        pollSCM('H/1 * * * *') // เช็คการเปลี่ยนแปลงจาก GitHub ทุกๆ 1 นาที
     }
+    
     agent { label 'connect-admin3940' }
+
     environment {
         GITLAB_IMAGE_NAME = "registry.gitlab.com/threeman/deployprojectcircuitregistry"
         VMTEST_MAIN_WORKSPACE = "/home/connect-admin3940/workspace/connect-admin3940@2"
-        DOCKER_PORT = "5000" // Specify the port to use
+        DOCKER_PORT = "5000"
     }
+
     stages {
-        stage('Deploy Docker Compose') {
-            agent { label 'connect-admin3940' }
+        stage('Checkout Source Code') {
             steps {
-                sh "docker-compose down"
-                sh "docker-compose up -d --build"
+                script {
+                    echo "Checking out source code from GitHub..."
+                    checkout scm
+                }
             }
         }
 
+        stage('Build and Tag Docker Image') {
+            steps {
+                script {
+                    echo "Building Docker image..."
+                    sh "docker build -t ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} ."
+                }
+            }
+        }
+
+        stage('Deploy Docker Compose') {
+            steps {
+                script {
+                    echo "Stopping existing containers..."
+                    sh "docker-compose down --remove-orphans"
+
+                    echo "Deploying new containers..."
+                    sh "docker-compose up -d --build"
+                }
+            }
+        }
 
         stage('Delivery to GitLab Registry') {
-            agent { label 'connect-admin3940' }
             steps {
                 script {
                     try {
@@ -31,9 +54,13 @@ pipeline {
                         ) {
                             echo "Logging into GitLab registry..."
                             sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+
                             echo "Tagging and pushing Docker image..."
-                            sh "docker tag ${GITLAB_IMAGE_NAME} ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                            sh "docker tag ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER} ${GITLAB_IMAGE_NAME}:latest"
                             sh "docker push ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
+                            sh "docker push ${GITLAB_IMAGE_NAME}:latest"
+
+                            echo "Cleaning up local images..."
                             sh "docker rmi ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                         }
                     } catch (Exception e) {
@@ -46,7 +73,6 @@ pipeline {
         }
 
         stage("Pull from GitLab Registry") {
-            agent {label 'connect-admin3940'}
             steps {
                 withCredentials(
                     [usernamePassword(
@@ -56,19 +82,32 @@ pipeline {
                     )]
                 ) {
                     script {
+                        echo "Stopping running containers..."
                         def containers = sh(script: "docker ps -q", returnStdout: true).trim()
                         if (containers) {
                             sh "docker stop ${containers}"
                         } else {
                             echo "No running containers to stop."
                         }
+
+                        echo "Pulling latest Docker image..."
+                        sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
+                        sh "docker pull ${GITLAB_IMAGE_NAME}:latest"
+
+                        echo "Deploying latest Docker image..."
+                        sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:latest"
                     }
-                    sh "docker login registry.gitlab.com -u ${gitlabUser} -p ${gitlabPassword}"
-                    sh "docker pull ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
-                    sh "docker run -p 5000:5000 -d ${GITLAB_IMAGE_NAME}:${env.BUILD_NUMBER}"
                 }
             }
         }
-        
+    }
+
+    post {
+        success {
+            echo "✅ Deployment completed successfully!"
+        }
+        failure {
+            echo "❌ Deployment failed. Please check the logs."
+        }
     }
 }
