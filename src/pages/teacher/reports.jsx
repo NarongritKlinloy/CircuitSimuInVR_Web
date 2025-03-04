@@ -36,12 +36,12 @@ const toggleAddModal = () => {
 
 /** ฟังก์ชันสำหรับกรอง Reports ตาม `searchTerm` */
 const filteredReports = reports.filter((report) => {
-  const reportDate = new Date(report.report_date).toLocaleDateString("en-GB"); // แปลงวันที่เป็น DD/MM/YYYY
+  const reportDate = new Date(report.report_create_date).toLocaleDateString("en-GB"); // แปลงวันที่เป็น DD/MM/YYYY
   const lowerSearchTerm = searchTerm.toLowerCase(); // แปลงเป็นตัวพิมพ์เล็กเพื่อให้ค้นหาแบบ case-insensitive
 
   return (
     report.report_name.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากชื่อ
-    report.report_uid.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากผู้ใช้
+    report.uid.toLowerCase().includes(lowerSearchTerm) || // ค้นหาจากผู้ใช้
     reportDate.includes(lowerSearchTerm) // ค้นหาจากวันที่
   );
 });
@@ -61,16 +61,16 @@ const getCurrentDateTime = () => {
 };
 
 const [newReport, setNewReport] = useState({
-    report_uid:sessionStorage.getItem("email"),
+    uid:sessionStorage.getItem("email"),
     report_name: "",
     report_detail: "",
-    report_date: getCurrentDateTime(), // เพิ่มฟิลด์สำหรับวันที่
+    report_create_date: getCurrentDateTime(), // เพิ่มฟิลด์สำหรับวันที่
   }); // สำหรับเก็บข้อมูลใหม่ของ report
 
   const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
 
-// console.log("newReportData---() ---> "+newReport.report_uid)
-
+// console.log("newReportData---() ---> "+newReport.uid+" "+newReport.report_detail+" "+newReport.report_create_date+" "+newReport.report_name)
+// console.log(newReport.report_name)
   // const navigate = useNavigate();
 
 
@@ -94,6 +94,7 @@ const [newReport, setNewReport] = useState({
 
 const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
 const API_URL = (`http://localhost:5000/api/report?email=${email}`);
+// console.log(API_URL)
  // ฟังก์ชันดึงข้อมูลจาก API
  const fetchUsers = async () => {
   try {
@@ -134,10 +135,10 @@ useEffect(() => {
   // const resetState = () => {
   //   console.log("Resetting form state...");
   //   setErrors({}); // รีเซ็ต Error ให้เป็นค่าว่าง
-  //   setNewReport({ report_name: "", report_detail: "", report_date: "" }); // รีเซ็ตข้อมูลใหม่
+  //   setNewReport({ report_name: "", report_detail: "", report_create_date: "" }); // รีเซ็ตข้อมูลใหม่
   //   console.log("Form state reset.");
   // };
-  const resetState = (defaultState = { report_uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_date: getCurrentDateTime() }) => {
+  const resetState = (defaultState = { uid:sessionStorage.getItem("email"),report_name: "", report_detail: "", report_create_date: getCurrentDateTime() }) => {
     console.log("Resetting form state...");
     setErrors({});
     setNewReport(defaultState);
@@ -150,7 +151,7 @@ useEffect(() => {
     const newErrors = {};
     if (!newReport.report_name) newErrors.report_name = "Report Name is required";
     if (!newReport.report_detail) newErrors.report_detail = "Detail is required";
-    if (!newReport.report_date) newErrors.report_date = "Report Date is required"; // ตรวจสอบ report_date
+    if (!newReport.report_create_date) newErrors.report_create_date = "Report Date is required"; // ตรวจสอบ report_create_date
     setErrors(newErrors);
     const result = Object.keys(newErrors).length === 0 ? true : false
     return result;
@@ -165,14 +166,14 @@ useEffect(() => {
   
 
   const handleSave = async () => {
-    // console.log("Data to send to API:", newReport);
+    console.log("Data to send to API:", newReport);
     
 
-    // ตรวจสอบว่า report_uid มีค่าหรือไม่
-    if (!newReport.report_uid) {
+    // ตรวจสอบว่า uid มีค่าหรือไม่
+    if (!newReport.uid) {
       Swal.fire({
         title: "Error!",
-        text: "เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ส่ง (report_uid)",
+        text: "เกิดข้อผิดพลาด: ไม่พบข้อมูลผู้ส่ง (uid)",
         icon: "error",
         confirmButtonText: "OK",
       });
@@ -300,7 +301,7 @@ useEffect(() => {
 
                  <td className={`${rowClassName} text-center`}>
                   <Typography className="text-s font-normal text-blue-gray-500">
-                  {new Date(report.report_date).toLocaleString("en-GB", {
+                  {new Date(report.report_create_date).toLocaleString("en-GB", {
                               year: "numeric",
                               month: "2-digit",
                               day: "2-digit",

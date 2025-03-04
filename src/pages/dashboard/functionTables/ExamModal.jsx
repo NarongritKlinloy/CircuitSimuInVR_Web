@@ -9,6 +9,7 @@ import {
   Button,
   Typography,
 } from "@material-tailwind/react";
+import Swal from "sweetalert2";
 
 function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave, btnStatus }) {
   const [errors, setErrors] = useState({}); // เก็บสถานะ Error
@@ -72,11 +73,16 @@ function ExamModal({ isOpen, toggleModal, practiceData, setPracticeData, onSave,
               </div>
               <div className="sm:w-1/2">
                 <Input
-                  label="score"
+                  label="score (0-100)"
                   value={practiceData.practice_score || ""}
-                  maxLength={2}
+                  maxLength={3}
                   onChange={(e) => {
-                    const value = e.target.value.replace(/\D/g, "");
+                    let value = e.target.value.replace(/\D/g, "");
+                    if (value !== "" && Number(value) > 100) value = "100";
+                    // if (value !== "" && Number(value) > 100) {
+                    //   alert("score must be 0-100 only!");
+                    //   value = "100";
+                    // }
                     setPracticeData({ ...practiceData, practice_score: value });
                   }}
                   error={!!errors.practice_score}
