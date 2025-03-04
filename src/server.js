@@ -27,9 +27,9 @@ const WS_PORT = 5050;
 const db = mysql.createPool({
   host: "localhost",
   user: "root",
-  password: "root",
-  // password: "123456789",
-  database: "circuit_project",
+  // password: "Dream241244",
+  password: "123456789",
+  database: "project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -1408,11 +1408,9 @@ app.put("/api/update-notification", async (req, res) => {
     // res.status(200).send({ message: "notification updated successfully" });
 
     const [result] = await db.query(sql, [report_id]);
-
     if (result.affectedRows === 0) {
       return res.status(404).json({ error: "Report not found or already updated" });
     }
-
     res.status(200).send({ message: "Report read status updated successfully" });
     // แจ้งเตือน WebSocket Clients
     broadcastData();
