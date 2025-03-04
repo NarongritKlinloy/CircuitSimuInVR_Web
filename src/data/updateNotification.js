@@ -8,7 +8,7 @@ export const updateNotificationAPI = async (report_id) => {
 
     try {
          // ส่งคำขออัพเดตไปที่ API
-      const response = await axios.put('http://smith11.ce.kmitl.ac.th/api/update-notification', {    
+      const response = await axios.put('http://localhost:3000/api/update-notification', {    
         report_id: report_id,
       });
 

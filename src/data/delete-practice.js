@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 
 export const deletePracticeAPI = async ({ practice_id, practice_name }) => {
   try {
-    const response = await axios.delete(`http://smith11.ce.kmitl.ac.th/api/practice/${practice_id}`);
+    const response = await axios.delete(`http://localhost:3000/api/practice/${practice_id}`);
     console.log(response.data.message);
     if (response.status === 200) {
       await Swal.fire({
