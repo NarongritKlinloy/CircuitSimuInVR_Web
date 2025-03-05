@@ -127,7 +127,6 @@ export function SignIn() {
 
   return (
     <GoogleOAuthProvider clientId="982632867823-itk9qev06129cdh7o99brmu2f70flg0f.apps.googleusercontent.com">
-
       <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300">
         <div className="w-full lg:w-1/2 p-8">
           {/* โลโก้ */}
@@ -166,7 +165,8 @@ export function SignIn() {
                 <GoogleLogin
                   onSuccess={handleGoogleLoginSuccess}
                   onError={handleGoogleLoginError}
-                // uxMode="popup" // โหมด Popup (ค่า default)
+                  uxMode="redirect"
+                  redirectUri="https://smith11.ce.kmitl.ac.th/auth/sign-in"
                 />
               </div>
             </div>
