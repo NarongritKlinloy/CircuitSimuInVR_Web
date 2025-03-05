@@ -125,7 +125,7 @@ export function SignIn() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="536241701089-qa3r463eobp3nt5754klif634rcr9f42.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="536241701089-ej2lkeskgljs17a9dp6d3eeorfhb2f2e.apps.googleusercontent.com">
       <GoogleLogin
         onSuccess={handleGoogleLoginSuccess}
         onError={handleGoogleLoginError}
