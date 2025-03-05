@@ -125,7 +125,13 @@ export function SignIn() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="536241701089-ej2lkeskgljs17a9dp6d3eeorfhb2f2e.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="536241701089-qa3r463eobp3nt5754klif634rcr9f42.apps.googleusercontent.com">
+      <GoogleLogin
+        onSuccess={handleGoogleLoginSuccess}
+        onError={handleGoogleLoginError}
+        useOneTap
+        redirect_uri="https://smith11.ce.kmitl.ac.th/auth/sign-in"  // ✅ เปลี่ยนให้ตรงกับ Google Console
+      />
       <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300">
         <div className="w-full lg:w-1/2 p-8">
           <div className="flex justify-center mt-4 py-5 px-6">
