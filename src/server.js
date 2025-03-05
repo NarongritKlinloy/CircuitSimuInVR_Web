@@ -25,7 +25,7 @@ const WS_PORT = 5050;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "circuit-db",
+  host: "db",
   user: "node_user",
   password: "Admin123!",
   // password: "123456789",
