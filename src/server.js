@@ -7,7 +7,7 @@ import mysql from "mysql2/promise";
 import cors from "cors";
 import axios from "axios";
 import { WebSocketServer } from "ws";
-import { createServer } from "https";
+import { createServer } from "http";
 
 const app = express();
 const PORT = 5000;
@@ -25,7 +25,7 @@ const WS_PORT = 5050;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "db",
+  host: "mysql_db",
   user: "node_user",
   password: "Admin123!",
   // password: "123456789",
@@ -75,7 +75,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://backend:5000/register", {
+          fetch("http://localhost:5000/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -95,10 +95,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://backend:5000/error";
+              window.location.href = "http://localhost:5000/error";
           });
       } else {
-          window.location.href = "http://backend:5000/error";
+          window.location.href = "http://localhost:5000/error";
       }
     </script>
   `);
