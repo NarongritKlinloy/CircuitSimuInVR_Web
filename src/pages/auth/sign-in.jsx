@@ -126,7 +126,7 @@ export function SignIn() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="982632867823-itk9qev06129cdh7o99brmu2f70flg0f.apps.googleusercontent.com">
+    <GoogleOAuthProvider clientId="440768325473-uq45q4cqueh029ovpq29m16nh28rlg9f.apps.googleusercontent.com">
       <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300">
         <div className="w-full lg:w-1/2 p-8">
           {/* โลโก้ */}
