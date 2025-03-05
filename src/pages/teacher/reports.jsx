@@ -69,7 +69,7 @@ const [newReport, setNewReport] = useState({
 
   const [errors, setErrors] = useState({}); // สำหรับเก็บ errors จากการ validate
 
-// console.log("newReportData---() ---> "+newReport.report_uid+" "+newReport.report_detail+" "+newReport.report_create_date+" "+newReport.report_name)
+// console.log("newReportData---() ---> "+newReport.uid+" "+newReport.report_detail+" "+newReport.report_create_date+" "+newReport.report_name)
 // console.log(newReport.report_name)
   // const navigate = useNavigate();
 
@@ -168,8 +168,7 @@ useEffect(() => {
   const handleSave = async () => {
     console.log("Data to send to API:", newReport);
     
-
-    // ตรวจสอบว่า report_uid มีค่าหรือไม่
+    // ตรวจสอบว่า uid มีค่าหรือไม่
     if (!newReport.uid) {
       Swal.fire({
         title: "Error!",
