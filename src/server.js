@@ -75,7 +75,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://backend:5000/register", {
+          fetch("https://backend:5000/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -84,7 +84,7 @@ app.get("/callback", (req, res) => {
           .then(data => {
               console.log("Login Success:", data);
               // แจ้ง Unity ผ่าน WebSocket
-              fetch("http://localhost:8080/notify", {
+              fetch("https://localhost:8080/notify", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ accessToken: token })
@@ -95,10 +95,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://backend:5000/error";
+              window.location.href = "https://backend:5000/error";
           });
       } else {
-          window.location.href = "http://backend:5000/error";
+          window.location.href = "https://backend:5000/error";
       }
     </script>
   `);
@@ -1609,10 +1609,10 @@ app.put("/api/update-notification", async (req, res) => {
 // 9) เริ่มต้น Server
 // // -----------------------------------------------------------
 // app.listen(PORT, () => {
-//   console.log(`Server running on http://localhost:${PORT}`);
+//   console.log(`Server running on https://localhost:${PORT}`);
 // });
 
 
 server.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`Server running on https://localhost:${PORT}`);
 });

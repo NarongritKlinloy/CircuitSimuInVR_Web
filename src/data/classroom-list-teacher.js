@@ -1,7 +1,7 @@
 import axios from "axios";
 export const ClassroomData = async (uid) => {
   try {
-    const response = await axios.get(`http://backend:5000/api/classroom/${uid}`);
+    const response = await axios.get(`https://backend:5000/api/classroom/${uid}`);
     console.log(response);
     return response.data;
   } catch (error) {
@@ -12,7 +12,7 @@ export const ClassroomData = async (uid) => {
 
 export const ClassroomDataTeacher = async (uid) => {
   try {
-    const response = await axios.get(`http://backend:5000/api/classroom/teach/${uid}`);
+    const response = await axios.get(`https://backend:5000/api/classroom/teach/${uid}`);
     return response.data;
   } catch (error) {
     console.error('Error fetching classroom', error);
