@@ -75,7 +75,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://smith11.ce.kmitl.ac.th/register", {
+          fetch("http://backend:5000/register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -95,10 +95,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://smith11.ce.kmitl.ac.th/error";
+              window.location.href = "http://backend:5000/error";
           });
       } else {
-          window.location.href = "http://smith11.ce.kmitl.ac.th/error";
+          window.location.href = "http://backend:5000/error";
       }
     </script>
   `);

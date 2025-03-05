@@ -20,7 +20,7 @@ export default defineConfig({
   preview: {
     host: true,   
     port: 3000,   // พอร์ตโหมด preview
-    allowedHosts: ["smith11.ce.kmitl.ac.th"] // อนุญาตให้เข้าถึงจากโดเมนนี้
+    allowedHosts: ["backend:5000"] // อนุญาตให้เข้าถึงจากโดเมนนี้
     // หรือหากต้องการเปิดกว้างทุกโฮสต์ ให้ใส่ 'all'
     // allowedHosts: 'all'
   },

@@ -3,7 +3,7 @@ import Swal from 'sweetalert2';
 export const addPracticeAPI = async (data) => {
   try {
     console.log("Sending data:", data);
-    const result = await axios.post(`http://smith11.ce.kmitl.ac.th/api/practice`, data);
+    const result = await axios.post(`http://backend:5000/api/practice`, data);
     if (result.status == 200) {
       Swal.fire({
         title: "Added!",
