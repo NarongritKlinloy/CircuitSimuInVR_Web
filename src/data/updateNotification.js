@@ -8,7 +8,7 @@ export const updateNotificationAPI = async (report_id) => {
 
     try {
          // ส่งคำขออัพเดตไปที่ API
-      const response = await axios.put('http://backend:5000/api/update-notification', {    
+      const response = await axios.put('https://backend:5000/api/update-notification', {    
         report_id: report_id,
       });
 
