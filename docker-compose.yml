@@ -1,6 +1,25 @@
 version: '3.8'
 
 services:
+  db:
+    container_name: circuit-db
+    image: mysql:latest
+    restart: always
+    ports:
+      - "3307:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: Project_circuit
+      MYSQL_USER: node_user
+      MYSQL_PASSWORD: Admin123!
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+
   frontend:
     container_name: circuit-frontend
     image: circuit-frontend:latest
@@ -36,22 +55,9 @@ services:
       - DB_NAME=Project_circuit
     command: ["node", "src/server.js"]
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     restart: unless-stopped
-
-  db:
-    container_name: circuit-db
-    image: mysql:latest
-    restart: always
-    ports:
-      - "3307:3306"
-    environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: Project_circuit
-      MYSQL_USER: node_user
-      MYSQL_PASSWORD: Admin123!
-    volumes:
-      - db_data:/var/lib/mysql
 
 volumes:
   db_data:
