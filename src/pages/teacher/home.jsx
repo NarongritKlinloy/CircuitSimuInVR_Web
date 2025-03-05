@@ -1,35 +1,18 @@
 import React from "react";
 import {
-  Typography,
+  statisticsCardsDataTheacher,
+} from "@/data";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
+import {
   Card,
   CardHeader,
   CardBody,
-  IconButton,
-  Menu,
-  MenuHandler,
-  MenuList,
-  MenuItem,
-  Avatar,
-  Tooltip,
-  Progress,
+  Typography,
 } from "@material-tailwind/react";
-import {
-  EllipsisVerticalIcon,
-  ArrowUpIcon,
-} from "@heroicons/react/24/outline";
-import { StatisticsCard } from "@/widgets/cards";
-import { StatisticsChart } from "@/widgets/charts";
-import {
-  statisticsCardsData,
-  statisticsChartsData,
-  projectsTableData,
-  ordersOverviewData,
-} from "@/data";
-import { CheckCircleIcon, ClockIcon } from "@heroicons/react/24/solid";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
 
 export function HomeTeacher() {
+  const pic = "https://lh3.googleusercontent.com/a/ACg8ocL1tRcFiCvtbh8NYV4inznc24_VDrWJrNCY85yCcsek3vzNSg=s96-c";
   const navigate = useNavigate();
   useEffect(() => {
     try {
@@ -46,39 +29,41 @@ export function HomeTeacher() {
   }, [navigate]);
 
   return (
-    <div className="mt-12">
-      
-
-      <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-3">
-        {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (  
-          <StatisticsCard
-            key={title}
-            {...rest}
-            title={title}
-            icon={React.createElement(icon, {
-              className: "w-6 h-6 text-white",
-            })}
-          />
+    <div className="mt-12 w-full">
+      <div className="mb-6 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
+        {statisticsCardsDataTheacher.map(({ color, icon, title, value }, index) => (
+          <Card key={index} className="border border-blue-gray-100 shadow-sm h-30"> 
+            <CardHeader
+              variant="gradient"
+              color={color}
+              floated={false}
+              shadow={false}
+              className="absolute grid place-items-center"
+            >
+              {React.createElement(icon, { className: "w-20 h-20 text-white" })} 
+            </CardHeader>
+            <CardBody className="p-6 text-right">
+              <Typography variant="h5" className="font-normal text-blue-gray-600">
+                {title}
+              </Typography>
+              <Typography variant="h2" color="blue-gray">
+                {value}
+              </Typography>
+            </CardBody>
+          </Card>
         ))}
       </div>
-
-
-      <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6 md:grid-cols-2 xl:grid-cols-1">
-        {statisticsChartsData.map((props) => (
-          <StatisticsChart
-            key={props.title}
-            {...props}
-            footer={
-              <Typography
-                variant="small"
-                className="flex items-center font-normal text-blue-gray-600"
-              >
-                <ClockIcon strokeWidth={2} className="h-4 w-4 text-blue-gray-400" />
-                &nbsp;{props.footer}
+      <div className="mb-12 w-full">
+          <Card className="border border-blue-gray-100 shadow-sm h-60">
+            <CardBody className="p-6 text-center justify-center place-items-center">
+              <Typography variant="h1" className="font-normal text-blue-gray-600">
+                Welcome Teacher!
               </Typography>
-            }
-          />
-        ))}
+              <Typography variant="h4" color="blue-gray">
+                {sessionStorage.getItem("name")}
+              </Typography>
+            </CardBody>
+          </Card>
       </div>
     </div>
   );

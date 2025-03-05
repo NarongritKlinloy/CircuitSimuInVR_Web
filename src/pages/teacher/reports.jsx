@@ -168,7 +168,6 @@ useEffect(() => {
   const handleSave = async () => {
     console.log("Data to send to API:", newReport);
     
-
     // ตรวจสอบว่า uid มีค่าหรือไม่
     if (!newReport.uid) {
       Swal.fire({
