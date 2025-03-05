@@ -2,7 +2,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 export const deleteTAAPI = async (uid, class_id) => {
     try {
-        const response = await axios.delete(`http://smith11.ce.kmitl.ac.th/api/classroom/assistant/${uid}/${class_id}`);
+        const response = await axios.delete(`http://backend:5000/api/classroom/assistant/${uid}/${class_id}`);
         console.log(uid, class_id);
         if (response.status === 200) { 
             Swal.fire({

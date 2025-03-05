@@ -3,7 +3,7 @@ import axios from "axios";
 export const TeacherReportData = async () => {
   const email = sessionStorage.getItem("email"); // ดึงค่า uid จาก sessionStorage
   try {
-    const response = await axios.get(`http://smith11.ce.kmitl.ac.th/api/report?email=${email}`);
+    const response = await axios.get(`http://backend:5000/api/report?email=${email}`);
     // headers: { "x-uid": email } // ส่งค่า uid ไปใน Query Parameters
     return response.data;
   } catch (error) {

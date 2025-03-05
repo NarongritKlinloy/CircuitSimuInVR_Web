@@ -1,7 +1,7 @@
 import axios from 'axios';
 export const practiceTableData = async () => {
   try{
-    const response = await axios.get('http://smith11.ce.kmitl.ac.th/api/practice');
+    const response = await axios.get('http://backend:5000/api/practice');
     return response.data;
   } 
   catch (error) {

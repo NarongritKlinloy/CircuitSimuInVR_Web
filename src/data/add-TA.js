@@ -2,7 +2,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 export const addTAAPI = async (data) => {
   try {
-    const result = await axios.post(`http://smith11.ce.kmitl.ac.th/api/classroom/assistant`, data);
+    const result = await axios.post(`http://backend:5000/api/classroom/assistant`, data);
     if (result.status == 200) {
       Swal.fire({
         title: "Added!",
