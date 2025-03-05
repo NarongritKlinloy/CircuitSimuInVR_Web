@@ -1,6 +1,4 @@
-import {
-  Typography,
-} from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
@@ -10,6 +8,7 @@ import { addLogAPI } from "@/data/log";
 
 export function SignIn() {
   const navigate = useNavigate();
+
   useEffect(() => {
     try {
       const role = sessionStorage.getItem("role");
@@ -24,11 +23,12 @@ export function SignIn() {
   }, [navigate]);
 
   const handleGoogleLoginSuccess = (credentialResponse) => {
-  const jwt = credentialResponse.credential;
-  const payload = JSON.parse(atob(jwt.split(".")[1]));
-  const email = payload.email;
-  const name = payload.name;
+    const jwt = credentialResponse.credential;
+    const payload = JSON.parse(atob(jwt.split(".")[1]));
+    const email = payload.email;
+    const name = payload.name;
 
+    // อนุญาตเฉพาะอีเมล @kmitl.ac.th
     if (!email.endsWith("@kmitl.ac.th")) {
       Swal.fire({
         icon: "error",
@@ -38,9 +38,15 @@ export function SignIn() {
       });
       return;
     }
- 
-     // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
-    if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th"||email==="boomza53214@gmail.com") {
+
+    // เงื่อนไขพิเศษสำหรับ email บางรายการ
+    if (
+      email === "65015041@kmitl.ac.th" ||
+      email === "65015123@kmitl.ac.th" ||
+      email === "65015101@kmitl.ac.th" ||
+      email === "65015168@kmitl.ac.th" ||
+      email === "boomza53214@gmail.com"
+    ) {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -61,25 +67,23 @@ export function SignIn() {
           sessionStorage.setItem("role", role);
           sessionStorage.setItem("email", email);
           sessionStorage.setItem("name", name);
+
+          const date = new Date().toISOString().slice(0, 19).replace("T", " ");
           if (role === "admin") {
-            const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 2, date);
-            addLogAPI(sessionStorage.getItem("email"), 0, 0);
-            navigate("/dashboard/home"); // Redirect ไปหน้า Admin
+            signInAPI(email, name, 2, date);
+            addLogAPI(email, 0, 0);
+            navigate("/dashboard/home");
           } else if (role === "teacher") {
-            const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
-            addLogAPI(sessionStorage.getItem("email"), 0, 0);
-            navigate("/teacher/home"); // Redirect ไปหน้า Teacher
+            signInAPI(email, name, 1, date);
+            addLogAPI(email, 0, 0);
+            navigate("/teacher/home");
           }
         }
       });
       return;
     }
-    
 
-    
-
+    // ตรวจสอบว่าเป็นนิสิตหรือไม่ (usernamePart เป็นตัวเลข 8 หลัก)
     const usernamePart = email.split("@")[0];
     const isNumber = /^\d{8}$/;
 
@@ -93,6 +97,7 @@ export function SignIn() {
         navigate("/auth/sign-in");
       });
     } else {
+      // อาจารย์
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -102,9 +107,10 @@ export function SignIn() {
         sessionStorage.setItem("email", email);
         sessionStorage.setItem("name", name);
         sessionStorage.setItem("role", "teacher");
-        const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
-        addLogAPI(sessionStorage.getItem("email"), 0, 0);
+
+        const date = new Date().toISOString().slice(0, 19).replace("T", " ");
+        signInAPI(email, name, 1, date);
+        addLogAPI(email, 0, 0);
         navigate("/teacher/home");
       });
     }
@@ -121,34 +127,29 @@ export function SignIn() {
 
   return (
     <GoogleOAuthProvider clientId="982632867823-itk9qev06129cdh7o99brmu2f70flg0f.apps.googleusercontent.com">
-       
-       <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300"> {/* เปลี่ยนสีพื้นหลัง */}
+      <section className="flex flex-wrap items-center justify-center min-h-screen bg-gray-300">
         <div className="w-full lg:w-1/2 p-8">
-          {/* กล่องหลัก */}
-
-          {/* เพิ่มรูปโลโก้ */}
+          {/* โลโก้ */}
           <div className="flex justify-center mt-4 py-5 px-6">
             <img
-              src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/KMITL_Sublogo.svg/768px-KMITL_Sublogo.svg.png" // ลิงก์ของโลโก้
-              alt="Logo"
-              className="w-64 h-auto" // ปรับขนาดโลโก้
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/KMITL_Sublogo.svg/768px-KMITL_Sublogo.svg.png"
+              alt="KMITL Logo"
+              className="w-64 h-auto"
             />
             <img
-              src="https://img5.pic.in.th/file/secure-sv1/DALLE-2025-01-05-14.14.45---A-bright-and-futuristic-circular-logo-design-for-a-virtual-reality-VR-application-focused-on-circuit-building.-The-logo-features-a-sleek-VR-headset.png" // ลิงก์ของโลโก้
-              alt="Logo"
-              className="w-32 h-auto" // ปรับขนาดโลโก้
+              src="https://img5.pic.in.th/file/secure-sv1/DALLE-2025-01-05-14.14.45---A-bright-and-futuristic-circular-logo-design-for-a-virtual-reality-VR-application-focused-on-circuit-building.-The-logo-features-a-sleek-VR-headset.png"
+              alt="VR Logo"
+              className="w-32 h-auto"
             />
           </div>
 
-
           <div className="bg-white border border-gray-300 shadow-lg rounded-lg overflow-hidden">
-            {/* ส่วนหัวสีส้ม */}
             <div className="bg-orange-500 text-white py-4 px-6">
-              <h1 className="text-lg font-bold text-center">KMITL Registration System</h1>
+              <h1 className="text-lg font-bold text-center">
+                KMITL Registration System
+              </h1>
             </div>
 
-
-            {/* เนื้อหาด้านใน */}
             <div className="p-6 text-center">
               <Typography variant="h3" className="font-bold text-gray-800">
                 ยืนยันตัวตนด้วยบริการของ Google
@@ -164,16 +165,15 @@ export function SignIn() {
                 <GoogleLogin
                   onSuccess={handleGoogleLoginSuccess}
                   onError={handleGoogleLoginError}
+                  // uxMode="popup" // โหมด Popup (ค่า default)
                 />
               </div>
             </div>
           </div>
         </div>
 
-
         <div className="hidden lg:block w-full lg:w-1/2">
           <img
-            //src="https://img2.pic.in.th/pic/DALLE-2024-12-23-12.47.png"
             src="https://img2.pic.in.th/pic/DALLE-2025-01-05-14.21.58---A-person-wearing-a-sleek-and-modern-VR-headset-with-a-distinctively-Thai-cultural-twist.-The-individual-is-dressed-in-a-contemporary-Thai-inspired-out.jpg"
             alt="Login Illustration"
             className="w-full h-full object-cover rounded-lg"
@@ -181,7 +181,6 @@ export function SignIn() {
         </div>
       </section>
     </GoogleOAuthProvider>
-
   );
 }
 
