@@ -1,6 +1,44 @@
 version: '3.8'
 
 services:
+  frontend:
+    container_name: circuit-frontend
+    image: circuit-frontend:latest
+    build: .
+    ports:
+      - "80:3000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+      - REACT_APP_API_URL=http://backend:5000  # ให้ Frontend ใช้ URL นี้
+    command: ["npm", "run", "preview"]
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    container_name: circuit-backend
+    image: circuit-backend:latest
+    build: .
+    ports:
+      - "5001:5000"
+    volumes:
+      - .:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=production
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_USER=node_user
+      - DB_PASSWORD=Admin123!
+      - DB_NAME=Project_circuit
+    command: ["node", "src/server.js"]
+    depends_on:
+      - db
+    restart: unless-stopped
+
   db:
     container_name: circuit-db
     image: mysql:latest
@@ -14,62 +52,6 @@ services:
       MYSQL_PASSWORD: Admin123!
     volumes:
       - db_data:/var/lib/mysql
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
-      interval: 10s
-      retries: 5
-      start_period: 20s
-
-  frontend:
-    container_name: circuit-frontend
-    image: circuit-frontend:latest
-    build: .
-    environment:
-      - NODE_ENV=production
-      - REACT_APP_API_URL=https://smith11.ce.kmitl.ac.th/api  # เปลี่ยนให้ใช้ HTTPS
-    depends_on:
-      - backend
-    restart: unless-stopped
-
-  backend:
-    container_name: circuit-backend
-    image: circuit-backend:latest
-    build: .
-    environment:
-      - NODE_ENV=production
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_USER=node_user
-      - DB_PASSWORD=Admin123!
-      - DB_NAME=Project_circuit
-    depends_on:
-      db:
-        condition: service_healthy
-    restart: unless-stopped
-
-  nginx:
-    image: nginx:latest
-    container_name: circuit-nginx
-    restart: always
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    depends_on:
-      - backend
-      - frontend
-
-  certbot:
-    image: certbot/certbot
-    container_name: certbot
-    volumes:
-      - ./certbot/www:/var/www/certbot
-      - ./certbot/conf:/etc/letsencrypt
-    entrypoint: ["certbot"]
 
 volumes:
   db_data:
-  certbot_data:
