@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const updateNotificationAPI = async (report_id) => {
     if (!report_id) {
-        console.error("Error: Missing required parameters (recipient_uid or report_id)");
+        console.error("Error: Missing required parameters (report_id)");
         return { error: "Missing required parameters" };
     }
 

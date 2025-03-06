@@ -591,6 +591,79 @@ app.get("/api/practices/count", async (req, res) => {
   }
 });
 
+// นับจำนวน student ทั้งหมดที่อยู่ใน classroom ของ teacher
+app.get("/api/student_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT count(*) AS studentCount 
+                FROM circuit_project.teach t 
+                JOIN circuit_project.enrollment en ON en.class_id = t.class_id
+                WHERE t.uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const studentCount = rows[0].studentCount;
+    res.status(200).json({ count: studentCount });
+  } catch (err) {
+    console.error("Error counting user:", err);
+    res.status(500).json({ error: "Count user failed" });
+  }
+});
+
+// นับจำนวน classroom ทั้งหมดที่ teacher มี
+app.get("/api/classroom_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT count(*) AS classroomCount
+                FROM circuit_project.teach
+                WHERE uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const classroomCount = rows[0].classroomCount;
+    res.status(200).json({ count: classroomCount });
+  } catch (err) {
+    console.error("Error counting classroom:", err);
+    res.status(500).json({ error: "Count classroom failed" });
+  }
+});
+
+// นับจำนวน practice ทั้งหมดที่ teacher เปิด
+app.get("/api/practice_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT
+                SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS practiceOpen,
+                COUNT(*) AS practiceCount
+                FROM
+                circuit_project.teach t
+                JOIN
+                circuit_project.classroompractice cp ON cp.class_id = t.class_id
+                WHERE
+                t.uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const practiceOpen = rows[0].practiceOpen || 0;
+    const practiceCount = rows[0].practiceCount || 0;
+    res.status(200).json({ open: practiceOpen, count: practiceCount });
+  } catch (err) {
+    console.error("Error counting classroom:", err);
+    res.status(500).json({ error: "Count classroom failed" });
+  }
+});
+
+// นับจำนวน report ที่ admin ยังไม่อ่าน
+app.get("/api/report_teacher/:uid", async (req, res) => {
+  const { uid } = req.params;
+  try {
+    const sql = `SELECT COUNT(*) AS reportCount,
+    SUM(CASE WHEN report_isread = 1 THEN 1 ELSE 0 END) AS reportOpen
+    FROM report WHERE report_isread = 0 AND uid = ?`;
+    const [rows] = await db.query(sql, [uid]);
+    const reportOpen = rows[0].reportOpen || 0;
+    const reportCount = rows[0].reportCount || 0;
+    res.status(200).json({ open: reportOpen, count: reportCount });
+  } catch (err) {
+    console.error("Error counting report:", err);
+    res.status(500).json({ error: "Count report failed" });
+  }
+});
+
 // -------------------------- ส่วน Log -------------------------- //
 // เพิ่ม log
 app.post("/api/log/visit", async (req, res) => {
@@ -607,13 +680,14 @@ app.post("/api/log/visit", async (req, res) => {
     res.status(500).json({ error: "Add log failed" });
   }
 });
+
 // ดึงข้อมูลการเข้าใช้งานย้อนหลัง 7 วัน
 app.get("/api/log/visits/7days", async (req, res) => {
   try {
     const [rows] = await db.query(`
       SELECT DATE(log_time) AS date, COUNT(*) AS count
       FROM log
-      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE()
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 0
       GROUP BY DATE(log_time)
       ORDER BY date ASC;
     `);
@@ -642,6 +716,49 @@ app.get("/api/log/visits/7days", async (req, res) => {
       formattedData[date] = foundRow ? foundRow.count : 0;
     });
 
+    return res.status(200).json(formattedData);
+  } catch (error) {
+    console.error('Error fetching log data:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// ดึงข้อมูลการเข้าใช้แบบทดสอบย้อนหลัง 7 วัน
+app.get("/api/log/practice/7days", async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT DATE(log_time) AS date, p.practice_name, COUNT(*) AS count
+      FROM log l JOIN practice p ON p.practice_id = l.practice_id
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 1
+      GROUP BY DATE(log_time), p.practice_name
+      ORDER BY date ASC, p.practice_name ASC;
+    `);
+
+    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    const dates = [];
+    for (let i = 0; i < 7; i++) {
+      const date = new Date();
+      date.setDate(date.getDate() - (6 - i));
+      dates.push(date.toISOString().split('T')[0]);
+    }
+
+    // สร้าง object โดยมีวันที่เป็น key และ array ของ practice_id และจำนวนเป็น value
+    const formattedData = {};
+    dates.forEach((date) => {
+      formattedData[date] = [];
+      const filteredRows = rows.filter(row => {
+        const rowDate = new Date(row.date);
+        // แปลง UTC เป็น +07:00 (โดยประมาณ)
+        rowDate.setHours(rowDate.getHours() + 7);
+        return rowDate.toISOString().split('T')[0] === date;
+      });
+      filteredRows.forEach(row => {
+        formattedData[date].push({
+          practice_name: row.practice_name,
+          count: row.count
+        });
+      });
+    });
     return res.status(200).json(formattedData);
   } catch (error) {
     console.error('Error fetching log data:', error);
@@ -865,15 +982,7 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
-<<<<<<< HEAD
                         LEFT JOIN PracticeSave ps
-=======
-<<<<<<< HEAD
-                        LEFT JOIN practice_save ps
-=======
-                        LEFT JOIN PracticeSave ps
->>>>>>> 7dd9ce61233083a6dc349131f5debe0645faf130
->>>>>>> 2508e58 (Add Jenkinsfile and Docker)
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?

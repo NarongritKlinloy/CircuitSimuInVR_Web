@@ -11,7 +11,7 @@
 //       const response = await axios.get("https://smith11.ce.kmitl.ac.th/api/adminreport");
 //       setReports(response.data);
 //     } catch (error) {
-//       console.error("❌ Error fetching reports:", error);
+//       console.error("Error fetching reports:", error);
 //     }
 //   };
 

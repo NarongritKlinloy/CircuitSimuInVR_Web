@@ -73,7 +73,7 @@ export function DashboardNavbar() {
 /****************************************************************************************************** */
 const [notificationCount, setNotificationCount] = useState(0); // เก็บจำนวนแจ้งเตือน
 const [isMenuOpen, setIsMenuOpen] = useState(false); // ควบคุมการเปิด/ปิดเมนูแจ้งเตือน
-console.log("isMenuOpen -- "+isMenuOpen)
+// console.log("isMenuOpen -- "+isMenuOpen)
 const menuRef = useRef(null); // ใช้ ref เพื่อตรวจจับการคลิกนอกเมนู
 let pollingInterval = null;
 
@@ -100,7 +100,7 @@ useEffect(() => {
 
     ws.onopen = () => {
 
-      console.log("WebSocket Connected to 5050");
+      // console.log("WebSocket Connected to 5050");
 
       // **ถ้า WebSocket กลับมา → หยุด API Polling**
       if (pollingInterval) {
@@ -261,8 +261,10 @@ useEffect(() => {
                 <BellIcon className="h-5 w-5 text-blue-gray-500" />
               </IconButton>
             </MenuHandler> */}
-
+            
+          {userRole === "admin" && (
             <MenuHandler>
+           
               <div className="relative">
                 {/* <IconButton variant="text" color="blue-gray"> */}
                 <IconButton
@@ -271,7 +273,9 @@ useEffect(() => {
                   onClick={toggleMenu}
                   className="relative"
                 >
+                  
                   <BellIcon className="h-6 w-6 text-blue-gray-500" />
+
                 </IconButton>
                 
                  {/* Badge สำหรับแสดงจำนวนแจ้งเตือนกับ teacher*/}
@@ -280,19 +284,23 @@ useEffect(() => {
                   </span> */}
 
                 {/* Badge สำหรับแสดงจำนวนแจ้งเตือนที่ยังไม่ได้อ่าน */}
-                {userRole === "admin" && notificationCount > 0 && (
+                {/* {userRole === "admin" && notificationCount > 0 && (
                   <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
                     {notificationCount}
                     <NotificationBellAdmin isOpen={isMenuOpen} toggleMenu={toggleMenu}/>
                   </span>
                   
-                )}
+                )} */}
 
-                
+                  <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full px-2">
+                    {notificationCount}
+                    <NotificationBellAdmin isOpen={isMenuOpen} toggleMenu={toggleMenu}/>
+                  </span>
 
               </div>
-            </MenuHandler>
 
+            </MenuHandler>
+          )}
             
             {/* <MenuList className="w-max border-0"> */}
             {/* {userRole === "admin" && notificationCount > 0 && (
