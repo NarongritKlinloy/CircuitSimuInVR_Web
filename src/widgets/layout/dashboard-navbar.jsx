@@ -82,7 +82,9 @@ let pollingInterval = null;
 
  const fetchNotifications = async () => {
   try {
+
     const response = await axios.get("https://smith11.ce.kmitl.ac.th/api/countnotifications");
+
     if (typeof response.data.unread_count === "number") {
       setNotificationCount(response.data.unread_count);
     }
@@ -96,6 +98,7 @@ useEffect(() => {
   /**  ฟังก์ชันเริ่ม WebSocket */
 
   const connectWebSocket = () => {
+
     const ws = new WebSocket("ws://smith11.ce.kmitl.ac.th:8181");
 
     ws.onopen = () => {

@@ -7,7 +7,7 @@ import {
   DocumentTextIcon,
   FolderIcon
 } from "@heroicons/react/24/solid";
-import { Home, Profile, Tables, Notifications, ExamManagement, ClassroomPractice } from "@/pages/dashboard";
+import { Home,  Tables, Notifications, ExamManagement, ClassroomPractice } from "@/pages/dashboard";
 import { SignIn, SignUp } from "@/pages/auth";
 
 const icon = {
@@ -46,13 +46,6 @@ export const routes = [
         path: "/Users",
         element: <Tables />,
       },
-
-      // {
-      //   icon: <UserCircleIcon {...icon} />,
-      //   name: "Admin",
-      //   path: "/profile",
-      //   element: <Profile />,
-      // },
       {
         icon: <DocumentTextIcon {...icon} />,
         name: "Feedback",

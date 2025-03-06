@@ -39,7 +39,9 @@ export function Notifications() {
 
   useEffect(() => {
     const connectWebSocket = () => {
+
       const ws = new WebSocket("ws://smith11.ce.kmitl.ac.th:8181");
+
 
       ws.onopen = () => {
 

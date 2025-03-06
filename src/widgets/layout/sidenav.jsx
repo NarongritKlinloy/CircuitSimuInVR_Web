@@ -36,7 +36,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
 
               <Typography
                 variant="h5"
-                color={sidenavType === "dark" ? "white" : "blue-gray"}
+                color={sidenavType === "gray" ? "white" : "blue-gray"}
                 className="font-bold"
               >
                 {brandName}
@@ -62,7 +62,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                   <li className="mx-3.5 mt-4 mb-2">
                     <Typography
                       variant="small"
-                      color={sidenavType === "dark" ? "white" : "blue-gray"}
+                      color={sidenavType === "gray" ? "white" : "blue-gray"}
                       className="font-black uppercase opacity-75"
                     >
                       {title}
@@ -80,7 +80,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
                             color={
                               isActive
                                 ? sidenavColor
-                                : sidenavType === "dark"
+                                : sidenavType === "gray"
                                   ? "white"
                                   : "blue-gray"
                             }

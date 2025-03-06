@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 3000;     //แก้ตรงนี้
+const PORT = 5000;     //แก้ตรงนี้
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
@@ -53,16 +53,16 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
 wss.on("connection", (ws) => {
-  console.log("✅ Unity Connected via WebSocket");
-  ws.send("✅ Connected to WebSocket Server");
+  console.log("Unity Connected via WebSocket");
+  ws.send("Connected to WebSocket Server");
 
   ws.on("message", (message) => {
-    console.log(`📩 Received: ${message}`);
-    ws.send(`✅ Received: ${message}`);
+    console.log(`Received: ${message}`);
+    ws.send(`Received: ${message}`);
   });
 
   ws.on("close", () => {
-    console.log("❌ Unity Disconnected");
+    console.log("Unity Disconnected");
   });
 });
 
@@ -188,7 +188,7 @@ function notifyUnityError(accessToken, email) {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(payload);
-      console.log("📡 Sent error message to Unity:", payload);
+      console.log(" Sent error message to Unity:", payload);
     }
   });
 }
@@ -596,8 +596,8 @@ app.get("/api/student_teacher/:uid", async (req, res) => {
   const { uid } = req.params;
   try {
     const sql = `SELECT count(*) AS studentCount 
-                FROM circuit_project.teach t 
-                JOIN circuit_project.enrollment en ON en.class_id = t.class_id
+                FROM teach t 
+                JOIN enrollment en ON en.class_id = t.class_id
                 WHERE t.uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const studentCount = rows[0].studentCount;
@@ -613,7 +613,7 @@ app.get("/api/classroom_teacher/:uid", async (req, res) => {
   const { uid } = req.params;
   try {
     const sql = `SELECT count(*) AS classroomCount
-                FROM circuit_project.teach
+                FROM teach
                 WHERE uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const classroomCount = rows[0].classroomCount;
@@ -632,9 +632,9 @@ app.get("/api/practice_teacher/:uid", async (req, res) => {
                 SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS practiceOpen,
                 COUNT(*) AS practiceCount
                 FROM
-                circuit_project.teach t
+                teach t
                 JOIN
-                circuit_project.classroompractice cp ON cp.class_id = t.class_id
+                classroompractice cp ON cp.class_id = t.class_id
                 WHERE
                 t.uid = ?`;
     const [rows] = await db.query(sql, [uid]);
@@ -653,7 +653,7 @@ app.get("/api/report_teacher/:uid", async (req, res) => {
   try {
     const sql = `SELECT COUNT(*) AS reportCount,
     SUM(CASE WHEN report_isread = 1 THEN 1 ELSE 0 END) AS reportOpen
-    FROM report WHERE report_isread = 0 AND uid = ?`;
+    FROM report WHERE uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const reportOpen = rows[0].reportOpen || 0;
     const reportCount = rows[0].reportCount || 0;
@@ -1535,8 +1535,6 @@ app.post("/api/addreport", async (req, res) => {
 
 
 /************************** ดึงข้อมูล Report ฝั่ง Admin   WebSocket ******************************/
-//const wssReact = new WebSocketServer({ port: WS_PORT });
-//  ฟังก์ชันดึงจำนวนแจ้งเตือนใหม่ (is_read = 0)
 
 const fetchUnreadNotifications = async () => {
   try {

@@ -2,7 +2,6 @@ import axios from "axios";
 export const ClassroomData = async (uid) => {
   try {
     const response = await axios.get(`https://smith11.ce.kmitl.ac.th/api/classroom/${uid}`);
-    console.log(response);
     return response.data;
   } catch (error) {
     console.error('Error fetching classroom', error);

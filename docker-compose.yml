@@ -12,7 +12,7 @@ services:
   #     - /app/node_modules
   #   environment:
   #     - NODE_ENV=production
-  #     - REACT_APP_API_URL=https://smith11.ce.kmitl.ac.th  # ให้ Frontend ใช้ URL นี้
+  #     - REACT_APP_API_URL=http://localhost:5000  # ให้ Frontend ใช้ URL นี้
   #   command: ["npm", "run", "preview"]
   #   depends_on:
   #     - backend
