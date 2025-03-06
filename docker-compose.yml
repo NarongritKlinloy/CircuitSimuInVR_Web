@@ -23,7 +23,9 @@ services:
     image: circuit-backend:latest
     build: .
     ports:
-      - "3000:3000"
+      - "3000:3000"    # Express
+      - "8181:8181"    # WebSocket #1
+      - "5050:5050"    # WebSocket #2
     volumes:
       - .:/app
       - /app/node_modules
