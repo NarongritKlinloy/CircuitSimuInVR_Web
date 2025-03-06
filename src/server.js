@@ -47,7 +47,11 @@ const db = mysql.createPool({
 })();
 
 // 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
-const wss = new WebSocketServer({ port: 8181 });
+const wss = new WebSocketServer({ server });
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+});
 wss.on("connection", (ws) => {
   console.log("Unity Connected via WebSocket");
   ws.send("Connected to WebSocket Server");
