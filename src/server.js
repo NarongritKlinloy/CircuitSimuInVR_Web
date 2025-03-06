@@ -1592,7 +1592,7 @@ const broadcastData = async () => {
     reports: reports,
   });
 
-  wssReact.clients.forEach((client) => {
+  wss.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(data);
     }
@@ -1645,7 +1645,7 @@ app.get("/api/adminreport", async (req, res) => {
 
 
 //  WebSocket Connection
-wssReact.on("connection", (ws) => {
+wss.on("connection", (ws) => {
   // console.log(" Client connected to WebSocket 5050");
 
   //  ส่งจำนวนแจ้งเตือนให้ Client ที่เพิ่งเชื่อมต่อ
