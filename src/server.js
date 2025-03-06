@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 const server = createServer(app);
 
 // สร้าง Port WebSocket Server ที่พอร์ต 5050
-//const WS_PORT = 5050;
+const WS_PORT = 8181;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
@@ -47,14 +47,23 @@ const db = mysql.createPool({
 })();
 
 // 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ port: WS_PORT });
 
 server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
 wss.on("connection", (ws) => {
-  console.log("Unity Connected via WebSocket");
-  ws.send("Connected to WebSocket Server");
+  console.log("✅ Unity Connected via WebSocket");
+  ws.send("✅ Connected to WebSocket Server");
+
+  ws.on("message", (message) => {
+    console.log(`📩 Received: ${message}`);
+    ws.send(`✅ Received: ${message}`);
+  });
+
+  ws.on("close", () => {
+    console.log("❌ Unity Disconnected");
+  });
 });
 
 // ฟังก์ชันแจ้งเตือน Unity ผ่าน WebSocket (ปรับให้ส่ง userId ไปด้วย)
@@ -166,19 +175,6 @@ app.post("/register", async (req, res) => {
     console.error("Google Token Verification Failed:", error);
     return res.status(400).json({ error: "Invalid Google Token" });
   }
-});
-
-
-wss.on("connection", function connection(ws) {
-  console.log("Client connected to WebSocket");
-
-  ws.on("message", function incoming(message) {
-    console.log("Received message from client:", message);
-  });
-
-  ws.on("close", () => {
-    console.log("Client disconnected");
-  });
 });
 
 
