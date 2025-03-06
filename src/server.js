@@ -664,6 +664,25 @@ app.get("/api/report_teacher/:uid", async (req, res) => {
   }
 });
 
+// -------------------------- ส่วน Log unity  -------------------------- //
+app.post("/api/log/visitunity", async (req, res) => {
+  try {
+    const { uid, log_type, practice_id } = req.body;
+
+    if (!uid || log_type === undefined || practice_id === undefined) {
+      return res.status(400).json({ error: "Missing log data" });
+    }
+
+    const sql = `INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, NOW(), ?, ?)`;
+    await db.query(sql, [uid, log_type, practice_id]); // ✅ ใช้ await db.query() ได้เลย
+
+    return res.status(200).json({ message: "Added log successfully" });
+  } catch (err) {
+    console.error("❌ Error adding log:", err);
+    return res.status(500).json({ error: "Add log failed" });
+  }
+});
+
 // -------------------------- ส่วน Log -------------------------- //
 // เพิ่ม log
 app.post("/api/log/visit", async (req, res) => {
