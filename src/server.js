@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 const server = createServer(app);
 
 // สร้าง Port WebSocket Server ที่พอร์ต 5050
-const WS_PORT = 5050;
+//const WS_PORT = 5050;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
@@ -84,7 +84,7 @@ app.get("/callback", (req, res) => {
           .then(data => {
               console.log("Login Success:", data);
               // แจ้ง Unity ผ่าน WebSocket
-              fetch("http://smith11.ce.kmitl.ac.th/notify", {
+              fetch("http://smith11.ce.kmitl.ac.th:8181/notify", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ accessToken: token })
@@ -1535,7 +1535,7 @@ app.post("/api/addreport", async (req, res) => {
 
 
 /************************** ดึงข้อมูล Report ฝั่ง Admin   WebSocket ******************************/
-const wssReact = new WebSocketServer({ port: WS_PORT });
+//const wssReact = new WebSocketServer({ port: WS_PORT });
 //  ฟังก์ชันดึงจำนวนแจ้งเตือนใหม่ (is_read = 0)
 
 const fetchUnreadNotifications = async () => {
