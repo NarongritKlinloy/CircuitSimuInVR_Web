@@ -2,7 +2,7 @@ import axios from 'axios';
 import Swal from 'sweetalert2';
 export const editClassroomAPI = async (id, data) => {
     try {
-        const result = await axios.put(`http://localhost:5000/api/classroom/${id}`, data);
+        const result = await axios.put(`https://smith11.ce.kmitl.ac.th/api/classroom/${id}`, data);
         if (result.status == 200) {
             Swal.fire({
                 title: "Updated!",

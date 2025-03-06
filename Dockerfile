@@ -15,7 +15,7 @@ COPY . .
 RUN npm run build
 
 # เปิดพอร์ต 5173 (Vite Default Port)
-EXPOSE 5173
+EXPOSE 3000
 
 # รันแอป
 CMD ["npm", "run", "preview"]

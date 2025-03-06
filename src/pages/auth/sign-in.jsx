@@ -1,6 +1,4 @@
-import {
-  Typography,
-} from "@material-tailwind/react";
+import { Typography } from "@material-tailwind/react";
 import { useNavigate } from "react-router-dom";
 import { GoogleOAuthProvider, GoogleLogin } from "@react-oauth/google";
 import Swal from "sweetalert2";
@@ -10,24 +8,16 @@ import { addLogAPI } from "@/data/log";
 
 export function SignIn() {
   const navigate = useNavigate();
+
   useEffect(() => {
-    try {
-      const role = sessionStorage.getItem("role");
-      if (role === "teacher") {
-        navigate("/teacher/home");
-      } else if (role === "admin") {
-        navigate("/dashboard/home");
-      }
-    } catch (error) {
-      console.error("Error accessing sessionStorage:", error);
-    }
-  }, [navigate]);
+    sessionStorage.clear();
+  }, []);
 
   const handleGoogleLoginSuccess = (credentialResponse) => {
-  const jwt = credentialResponse.credential;
-  const payload = JSON.parse(atob(jwt.split(".")[1]));
-  const email = payload.email;
-  const name = payload.name;
+    const jwt = credentialResponse.credential;
+    const payload = JSON.parse(atob(jwt.split(".")[1]));
+    const email = payload.email;
+    const name = payload.name;
 
     if (!email.endsWith("@kmitl.ac.th")) {
       Swal.fire({
@@ -38,9 +28,15 @@ export function SignIn() {
       });
       return;
     }
- 
-     // เงื่อนไขพิเศษสำหรับ email 65015xxx@kmitl.ac.th
-    if (email === "65015041@kmitl.ac.th"||email === "65015123@kmitl.ac.th"||email === "65015101@kmitl.ac.th"||email === "65015168@kmitl.ac.th"||email==="boomza53214@gmail.com") {
+
+    // เงื่อนไขพิเศษสำหรับ email ทีม Dev
+    if (
+      email === "65015041@kmitl.ac.th" ||
+      email === "65015123@kmitl.ac.th" ||
+      email === "65015101@kmitl.ac.th" ||
+      email === "65015168@kmitl.ac.th" ||
+      email === "boomza53214@gmail.com"
+    ) {
       Swal.fire({
         icon: "success",
         title: "Login Successful",
@@ -53,7 +49,8 @@ export function SignIn() {
         inputPlaceholder: "Select your role",
         confirmButtonText: "Proceed",
         customClass: {
-          confirmButton: "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
+          confirmButton:
+            "bg-blue-500 text-white rounded px-4 py-2 hover:bg-blue-600",
         },
       }).then((result) => {
         if (result.isConfirmed) {
@@ -61,25 +58,24 @@ export function SignIn() {
           sessionStorage.setItem("role", role);
           sessionStorage.setItem("email", email);
           sessionStorage.setItem("name", name);
+
+          const date = new Date().toISOString().slice(0, 19).replace("T", " ");
+
           if (role === "admin") {
-            const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 2, date);
-            addLogAPI(sessionStorage.getItem("email"), 0, 0);
-            navigate("/dashboard/home"); // Redirect ไปหน้า Admin
+            signInAPI(email, name, 2, date);
+            addLogAPI(email, 0, 0);
+            navigate("/dashboard/home");
           } else if (role === "teacher") {
-            const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-            signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
-            addLogAPI(sessionStorage.getItem("email"), 0, 0);
-            navigate("/teacher/home"); // Redirect ไปหน้า Teacher
+            signInAPI(email, name, 1, date);
+            addLogAPI(email, 0, 0);
+            navigate("/teacher/home");
           }
         }
       });
       return;
     }
-    
 
-    
-
+    // ตรวจสอบรูปแบบอีเมล ถ้าขึ้นต้นเป็นตัวเลข 8 หลัก
     const usernamePart = email.split("@")[0];
     const isNumber = /^\d{8}$/;
 
@@ -102,9 +98,11 @@ export function SignIn() {
         sessionStorage.setItem("email", email);
         sessionStorage.setItem("name", name);
         sessionStorage.setItem("role", "teacher");
-        const date = new Date().toISOString().slice(0, 19).replace('T', ' ');
-        signInAPI(sessionStorage.getItem("email"), sessionStorage.getItem("name"), 1, date);
-        addLogAPI(sessionStorage.getItem("email"), 0, 0);
+
+        const date = new Date().toISOString().slice(0, 19).replace("T", " ");
+        signInAPI(email, name, 1, date);
+        addLogAPI(email, 0, 0);
+
         navigate("/teacher/home");
       });
     }
@@ -120,29 +118,22 @@ export function SignIn() {
   };
 
   return (
-    <GoogleOAuthProvider clientId="289166698407-3sivu8jo52aveuuh78kg8n17agseta42.apps.googleusercontent.com">
-       
-       <section className="flex flex-wrap items-center justify-center min-h-screen bg-[url('https://img5.pic.in.th/file/secure-sv1/65395415_9563801.jpg')] bg-cover bg-center"> {/* เปลี่ยนสีพื้นหลัง */}
+    <GoogleOAuthProvider clientId="536241701089-ej2lkeskgljs17a9dp6d3eeorfhb2f2e.apps.googleusercontent.com">
+      <section className="flex flex-wrap items-center justify-center min-h-screen bg-[url('https://img5.pic.in.th/file/secure-sv1/65395415_9563801.jpg')] bg-cover bg-center">
         <div className="w-full lg:w-1/2 p-8">
-          {/* กล่องหลัก */}
-
           <div className="bg-white shadow-lg rounded-lg overflow-hidden">
-
-            {/* เพิ่มรูปโลโก้ */}
             <div className="flex justify-center mt-4 py-5 px-6">
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/KMITL_Sublogo.svg/768px-KMITL_Sublogo.svg.png" // ลิงก์ของโลโก้
-                alt="Logo"
-                className="w-64 h-auto" // ปรับขนาดโลโก้
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/KMITL_Sublogo.svg/768px-KMITL_Sublogo.svg.png"
+                alt="KMITL Logo"
+                className="w-64 h-auto"
               />
               <img
-                src="https://img5.pic.in.th/file/secure-sv1/11zon_croppedba3732dd0cac4716.png" // ลิงก์ของโลโก้
-                alt="Logo"
-                className="w-32 h-auto" // ปรับขนาดโลโก้
+                src="https://img5.pic.in.th/file/secure-sv1/11zon_croppedba3732dd0cac4716.png"
+                alt="VR Logo"
+                className="w-32 h-auto"
               />
             </div>
-
-            {/* เนื้อหาด้านใน */}
             <div className="p-6 text-center">
               <Typography variant="h3" className="font-bold text-gray-800">
                 KMITL Registration System
@@ -154,10 +145,12 @@ export function SignIn() {
               >
                 ใช้ Email Account ของสถาบันฯ
               </Typography>
-              <div className="max-w-md mx-auto mt-6 mb-4">
+              {/* เพิ่ม flex justify-center เพื่อให้ปุ่มอยู่ตรงกลาง */}
+              <div className="max-w-md mx-auto mt-6 mb-4 flex justify-center">
                 <GoogleLogin
                   onSuccess={handleGoogleLoginSuccess}
                   onError={handleGoogleLoginError}
+                  prompt="select_account"
                 />
               </div>
             </div>
@@ -165,7 +158,6 @@ export function SignIn() {
         </div>
       </section>
     </GoogleOAuthProvider>
-
   );
 }
 

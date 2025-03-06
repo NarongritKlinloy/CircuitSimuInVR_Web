@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;     //แก้ตรงนี้
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
@@ -25,21 +25,11 @@ const WS_PORT = 5050;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-
-  // for localhost
-  host: "localhost",
-  user: "root",
-  // password: "Dream241244",
-  password: "root",
-  database: "circuit_project",
-
-  // for VM
-  // host: "mysql_db",
-  // user: "node_user",
-  // password: "Admin123!",
+  host: "db",
+  user: "node_user",
+  password: "Admin123!",
   // password: "123456789",
-  // database: "Project_circuit",
-
+  database: "Project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -85,7 +75,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://localhost:5000/register", {
+          fetch("http://smith11.ce.kmitl.ac.th//register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -105,10 +95,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://localhost:5000/error";
+              window.location.href = "http://smith11.ce.kmitl.ac.th//error";
           });
       } else {
-          window.location.href = "http://localhost:5000/error";
+          window.location.href = "http://smith11.ce.kmitl.ac.th//error";
       }
     </script>
   `);
