@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 3000;     //แก้ตรงนี้
+const PORT = 5000;     //แก้ตรงนี้
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
@@ -25,11 +25,11 @@ const WS_PORT = 8181;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "db",
-  user: "node_user",
-  password: "Admin123!",
+  host: "localhost",
+  user: "root",
+  password: "root",
   // password: "123456789",
-  database: "Project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -53,16 +53,16 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on http://0.0.0.0:${PORT}`);
 });
 wss.on("connection", (ws) => {
-  console.log("✅ Unity Connected via WebSocket");
-  ws.send("✅ Connected to WebSocket Server");
+  console.log("Unity Connected via WebSocket");
+  ws.send("Connected to WebSocket Server");
 
   ws.on("message", (message) => {
-    console.log(`📩 Received: ${message}`);
-    ws.send(`✅ Received: ${message}`);
+    console.log(`Received: ${message}`);
+    ws.send(`Received: ${message}`);
   });
 
   ws.on("close", () => {
-    console.log("❌ Unity Disconnected");
+    console.log("Unity Disconnected");
   });
 });
 
@@ -653,7 +653,7 @@ app.get("/api/report_teacher/:uid", async (req, res) => {
   try {
     const sql = `SELECT COUNT(*) AS reportCount,
     SUM(CASE WHEN report_isread = 1 THEN 1 ELSE 0 END) AS reportOpen
-    FROM report WHERE report_isread = 0 AND uid = ?`;
+    FROM report WHERE uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const reportOpen = rows[0].reportOpen || 0;
     const reportCount = rows[0].reportCount || 0;
@@ -1535,8 +1535,6 @@ app.post("/api/addreport", async (req, res) => {
 
 
 /************************** ดึงข้อมูล Report ฝั่ง Admin   WebSocket ******************************/
-//const wssReact = new WebSocketServer({ port: WS_PORT });
-//  ฟังก์ชันดึงจำนวนแจ้งเตือนใหม่ (is_read = 0)
 
 const fetchUnreadNotifications = async () => {
   try {

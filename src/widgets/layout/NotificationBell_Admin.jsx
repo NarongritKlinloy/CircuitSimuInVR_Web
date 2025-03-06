@@ -17,6 +17,7 @@ const NotificationBellAdmin = ({ isOpen, toggleMenu }) => {
   /**  ฟังก์ชันดึงแจ้งเตือนจาก API */
   const fetchNotifications = async () => {
     try {
+
       const response = await axios.get("https://smith11.ce.kmitl.ac.th/api/all_notifications");
       setNotifications(response.data);
     } catch (error) {
@@ -26,6 +27,7 @@ const NotificationBellAdmin = ({ isOpen, toggleMenu }) => {
 
   /**  ฟังก์ชันเริ่ม WebSocket */
   const connectWebSocket = () => {
+
     const newWs = new WebSocket("ws://smith11.ce.kmitl.ac.th:8181");
 
     newWs.onopen = () => {

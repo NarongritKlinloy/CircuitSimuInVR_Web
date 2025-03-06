@@ -53,7 +53,6 @@ StatisticsChart.propTypes = {
   ]),
   chart: PropTypes.object.isRequired,
   title: PropTypes.node.isRequired,
-  description: PropTypes.node.isRequired,
   footer: PropTypes.node,
 };
 

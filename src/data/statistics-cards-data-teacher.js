@@ -6,7 +6,6 @@ import {
   BuildingOffice2Icon,
 } from "@heroicons/react/24/solid";
 import axios from 'axios';
-const uid = sessionStorage.getItem("email");
 export const countStudentAPI = async (uid) => {
     try {
         const response = await axios.get(`http://localhost:5000/api/student_teacher/${uid}`);
@@ -16,7 +15,6 @@ export const countStudentAPI = async (uid) => {
         return 0;
     }
 };
-const student_count = await countStudentAPI(uid);
 
 export const countClassroomAPI = async (uid) => {
   try {
@@ -27,7 +25,6 @@ export const countClassroomAPI = async (uid) => {
     return 0;
   }
 };
-const classroom_count = await countClassroomAPI(uid);
 
 export const countPracticeAPI = async (uid) => {
   try {
@@ -38,7 +35,6 @@ export const countPracticeAPI = async (uid) => {
     return 0;
   }
 };
-const practice  = await countPracticeAPI(uid);
 
 export const countReportAPI = async (uid) => {
   try {
@@ -49,33 +45,40 @@ export const countReportAPI = async (uid) => {
     return 0;
   }
 };
-const report  = await countReportAPI(uid);
 
-export const statisticsCardsDataTheacher = [
-  {
-    color: "gray",
-    icon: AcademicCapIcon,
-    title: "Students",
-    value: student_count,
-  },
-  {
-    color: "gray",
-    icon: BuildingOffice2Icon,
-    title: "Classrooms",
-    value: classroom_count,
-  },
-  {
-    color: "gray",
-    icon: BookOpenIcon,
-    title: "Practice Open",
-    value: `${practice.open} / ${practice.count}`,
-  },
-  {
-    color: "gray",
-    icon: DocumentTextIcon,
-    title: "Feedback Approved",
-    value: `${report.open} / ${report.count}`,
-  }
-];
+export const statisticsCardsDataTheacher = async () => { // เปลี่ยนเป็น async function
+  const uid = sessionStorage.getItem("email");
+  const student_count = await countStudentAPI(uid); // รอให้ countStudentAPI() return ค่า
+  const report = await countReportAPI(uid); // รอให้ countReportAPI() return ค่า
+  const classroom_count = await countClassroomAPI(uid); // รอให้ countClassroomAPI() return ค่า
+  const practice = await countPracticeAPI(uid); // รอให้ countPracticeAPI() return ค่า
+
+  return [
+    {
+      color: "gray",
+      icon: AcademicCapIcon,
+      title: "Students",
+      value: student_count,
+    },
+    {
+      color: "gray",
+      icon: BuildingOffice2Icon,
+      title: "Classrooms",
+      value: classroom_count,
+    },
+    {
+      color: "gray",
+      icon: BookOpenIcon,
+      title: "Practice Open",
+      value: `${practice.open} / ${practice.count}`,
+    },
+    {
+      color: "gray",
+      icon: DocumentTextIcon,
+      title: "Feedback Approved",
+      value: `${report.open} / ${report.count}`,
+    }
+  ];
+};
 
 export default statisticsCardsDataTheacher;

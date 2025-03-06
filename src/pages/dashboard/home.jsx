@@ -1,35 +1,54 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StatisticsCard } from "@/widgets/cards";
 import { StatisticsChart } from "@/widgets/charts";
-import {
-  statisticsCardsData,
-  statisticsChartsData,
-} from "@/data";
-import { useEffect } from "react";
+import { statisticsCardsData, statisticsChartsData } from "@/data";
 import { useNavigate } from "react-router-dom";
 
 export function Home() {
   const navigate = useNavigate();
+  const [chartsData, setChartsData] = useState([]);
+  const [cardsData, setCardsData] = useState([]);
+
   useEffect(() => {
-    try {
-      const role = sessionStorage.getItem("role");
-      if (role === "teacher") {
-        navigate("/teacher/home");
-      }else if(role === null){
+    const checkRoleAndRedirect = async () => {
+      try {
+        const role = sessionStorage.getItem("role");
+        if (role === "teacher") {
+          navigate("/teacher/home");
+        } else if (role === null) {
+          navigate("/auth/sign-in");
+        }
+      } catch (error) {
+        console.error("Error accessing sessionStorage:", error);
         navigate("/auth/sign-in");
       }
-    } catch (error) {
-      console.error("Error accessing sessionStorage:", error);
-      navigate("/auth/sign-in");
-    }
+    };
+
+    checkRoleAndRedirect();
   }, [navigate]);
+
+  useEffect(() => {
+    const loadChartsData = async () => {
+      const data = await statisticsChartsData();
+      setChartsData(data);
+    };
+
+    loadChartsData();
+  }, []);
+
+  useEffect(() => {
+    const loadCardsData = async () => {
+      const data = await statisticsCardsData();
+      setCardsData(data);
+    };
+
+    loadCardsData();
+  }, []);
 
   return (
     <div className="mt-12">
-      
-
       <div className="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-5">
-        {statisticsCardsData.map(({ icon, title, footer, ...rest }) => (  
+        {cardsData.map(({ icon, title, footer, ...rest }) => (
           <StatisticsCard
             key={title}
             {...rest}
@@ -41,16 +60,15 @@ export function Home() {
         ))}
       </div>
 
-
       <div className="mb-6 grid grid-cols-1 gap-y-12 gap-x-6">
-        {statisticsChartsData.map((props) => (
+        {chartsData.map((props) => (
           <StatisticsChart
             key={props.title}
             {...props}
           />
         ))}
       </div>
-      </div>
+    </div>
   );
 }
 
