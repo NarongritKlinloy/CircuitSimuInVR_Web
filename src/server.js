@@ -46,25 +46,25 @@ const db = mysql.createPool({
   }
 })();
 
-// // 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
-// //const wss = new WebSocketServer({ port: WS_PORT });
+//4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
+const wss = new WebSocketServer({ port: WS_PORT });
 
-// server.listen(PORT, "0.0.0.0", () => {
-//   console.log(`Server running on http://0.0.0.0:${PORT}`);
-// });
-// wss.on("connection", (ws) => {
-//   console.log("✅ Unity Connected via WebSocket");
-//   ws.send("✅ Connected to WebSocket Server");
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+});
+wss.on("connection", (ws) => {
+  console.log("✅ Unity Connected via WebSocket");
+  ws.send("✅ Connected to WebSocket Server");
 
-//   ws.on("message", (message) => {
-//     console.log(`📩 Received: ${message}`);
-//     ws.send(`✅ Received: ${message}`);
-//   });
+  ws.on("message", (message) => {
+    console.log(`📩 Received: ${message}`);
+    ws.send(`✅ Received: ${message}`);
+  });
 
-//   ws.on("close", () => {
-//     console.log("❌ Unity Disconnected");
-//   });
-// });
+  ws.on("close", () => {
+    console.log("❌ Unity Disconnected");
+  });
+});
 
 // ฟังก์ชันแจ้งเตือน Unity ผ่าน WebSocket (ปรับให้ส่ง userId ไปด้วย)
 function notifyUnity(token, userId) {
