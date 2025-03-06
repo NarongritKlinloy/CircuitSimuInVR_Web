@@ -20,6 +20,6 @@ export default defineConfig({
   preview: {
     host: true,
     port: 3000,
-    allowedHosts: ["backend:5000", "smith11.ce.kmitl.ac.th"] // ✅ เพิ่ม domain ที่ต้องการ
+    allowedHosts: ["smith11.ce.kmitl.ac.th", "smith11.ce.kmitl.ac.th"] // ✅ เพิ่ม domain ที่ต้องการ
   },
 });
