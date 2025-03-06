@@ -47,7 +47,7 @@ const db = mysql.createPool({
 })();
 
 // 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
-const wss = new WebSocketServer({ port: 8080 });
+const wss = new WebSocketServer({ port: 8181 });
 wss.on("connection", (ws) => {
   console.log("Unity Connected via WebSocket");
   ws.send("Connected to WebSocket Server");
@@ -84,7 +84,7 @@ app.get("/callback", (req, res) => {
           .then(data => {
               console.log("Login Success:", data);
               // แจ้ง Unity ผ่าน WebSocket
-              fetch("http://localhost:8080/notify", {
+              fetch("http://smith11.ce.kmitl.ac.th/notify", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ accessToken: token })

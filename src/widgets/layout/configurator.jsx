@@ -184,6 +184,7 @@ export function Configurator() {
                 if (result.isConfirmed) {
                   sessionStorage.clear();
                   navigate("/auth/sign-in");
+                  onClick={handleLogout}
                 }
               });
             }}
