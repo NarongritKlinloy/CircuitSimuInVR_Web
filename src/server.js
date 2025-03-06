@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 3000;     //แก้ตรงนี้
+const PORT = 5000;     //แก้ตรงนี้
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
@@ -21,15 +21,15 @@ app.use(express.urlencoded({ extended: true }));
 const server = createServer(app);
 
 // สร้าง Port WebSocket Server ที่พอร์ต 5050
-const WS_PORT = 5050;
+const WS_PORT = 8181;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "db",
-  user: "node_user",
-  password: "Admin123!",
+  host: "localhost",
+  user: "root",
+  password: "root",
   // password: "123456789",
-  database: "Project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -46,11 +46,24 @@ const db = mysql.createPool({
   }
 })();
 
-// 4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
-const wss = new WebSocketServer({ port: 8080 });
+//4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
+const wss = new WebSocketServer({ port: WS_PORT });
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Server running on http://0.0.0.0:${PORT}`);
+});
 wss.on("connection", (ws) => {
   console.log("Unity Connected via WebSocket");
   ws.send("Connected to WebSocket Server");
+
+  ws.on("message", (message) => {
+    console.log(`Received: ${message}`);
+    ws.send(`Received: ${message}`);
+  });
+
+  ws.on("close", () => {
+    console.log("Unity Disconnected");
+  });
 });
 
 // ฟังก์ชันแจ้งเตือน Unity ผ่าน WebSocket (ปรับให้ส่ง userId ไปด้วย)
@@ -75,7 +88,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://smith11.ce.kmitl.ac.th//register", {
+          fetch("http://localhost:5000//register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -95,10 +108,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://smith11.ce.kmitl.ac.th//error";
+              window.location.href = "http://localhost:5000//error";
           });
       } else {
-          window.location.href = "http://smith11.ce.kmitl.ac.th//error";
+          window.location.href = "http://localhost:5000//error";
       }
     </script>
   `);
@@ -653,7 +666,7 @@ app.get("/api/report_teacher/:uid", async (req, res) => {
   try {
     const sql = `SELECT COUNT(*) AS reportCount,
     SUM(CASE WHEN report_isread = 1 THEN 1 ELSE 0 END) AS reportOpen
-    FROM report WHERE report_isread = 0 AND uid = ?`;
+    FROM report WHERE uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const reportOpen = rows[0].reportOpen || 0;
     const reportCount = rows[0].reportCount || 0;
@@ -1516,7 +1529,7 @@ app.post("/api/addreport", async (req, res) => {
 
 
 /************************** ดึงข้อมูล Report ฝั่ง Admin   WebSocket ******************************/
-const wssReact = new WebSocketServer({ port: WS_PORT });
+// const wssReact = new WebSocketServer({ port: WS_PORT });
 //  ฟังก์ชันดึงจำนวนแจ้งเตือนใหม่ (is_read = 0)
 
 const fetchUnreadNotifications = async () => {
@@ -1573,7 +1586,7 @@ const broadcastData = async () => {
     reports: reports,
   });
 
-  wssReact.clients.forEach((client) => {
+  wss.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(data);
     }
@@ -1626,7 +1639,7 @@ app.get("/api/adminreport", async (req, res) => {
 
 
 //  WebSocket Connection
-wssReact.on("connection", (ws) => {
+wss.on("connection", (ws) => {
   // console.log(" Client connected to WebSocket 5050");
 
   //  ส่งจำนวนแจ้งเตือนให้ Client ที่เพิ่งเชื่อมต่อ

@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 export const removeClassroomPractice = async (data) => {
   try {
     console.log("Request Data:", data);
-    const result = await axios.delete(`https://smith11.ce.kmitl.ac.th/api/classroom/practice`, { data });
+    const result = await axios.delete(`http://localhost:5000/api/classroom/practice`, { data });
     if (result.status === 200) {
       Swal.fire({
         title: "Removed!",

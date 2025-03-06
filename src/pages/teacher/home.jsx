@@ -3,7 +3,7 @@ import {
   statisticsCardsDataTheacher,
 } from "@/data";
 import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Card,
   CardHeader,
@@ -12,7 +12,7 @@ import {
 } from "@material-tailwind/react";
 
 export function HomeTeacher() {
-  const pic = "https://lh3.googleusercontent.com/a/ACg8ocL1tRcFiCvtbh8NYV4inznc24_VDrWJrNCY85yCcsek3vzNSg=s96-c";
+  const [cardsData, setCardsData] = useState([]);
   const navigate = useNavigate();
   useEffect(() => {
     try {
@@ -28,10 +28,19 @@ export function HomeTeacher() {
     }
   }, [navigate]);
 
+  useEffect(() => {
+    const loadCardsData = async () => {
+      const data = await statisticsCardsDataTheacher();
+      setCardsData(data);
+    };
+
+    loadCardsData();
+  }, []);
+
   return (
     <div className="mt-12 w-full">
       <div className="mb-6 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-2">
-        {statisticsCardsDataTheacher.map(({ color, icon, title, value }, index) => (
+        {cardsData.map(({ color, icon, title, value }, index) => (
           <Card key={index} className="border border-blue-gray-100 shadow-sm h-30"> 
             <CardHeader
               variant="gradient"
@@ -55,7 +64,7 @@ export function HomeTeacher() {
       </div>
       <div className="mb-12 w-full">
           <Card className="border border-blue-gray-100 shadow-sm h-60">
-            <CardBody className="p-6 text-center justify-center place-items-center">
+            <CardBody className="p-6 text-center justify-center place-items-center md:mt-9">
               <Typography variant="h1" className="font-normal text-blue-gray-600">
                 Welcome Teacher!
               </Typography>
