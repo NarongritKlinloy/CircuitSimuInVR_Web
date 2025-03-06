@@ -25,11 +25,11 @@ const WS_PORT = 8181;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "root",
+  host: "db",
+  user: "node_user",
+  password: "Admin123!",
   // password: "123456789",
-  database: "circuit_project",
+  database: "Project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -188,7 +188,7 @@ function notifyUnityError(accessToken, email) {
   wss.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(payload);
-      console.log("📡 Sent error message to Unity:", payload);
+      console.log(" Sent error message to Unity:", payload);
     }
   });
 }
@@ -596,8 +596,8 @@ app.get("/api/student_teacher/:uid", async (req, res) => {
   const { uid } = req.params;
   try {
     const sql = `SELECT count(*) AS studentCount 
-                FROM circuit_project.teach t 
-                JOIN circuit_project.enrollment en ON en.class_id = t.class_id
+                FROM teach t 
+                JOIN enrollment en ON en.class_id = t.class_id
                 WHERE t.uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const studentCount = rows[0].studentCount;
@@ -613,7 +613,7 @@ app.get("/api/classroom_teacher/:uid", async (req, res) => {
   const { uid } = req.params;
   try {
     const sql = `SELECT count(*) AS classroomCount
-                FROM circuit_project.teach
+                FROM teach
                 WHERE uid = ?`;
     const [rows] = await db.query(sql, [uid]);
     const classroomCount = rows[0].classroomCount;
@@ -632,9 +632,9 @@ app.get("/api/practice_teacher/:uid", async (req, res) => {
                 SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS practiceOpen,
                 COUNT(*) AS practiceCount
                 FROM
-                circuit_project.teach t
+                teach t
                 JOIN
-                circuit_project.classroompractice cp ON cp.class_id = t.class_id
+                classroompractice cp ON cp.class_id = t.class_id
                 WHERE
                 t.uid = ?`;
     const [rows] = await db.query(sql, [uid]);

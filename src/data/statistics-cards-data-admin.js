@@ -10,7 +10,7 @@ import axios from 'axios';
 // ฟังก์ชันสำหรับดึงข้อมูลและนับจำนวนนักเรียน
 const countStudentAPI = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/student/count');
+    const response = await axios.get('https://smith11.ce.kmitl.ac.th/api/student/count');
     return response.data.count;
   } catch (error) {
     console.error("Error counting student:", error);
@@ -21,7 +21,7 @@ const countStudentAPI = async () => {
 // ฟังก์ชันสำหรับดึงข้อมูลและนับจำนวนอาจารย์
 const countTeacherAPI = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/teacher/count');
+    const response = await axios.get('https://smith11.ce.kmitl.ac.th/api/teacher/count');
     return response.data.count;
   } catch (error) {
     console.error("Error counting teacher:", error);
@@ -32,7 +32,7 @@ const countTeacherAPI = async () => {
 // ฟังก์ชันสำหรับดึงข้อมูลและนับจำนวนรายงาน
 const countReportAPI = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/report/count');
+    const response = await axios.get('https://smith11.ce.kmitl.ac.th/api/report/count');
     return response.data.count;
   } catch (error) {
     console.error("Error counting report:", error);
@@ -43,7 +43,7 @@ const countReportAPI = async () => {
 // ฟังก์ชันสำหรับดึงข้อมูลและนับจำนวนห้องเรียน
 const countClassroomAPI = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/classroom/count');
+    const response = await axios.get('https://smith11.ce.kmitl.ac.th/api/classroom/count');
     return response.data.count;
   } catch (error) {
     console.error("Error counting classroom:", error);
@@ -54,7 +54,7 @@ const countClassroomAPI = async () => {
 // ฟังก์ชันสำหรับดึงข้อมูลและนับจำนวนการฝึกฝน
 const countPracticeAPI = async () => {
   try {
-    const response = await axios.get('http://localhost:5000/api/practices/count');
+    const response = await axios.get('https://smith11.ce.kmitl.ac.th/api/practices/count');
     return response.data.count;
   } catch (error) {
     console.error("Error counting practice:", error);

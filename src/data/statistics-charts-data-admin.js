@@ -5,14 +5,14 @@ import axios from 'axios';
 export const statisticsChartsData = async () => {
   try {
     const ShowVisitAPI = async () => {
-      const result = await axios.get(`http://localhost:5000/api/log/visits/7days`);
+      const result = await axios.get(`https://smith11.ce.kmitl.ac.th/api/log/visits/7days`);
       return result.data;
     };
     const ShowVisit = await ShowVisitAPI();
     const dataArray = Object.values(ShowVisit);
 
     const ShowVisitPracticeAPI = async () => {
-      const result = await axios.get(`http://localhost:5000/api/log/practice/7days`);
+      const result = await axios.get(`https://smith11.ce.kmitl.ac.th/api/log/practice/7days`);
       return result.data;
     };
     const ShowVisitPractice = await ShowVisitPracticeAPI();

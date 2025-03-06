@@ -6,7 +6,7 @@ export const addLogAPI = async (uid, log_type, practice_id) => {
         log_type: log_type,
         practice_id: practice_id,
       };
-    const result = await axios.post(`http://localhost:5000/api/log/visit`, data);
+    const result = await axios.post(`https://smith11.ce.kmitl.ac.th/api/log/visit`, data);
     return result.data;
   } catch (err) {
     console.error('Error insert log', err);

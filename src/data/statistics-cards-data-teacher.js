@@ -8,7 +8,7 @@ import {
 import axios from 'axios';
 export const countStudentAPI = async (uid) => {
     try {
-        const response = await axios.get(`http://localhost:5000/api/student_teacher/${uid}`);
+        const response = await axios.get(`https://smith11.ce.kmitl.ac.th/api/student_teacher/${uid}`);
         return response.data.count;
     } catch (error) {
         console.error("Error counting student:", error);
@@ -18,7 +18,7 @@ export const countStudentAPI = async (uid) => {
 
 export const countClassroomAPI = async (uid) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/classroom_teacher/${uid}`);
+    const response = await axios.get(`https://smith11.ce.kmitl.ac.th/api/classroom_teacher/${uid}`);
     return response.data.count;
   } catch (error) {
     console.error("Error counting classroom:", error);
@@ -28,7 +28,7 @@ export const countClassroomAPI = async (uid) => {
 
 export const countPracticeAPI = async (uid) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/practice_teacher/${uid}`);
+    const response = await axios.get(`https://smith11.ce.kmitl.ac.th/api/practice_teacher/${uid}`);
     return response.data;
   } catch (error) {
     console.error("Error counting practice:", error);
@@ -38,7 +38,7 @@ export const countPracticeAPI = async (uid) => {
 
 export const countReportAPI = async (uid) => {
   try {
-    const response = await axios.get(`http://localhost:5000/api/report_teacher/${uid}`);
+    const response = await axios.get(`https://smith11.ce.kmitl.ac.th/api/report_teacher/${uid}`);
     return response.data;
   } catch (error) {
     console.error("Error counting report:", error);
