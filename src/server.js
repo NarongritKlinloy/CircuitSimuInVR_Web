@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 5000;     //แก้ตรงนี้
+const PORT = 3000;     //แก้ตรงนี้
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
@@ -29,7 +29,7 @@ const db = mysql.createPool({
   user: "node_user",
   password: "Admin123!",
   // password: "123456789",
-  database: "Project_circuit",
+  database: "circuit_project",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
