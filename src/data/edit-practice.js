@@ -4,7 +4,7 @@ import Swal from 'sweetalert2';
 export const editPracticeAPI = async (practiceData) => {
     try {
       const { practice_id, practice_name } = practiceData;
-      const result = await axios.put(`https://backend:5000/api/practice/${practice_id}`,practiceData );
+      const result = await axios.put(`https://smith11.ce.kmitl.ac.th/api/practice/${practice_id}`,practiceData );
       if (result.status === 200) {
         Swal.fire({
           title: "Updated!",

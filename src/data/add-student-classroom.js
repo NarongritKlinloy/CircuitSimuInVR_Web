@@ -2,7 +2,7 @@ import axios from "axios";
 import Swal from 'sweetalert2';
 export const addStudentAPI = async (data) => {
   try {
-    const result = await axios.post(`https://backend:5000/api/classroom/student`, data);
+    const result = await axios.post(`https://smith11.ce.kmitl.ac.th/api/classroom/student`, data);
     if (result.status == 200) {
       Swal.fire({
         title: "Added!",
@@ -29,7 +29,7 @@ export const addStudentAPI = async (data) => {
 
 export const addMultiStudentAPI = async (data) => {
   try {
-    const result = await axios.post(`https://backend:5000/api/classroom/student/multidata`, { data });
+    const result = await axios.post(`https://smith11.ce.kmitl.ac.th/api/classroom/student/multidata`, { data });
     console.log(result);
     if (result.status == 200) {
       const uids = result.data.map((item) => item.uid);

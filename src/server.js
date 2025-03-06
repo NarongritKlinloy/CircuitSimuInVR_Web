@@ -10,7 +10,7 @@ import { WebSocketServer } from "ws";
 import { createServer } from "http";
 
 const app = express();
-const PORT = 5000;
+const PORT = 3000;     //แก้ตรงนี้
 
 // 1) เปิดใช้งาน CORS, JSON Parser
 app.use(cors());
@@ -75,7 +75,7 @@ app.get("/callback", (req, res) => {
       const token = params.get("access_token");
 
       if (token) {
-          fetch("http://localhost:5000/register", {
+          fetch("http://smith11.ce.kmitl.ac.th//register", {
               method: "POST",
               headers: { "Content-Type": "application/json" },
               body: JSON.stringify({ accessToken: token })
@@ -95,10 +95,10 @@ app.get("/callback", (req, res) => {
           })
           .catch(error => {
               console.error("Error:", error);
-              window.location.href = "http://localhost:5000/error";
+              window.location.href = "http://smith11.ce.kmitl.ac.th//error";
           });
       } else {
-          window.location.href = "http://localhost:5000/error";
+          window.location.href = "http://smith11.ce.kmitl.ac.th//error";
       }
     </script>
   `);

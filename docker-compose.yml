@@ -1,29 +1,29 @@
 version: '3.8'
 
 services:
-  frontend:
-    container_name: circuit-frontend
-    image: circuit-frontend:latest
-    build: .
-    ports:
-      - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    environment:
-      - NODE_ENV=production
-      - REACT_APP_API_URL=https://backend:5000  # ให้ Frontend ใช้ URL นี้
-    command: ["npm", "run", "preview"]
-    depends_on:
-      - backend
-    restart: unless-stopped
+  # frontend:
+  #   container_name: circuit-frontend
+  #   image: circuit-frontend:latest
+  #   build: .
+  #   ports:
+  #     - "3000:3000"
+  #   volumes:
+  #     - .:/app
+  #     - /app/node_modules
+  #   environment:
+  #     - NODE_ENV=production
+  #     - REACT_APP_API_URL=https://smith11.ce.kmitl.ac.th  # ให้ Frontend ใช้ URL นี้
+  #   command: ["npm", "run", "preview"]
+  #   depends_on:
+  #     - backend
+  #   restart: unless-stopped
 
   backend:
     container_name: circuit-backend
     image: circuit-backend:latest
     build: .
     ports:
-      - "5001:5000"
+      - "3000:3000"
     volumes:
       - .:/app
       - /app/node_modules

@@ -17,7 +17,7 @@ const NotificationBellAdmin = ({ isOpen, toggleMenu }) => {
   /**  ฟังก์ชันดึงแจ้งเตือนจาก API */
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get("http://backend:5000/api/all_notifications");
+      const response = await axios.get("http://smith11.ce.kmitl.ac.th/api/all_notifications");
       setNotifications(response.data);
     } catch (error) {
       console.error(" Error fetching notifications:", error);
