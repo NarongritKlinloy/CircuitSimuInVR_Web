@@ -86,7 +86,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                     <table className="w-full min-w-[640px] table-auto border-collapse">
                         <thead>
                             <tr>
-                                {["Name", "Email", "Status", "Last Active", "Edit", "Delete"].map((header, index) => (
+                                {["Name", "Email", "Last Active", "Edit", "Delete"].map((header, index) => (
                                     <th
                                         key={index} // ใช้ index เป็น key
                                         className={`border-b border-blue-gray-50 px-5 py-2 ${
@@ -135,15 +135,6 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                                             <Typography className="text-xs font-normal text-blue-gray-500">
                                                 {user.uid}
                                             </Typography>
-                                        </td>
-
-                                        <td className={`${rowClassName} text-center`}>
-                                            <Chip
-                                                variant="gradient"
-                                                color={user.online ? "green" : "blue-gray"}
-                                                value={user.online ? "ONLINE" : "OFFLINE"}
-                                                className="py-0.5 px-2 text-[11px] font-medium w-fit mx-auto"
-                                            />
                                         </td>
 
                                         <td className={`${rowClassName} text-center`}>

@@ -23,3 +23,4 @@ export default defineConfig({
     allowedHosts: ["smith11.ce.kmitl.ac.th", "smith11.ce.kmitl.ac.th"] // ✅ เพิ่ม domain ที่ต้องการ
   },
 });
+
