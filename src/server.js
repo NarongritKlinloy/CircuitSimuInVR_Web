@@ -21,7 +21,10 @@ app.use(express.urlencoded({ extended: true }));
 const server = createServer(app);
 
 // สร้าง Port WebSocket Server ที่พอร์ต 5050
-const WS_PORT = 8181;
+const WS_PORT_UNITY = 8181;
+const wssUnity = new WebSocketServer({ port: WS_PORT_UNITY });
+
+// const WS_PORTWEB = 8282;
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
@@ -47,18 +50,13 @@ const db = mysql.createPool({
 })();
 
 //4) สร้าง WebSocket Server แยกพอร์ตเป็น 8080
-const wss = new WebSocketServer({ port: WS_PORT });
-
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server running on http://0.0.0.0:${PORT}`);
-});
-wss.on("connection", (ws) => {
-  console.log("Unity Connected via WebSocket");
-  ws.send("Connected to WebSocket Server");
+wssUnity.on("connection", (ws) => {
+  console.log("Unity Connected via WebSocket (Port 8181)");
+  ws.send("Connected to Unity WebSocket Server");
 
   ws.on("message", (message) => {
-    console.log(`Received: ${message}`);
-    ws.send(`Received: ${message}`);
+    console.log(`Received from Unity: ${message}`);
+    ws.send(`Echo: ${message}`);
   });
 
   ws.on("close", () => {
@@ -68,7 +66,7 @@ wss.on("connection", (ws) => {
 
 // ฟังก์ชันแจ้งเตือน Unity ผ่าน WebSocket (ปรับให้ส่ง userId ไปด้วย)
 function notifyUnity(token, userId) {
-  wss.clients.forEach((client) => {
+  wssUnity.clients.forEach((client) => {
     if (client.readyState === 1) {
       // ส่งเป็น JSON ที่มีทั้ง accessToken และ userId
       client.send(JSON.stringify({ accessToken: token, userId: userId }));
@@ -76,6 +74,24 @@ function notifyUnity(token, userId) {
   });
 }
 
+
+// 5) WebSocket Server สำหรับเว็บ (พอร์ต 8282)
+const WS_PORT_WEB = 8282;
+const wssWeb = new WebSocketServer({ port: WS_PORT_WEB });
+
+wssWeb.on("connection", (ws) => {
+  console.log("Web Page Connected via WebSocket (Port 8282)");
+  ws.send("Connected to Web WebSocket Server");
+
+  ws.on("message", (message) => {
+    console.log(`Received from Web: ${message}`);
+    ws.send(`Echo: ${message}`);
+  });
+
+  ws.on("close", () => {
+    console.log("Web Disconnected");
+  });
+});
 //+++++++++++++++++++++++++++++++จุดเริ่มต้นของ UNITY +++++++++++++++++++++++++++//
 // -----------------------------------------------------------
 // Google OAuth Callback & Logout
@@ -185,7 +201,7 @@ function notifyUnityError(accessToken, email) {
   console.log("Sending error notification to WebSocket:", payload);
 
   // ส่ง error ไปยัง **ทุก Unity client** ที่เชื่อมต่อ
-  wss.clients.forEach(client => {
+  wssUnity.clients.forEach(client => {
     if (client.readyState === WebSocket.OPEN) {
       client.send(payload);
       console.log(" Sent error message to Unity:", payload);
@@ -1590,7 +1606,7 @@ const broadcastData = async () => {
     reports: reports,
   });
 
-  wss.clients.forEach((client) => {
+  wssWeb.clients.forEach((client) => {
     if (client.readyState === 1) {
       client.send(data);
     }
@@ -1643,7 +1659,7 @@ app.get("/api/adminreport", async (req, res) => {
 
 
 //  WebSocket Connection
-wss.on("connection", (ws) => {
+wssWeb.on("connection", (ws) => {
   // console.log(" Client connected to WebSocket 5050");
 
   //  ส่งจำนวนแจ้งเตือนให้ Client ที่เพิ่งเชื่อมต่อ
