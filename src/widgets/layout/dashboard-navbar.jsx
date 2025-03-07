@@ -99,7 +99,7 @@ useEffect(() => {
 
   const connectWebSocket = () => {
 
-    const ws = new WebSocket("ws://smith11.ce.kmitl.ac.th:8181");
+    const ws = new WebSocket("wss://smith11.ce.kmitl.ac.th:8181");
 
     ws.onopen = () => {
 

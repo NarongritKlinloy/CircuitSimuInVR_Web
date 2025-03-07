@@ -28,7 +28,7 @@ const NotificationBellAdmin = ({ isOpen, toggleMenu }) => {
   /**  ฟังก์ชันเริ่ม WebSocket */
   const connectWebSocket = () => {
 
-    const newWs = new WebSocket("ws://smith11.ce.kmitl.ac.th:8181");
+    const newWs = new WebSocket("wss://smith11.ce.kmitl.ac.th:8181");
 
     newWs.onopen = () => {
       // console.log(" WebSocket Connected to 5050");

@@ -29,7 +29,7 @@ const db = mysql.createPool({
   user: "node_user",
   password: "Admin123!",
   // password: "123456789",
-  database: "circuit_project",
+  database: "Project_circuit",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -807,7 +807,7 @@ app.get("/api/practice/classroom/:class_id", async (req, res) => {
                 ELSE 0 
                 END AS is_assigned
               FROM practice p
-              LEFT JOIN ClassroomPractice cp 
+              LEFT JOIN classroompractice cp 
                   ON p.practice_id = cp.practice_id 
                   AND cp.class_id = ?`;
   try {
@@ -859,12 +859,12 @@ app.delete("/api/practice/:practice_id", async (req, res) => {
   const sql = `
     DELETE FROM practice 
     WHERE practice_id = ? 
-      AND practice_id NOT IN (SELECT practice_id FROM ClassroomPractice)
+      AND practice_id NOT IN (SELECT practice_id FROM classroompractice)
   `;
   try {
     const [result] = await db.query(sql, [practice_id]);
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: "Practice not found or is assigned in ClassroomPractice" });
+      return res.status(404).json({ error: "Practice not found or is assigned in classroompractice" });
     }
     res.status(200).json({ message: "Practice deleted successfully" });
   } catch (err) {
@@ -917,7 +917,7 @@ app.post("/api/classroom/practice", async (req, res) => {
   const { class_id, practice_ids } = req.body;
   try {
     for (const pid of practice_ids) {
-      const sql_insert = `INSERT INTO ClassroomPractice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
+      const sql_insert = `INSERT INTO classroompractice (class_id, practice_id, practice_status) VALUES (?, ?, '0')`;
       await db.query(sql_insert, [class_id, pid]);
     }
     res.status(200).json({ message: "Insert classroom practices successfully" });
@@ -934,7 +934,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
   }
   try {
     for (const pid of practice_ids) {
-      const sql_delete = "DELETE FROM ClassroomPractice WHERE class_id = ? AND practice_id = ?";
+      const sql_delete = "DELETE FROM classroompractice WHERE class_id = ? AND practice_id = ?";
       await db.query(sql_delete, [class_id, pid]);
     }
     res.status(200).json({ message: "Classroom practices removed successfully" });
@@ -949,7 +949,7 @@ app.delete("/api/classroom/practice", async (req, res) => {
 // เปลี่ยน status practice 
 app.put("/api/update-status-practice", async (req, res) => {
   const { class_id, practice_id, new_status } = req.body;
-  const sql_toggle = `update ClassroomPractice set practice_status = ? 
+  const sql_toggle = `update classroompractice set practice_status = ? 
                       where class_id = ? and practice_id = ?`;
   try {
     await db.query(sql_toggle, [new_status, class_id, practice_id]);
@@ -969,7 +969,7 @@ app.get("/api/classroom/:uid", async (req, res) => {
                 SUM(CASE WHEN cp.practice_status = 1 THEN 1 ELSE 0 END) AS active_practice
                 FROM classroom c
                 JOIN teach t ON c.class_id = t.class_id
-                LEFT JOIN ClassroomPractice cp ON c.class_id = cp.class_id
+                LEFT JOIN classroompractice cp ON c.class_id = cp.class_id
                 WHERE t.uid = ?
                 GROUP BY c.class_id`;
   try {
@@ -994,7 +994,7 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             c.sec,
                             COUNT(DISTINCT e.uid) AS enrolled_count,
                             COUNT(DISTINCT CASE WHEN ps.score IS NOT NULL THEN e.uid END) AS submit_total
-                        FROM ClassroomPractice cp
+                        FROM classroompractice cp
                         JOIN practice p 
                             ON p.practice_id = cp.practice_id
                         JOIN classroom c 
@@ -1033,7 +1033,7 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
                                   ps.score AS max_score,
                                   ps.submit_date,
                                   p.practice_score
-                              FROM ClassroomPractice cp
+                              FROM classroompractice cp
                               JOIN classroom c 
                                   ON cp.class_id = c.class_id
                               JOIN PracticeSave ps 
