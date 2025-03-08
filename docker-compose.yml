@@ -35,8 +35,8 @@ services:
       MYSQL_DATABASE: Project_circuit
       MYSQL_USER: node_user
       MYSQL_PASSWORD: Admin123!
-      TZ: Asia/Bangkok  # ✅ กำหนดโซนเวลาให้เป็น Asia/Bangkok
-    command: ["mysqld", "--default-time-zone=+07:00"]  # ✅ บังคับให้ MySQL ใช้โซนเวลา
+      TZ: Asia/Bangkok  #  กำหนดโซนเวลาให้เป็น Asia/Bangkok
+    command: ["mysqld", "--default-time-zone=+07:00"]  #  บังคับให้ MySQL ใช้โซนเวลา
     volumes:
       - db_data:/var/lib/mysql
 
