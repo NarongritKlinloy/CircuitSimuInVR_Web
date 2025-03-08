@@ -745,7 +745,7 @@ app.get("/api/log/visits/7days", async (req, res) => {
       dates.push(formattedDate);
     }
 
-    console.log("Generated Dates:", dates);
+    //console.log("Generated Dates:", dates);
 
     // 🔹 สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
     const formattedData = {};
@@ -781,29 +781,46 @@ app.get("/api/log/practice/7days", async (req, res) => {
     const [rows] = await db.query(`
       SELECT DATE(log_time) AS date, p.practice_name, COUNT(*) AS count
       FROM log l JOIN practice p ON p.practice_id = l.practice_id
-      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 1
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+        AND DATE(log_time) <= CURDATE() 
+        AND log_type = 1
       GROUP BY DATE(log_time), p.practice_name
       ORDER BY date ASC, p.practice_name ASC;
     `);
 
-    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    // 🔹 สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต) โดยใช้โซนเวลา Asia/Bangkok
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
-      dates.push(date.toISOString().split('T')[0]);
+
+      //ปรับให้ใช้โซนเวลา Asia/Bangkok
+      const formattedDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }))
+        .toISOString()
+        .split('T')[0];
+
+      dates.push(formattedDate);
     }
 
-    // สร้าง object โดยมีวันที่เป็น key และ array ของ practice_id และจำนวนเป็น value
+    //console.log("Generated Dates:", dates);
+
+    // 🔹 สร้าง object โดยมีวันที่เป็น key และ array ของ practice_name กับจำนวนเป็น value
     const formattedData = {};
     dates.forEach((date) => {
       formattedData[date] = [];
+      
+      //ใช้ `toLocaleString()` เพื่อให้โซนเวลาตรงกับ `Asia/Bangkok`
       const filteredRows = rows.filter(row => {
         const rowDate = new Date(row.date);
-        // แปลง UTC เป็น +07:00 (โดยประมาณ)
-        rowDate.setHours(rowDate.getHours() + 7);
-        return rowDate.toISOString().split('T')[0] === date;
+
+        const formattedRowDate = new Date(
+          rowDate.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+        ).toISOString().split('T')[0];
+
+        return formattedRowDate === date;
       });
+
+      // 🔹 ถ้ามีข้อมูลให้เพิ่มลงไป
       filteredRows.forEach(row => {
         formattedData[date].push({
           practice_name: row.practice_name,
@@ -811,12 +828,14 @@ app.get("/api/log/practice/7days", async (req, res) => {
         });
       });
     });
+
     return res.status(200).json(formattedData);
   } catch (error) {
-    console.error('Error fetching log data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching log data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // -------------------------- Begin จัดการข้อมูล Practice (Admin) -------------------------- //
 // ดึงข้อมูล practice (ทั้งหมด)
