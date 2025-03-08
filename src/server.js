@@ -33,6 +33,7 @@ const db = mysql.createPool({
   password: "Admin123!",
   // password: "123456789",
   database: "Project_circuit",
+  timezone: "Asia/Bangkok",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
@@ -159,9 +160,9 @@ app.post("/register", async (req, res) => {
       return res.status(403).json({ error: "Unauthorized email domain" });
     }
 
-    const now = new Date();
-    now.setHours(now.getHours() + 7); // ปรับเวลาตามไทย
-    const last_active = now.toISOString().slice(0, 19).replace("T", " ");
+    // const now = new Date();
+    // now.setHours(now.getHours() + 7); // ปรับเวลาตามไทย
+    // const last_active = now.toISOString().slice(0, 19).replace("T", " ");
     const role_id = 3;
 
     const [existingUser] = await db.query("SELECT * FROM user WHERE uid = ?", [
@@ -169,16 +170,16 @@ app.post("/register", async (req, res) => {
     ]);
     if (existingUser.length > 0) {
       await db.query(
-        "UPDATE user SET last_active = ?, role_id = ? WHERE uid = ?",
-        [last_active, role_id, email]
+        "UPDATE user SET last_active = NOW(), role_id = ? WHERE uid = ?",
+        [role_id, email]
       );
       console.log(`User ${email} updated successfully`);
       notifyUnity(accessToken, email);
       return res.json({ message: "User updated successfully", userId: email });
     } else {
       await db.query(
-        "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, ?)",
-        [email, name, role_id, last_active]
+        "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, NOW())",
+        [email, name, role_id]
       );
       console.log(`User ${email} registered successfully`);
       notifyUnity(accessToken, email);
@@ -690,11 +691,11 @@ app.post("/api/log/visitunity", async (req, res) => {
     }
 
     const sql = `INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, NOW(), ?, ?)`;
-    await db.query(sql, [uid, log_type, practice_id]); // ✅ ใช้ await db.query() ได้เลย
+    await db.query(sql, [uid, log_type, practice_id]); // ใช้ await db.query() ได้เลย
 
     return res.status(200).json({ message: "Added log successfully" });
   } catch (err) {
-    console.error("❌ Error adding log:", err);
+    console.error("Error adding log:", err);
     return res.status(500).json({ error: "Add log failed" });
   }
 });
@@ -703,12 +704,12 @@ app.post("/api/log/visitunity", async (req, res) => {
 // เพิ่ม log
 app.post("/api/log/visit", async (req, res) => {
   const { uid, log_type, practice_id } = req.body;
-  const sql = "INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, ?, ?, ?)";
+  const sql = "INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, NOW(), ?, ?)";
   try {
-    const now = new Date();
-    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
-    const date = now.toISOString().slice(0, 19).replace("T", " ");
-    await db.query(sql, [uid, date, log_type, practice_id]);
+    // const now = new Date();
+    // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    // const date = now.toISOString().slice(0, 19).replace("T", " ");
+    await db.query(sql, [uid, log_type, practice_id]);
     return res.status(200).json({message: "Added log successfully"});
   } catch (err) {
     console.error("Error adding log:", err);
@@ -719,31 +720,46 @@ app.post("/api/log/visit", async (req, res) => {
 // ดึงข้อมูลการเข้าใช้งานย้อนหลัง 7 วัน
 app.get("/api/log/visits/7days", async (req, res) => {
   try {
+    // 🔹 ดึงข้อมูลจาก MySQL โดยใช้วันที่ย้อนหลัง 7 วัน
     const [rows] = await db.query(`
       SELECT DATE(log_time) AS date, COUNT(*) AS count
       FROM log
-      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 0
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+        AND DATE(log_time) <= CURDATE() 
+        AND log_type = 0
       GROUP BY DATE(log_time)
       ORDER BY date ASC;
     `);
 
-    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    // 🔹 สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
-      dates.push(date.toISOString().split('T')[0]);
+
+      // ปรับให้ใช้โซนเวลา Asia/Bangkok
+      const formattedDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }))
+        .toISOString()
+        .split('T')[0];
+
+      dates.push(formattedDate);
     }
 
-    // สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
+    //console.log("Generated Dates:", dates);
+
+    // 🔹 สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
     const formattedData = {};
     dates.forEach((date) => {
       let foundRow = null;
       for (const row of rows) {
         const rowDate = new Date(row.date);
-        // แปลง UTC เป็น +07:00 (โดยประมาณ)
-        rowDate.setHours(rowDate.getHours() + 7);
-        if (rowDate.toISOString().split('T')[0] === date) {
+
+        // ปรับค่า `row.date` ให้เป็นโซนเวลา Asia/Bangkok
+        const formattedRowDate = new Date(
+          rowDate.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+        ).toISOString().split('T')[0];
+
+        if (formattedRowDate === date) {
           foundRow = row;
           break;
         }
@@ -753,10 +769,11 @@ app.get("/api/log/visits/7days", async (req, res) => {
 
     return res.status(200).json(formattedData);
   } catch (error) {
-    console.error('Error fetching log data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching log data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // ดึงข้อมูลการเข้าใช้แบบทดสอบย้อนหลัง 7 วัน
 app.get("/api/log/practice/7days", async (req, res) => {
@@ -764,29 +781,46 @@ app.get("/api/log/practice/7days", async (req, res) => {
     const [rows] = await db.query(`
       SELECT DATE(log_time) AS date, p.practice_name, COUNT(*) AS count
       FROM log l JOIN practice p ON p.practice_id = l.practice_id
-      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 1
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+        AND DATE(log_time) <= CURDATE() 
+        AND log_type = 1
       GROUP BY DATE(log_time), p.practice_name
       ORDER BY date ASC, p.practice_name ASC;
     `);
 
-    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    // 🔹 สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต) โดยใช้โซนเวลา Asia/Bangkok
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
-      dates.push(date.toISOString().split('T')[0]);
+
+      //ปรับให้ใช้โซนเวลา Asia/Bangkok
+      const formattedDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }))
+        .toISOString()
+        .split('T')[0];
+
+      dates.push(formattedDate);
     }
 
-    // สร้าง object โดยมีวันที่เป็น key และ array ของ practice_id และจำนวนเป็น value
+    //console.log("Generated Dates:", dates);
+
+    // 🔹 สร้าง object โดยมีวันที่เป็น key และ array ของ practice_name กับจำนวนเป็น value
     const formattedData = {};
     dates.forEach((date) => {
       formattedData[date] = [];
+      
+      //ใช้ `toLocaleString()` เพื่อให้โซนเวลาตรงกับ `Asia/Bangkok`
       const filteredRows = rows.filter(row => {
         const rowDate = new Date(row.date);
-        // แปลง UTC เป็น +07:00 (โดยประมาณ)
-        rowDate.setHours(rowDate.getHours() + 7);
-        return rowDate.toISOString().split('T')[0] === date;
+
+        const formattedRowDate = new Date(
+          rowDate.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+        ).toISOString().split('T')[0];
+
+        return formattedRowDate === date;
       });
+
+      // 🔹 ถ้ามีข้อมูลให้เพิ่มลงไป
       filteredRows.forEach(row => {
         formattedData[date].push({
           practice_name: row.practice_name,
@@ -794,12 +828,14 @@ app.get("/api/log/practice/7days", async (req, res) => {
         });
       });
     });
+
     return res.status(200).json(formattedData);
   } catch (error) {
-    console.error('Error fetching log data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching log data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // -------------------------- Begin จัดการข้อมูล Practice (Admin) -------------------------- //
 // ดึงข้อมูล practice (ทั้งหมด)
@@ -845,19 +881,18 @@ app.post("/api/practice", async (req, res) => {
     return res.status(400).json({ error: "Missing required fields" });
   }
 
-  const now = new Date();
-  now.setHours(now.getHours() + 7);
-  const createDate = now.toISOString().slice(0, 19).replace("T", " ");
+  // const now = new Date();
+  // now.setHours(now.getHours() + 7);
+  // const createDate = now.toISOString().slice(0, 19).replace("T", " ");
 
   const sql_insert_practice = `INSERT INTO practice (practice_name, practice_detail, practice_score, create_date)
-    VALUES (?, ?, ?, ?)`;
+    VALUES (?, ?, ?, NOW())`;
 
   try {
     const [insertResult] = await db.query(sql_insert_practice, [
       practice_name,
       practice_detail,
       practice_score,
-      createDate,
     ]);
     res.status(200).json({
       message: "Added practice successfully",
@@ -1257,12 +1292,12 @@ app.post("/api/classroom/student", async (req, res) => {
     if (enrollRows.length > 0) {
       return res.status(400).json({ message: "Student already has a classroom" });
     }
-    const now = new Date();
-    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
-    const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
+    // const now = new Date();
+    // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    // const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
 
-    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
-    await db.query(sql_enroll, [processedUid, class_id, enrollDate]);
+    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, NOW())";
+    await db.query(sql_enroll, [processedUid, class_id]);
     res.status(200).send({ message: "Added student to classroom successfully" });
   } catch (err) {
     console.error("Error insert student:", err);
@@ -1280,13 +1315,13 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
   }
   try {
     const sql_check_user = "SELECT * FROM user WHERE uid = ?";
-    const sql_insert_user = "INSERT INTO user (uid, name, role_id, last_active) VALUES(?, ?, 3, ?)";
+    const sql_insert_user = "INSERT INTO user (uid, name, role_id, last_active) VALUES(?, ?, 3, NOW())";
     const sql_enroll_select = "SELECT * FROM enrollment WHERE uid = ?";
-    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, ?)";
+    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, NOW())";
 
-    const now = new Date();
-    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
-    const last_active = now.toISOString().slice(0, 19).replace("T", " ");
+    // const now = new Date();
+    // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    // const last_active = now.toISOString().slice(0, 19).replace("T", " ");
 
     const promises = data.map(async students => {
       const uid = String(students?.id || "");
@@ -1295,18 +1330,17 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
       const [checkStudent] = await db.query(sql_check_user, [processedUid]);
       // ตรวจสอบ user
       if (checkStudent.length === 0) {
-        await db.query(sql_insert_user, [processedUid, name, last_active])
+        await db.query(sql_insert_user, [processedUid, name])
       }
       else if (checkStudent[0].role_id !== 3) {
         user_failed.push({ uid: uid, name: name });
-      } else {
+      }
         // ตรวจสอบ enrollment
         const [enrollRows] = await db.query(sql_enroll_select, [processedUid]);
         if (enrollRows.length === 0) {
-          await db.query(sql_enroll, [processedUid, class_id, last_active]);
+          await db.query(sql_enroll, [processedUid, class_id]);
         } else {
           user_failed.push({ uid: uid, name: name });
-        }
       }
     });
     await Promise.all(promises);
@@ -1425,12 +1459,11 @@ app.put("/api/classroom/sec/:uid", async (req, res) => {
   try {
     const { uid } = req.params;
     const { class_id } = req.body;
-    const now = new Date();
-    now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
-    const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
-    const sql_enroll = ("UPDATE enrollment SET class_id = ?, enroll_date = ? WHERE uid = ?");
-    const [updateResult] = await db.query(sql_enroll, [class_id, enrollDate, uid])
-    console.log(enrollDate);
+    // const now = new Date();
+    // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
+    // const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
+    const sql_enroll = ("UPDATE enrollment SET class_id = ?, enroll_date = NOW() WHERE uid = ?");
+    const [updateResult] = await db.query(sql_enroll, [class_id, uid])
     if (!updateResult) {
       return res.status(400).json({ error: "Sec failed to update!" });
     }
@@ -1442,20 +1475,20 @@ app.put("/api/classroom/sec/:uid", async (req, res) => {
 });
 
 // เพิ่ม user เข้าระบบ
-app.post("/api/user/:uid/:name/:role_id/:last_active", async (req, res) => {
-  const { uid, name, role_id, last_active } = req.params;
+app.post("/api/user/:uid/:name/:role_id", async (req, res) => {
+  const { uid, name, role_id } = req.params;
   const sql_select_user = "SELECT * FROM user WHERE uid = ?";
   try {
     const [rows] = await db.query(sql_select_user, [uid]);
     if (rows.length > 0) {
       // อัปเดต
-      const sql_update = "UPDATE user SET name = ?, role_id = ?, last_active = ? WHERE uid = ?";
-      await db.query(sql_update, [name, role_id, last_active, uid]);
+      const sql_update = "UPDATE user SET name = ?, role_id = ?, last_active = NOW() WHERE uid = ?";
+      await db.query(sql_update, [name, role_id, uid]);
     } else {
       // เพิ่มใหม่
       const sql_insert_user =
-        "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, ?)";
-      await db.query(sql_insert_user, [uid, name, role_id, last_active]);
+        "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, NOW())";
+      await db.query(sql_insert_user, [uid, name, role_id]);
     }
     res.status(200).json({ message: "sign in successfully" });
   } catch (err) {

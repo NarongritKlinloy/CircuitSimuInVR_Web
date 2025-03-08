@@ -58,15 +58,12 @@ export function SignIn() {
           sessionStorage.setItem("role", role);
           sessionStorage.setItem("email", email);
           sessionStorage.setItem("name", name);
-
-          const date = new Date().toISOString().slice(0, 19).replace("T", " ");
-
           if (role === "admin") {
-            signInAPI(email, name, 2, date);
+            signInAPI(email, name, 2);
             addLogAPI(email, 0, 0);
             navigate("/dashboard/home");
           } else if (role === "teacher") {
-            signInAPI(email, name, 1, date);
+            signInAPI(email, name, 1);
             addLogAPI(email, 0, 0);
             navigate("/teacher/home");
           }
@@ -98,9 +95,7 @@ export function SignIn() {
         sessionStorage.setItem("email", email);
         sessionStorage.setItem("name", name);
         sessionStorage.setItem("role", "teacher");
-
-        const date = new Date().toISOString().slice(0, 19).replace("T", " ");
-        signInAPI(email, name, 1, date);
+        signInAPI(email, name, 1);
         addLogAPI(email, 0, 0);
 
         navigate("/teacher/home");

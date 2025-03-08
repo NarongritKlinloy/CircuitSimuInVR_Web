@@ -147,6 +147,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
                                                 minute: "2-digit",
                                                 second: "2-digit",
                                                 hour12: false,
+                                                timeZone: "UTC",
                                             }).replace(",", "")}
                                             </Typography>
                                         </td>
