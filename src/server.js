@@ -33,6 +33,7 @@ const db = mysql.createPool({
   password: "Admin123!",
   // password: "123456789",
   database: "Project_circuit",
+  timezone: "Asia/Bangkok",
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0,
