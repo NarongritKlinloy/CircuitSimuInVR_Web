@@ -1,23 +1,6 @@
 version: '3.8'
 
 services:
-  # frontend:
-  #   container_name: circuit-frontend
-  #   image: circuit-frontend:latest
-  #   build: .
-  #   ports:
-  #     - "3000:3000"
-  #   volumes:
-  #     - .:/app
-  #     - /app/node_modules
-  #   environment:
-  #     - NODE_ENV=production
-  #     - REACT_APP_API_URL=http://localhost:5000  # ให้ Frontend ใช้ URL นี้
-  #   command: ["npm", "run", "preview"]
-  #   depends_on:
-  #     - backend
-  #   restart: unless-stopped
-
   backend:
     container_name: circuit-backend
     image: circuit-backend:latest
@@ -52,6 +35,8 @@ services:
       MYSQL_DATABASE: Project_circuit
       MYSQL_USER: node_user
       MYSQL_PASSWORD: Admin123!
+      TZ: Asia/Bangkok  # ✅ กำหนดโซนเวลาให้เป็น Asia/Bangkok
+    command: ["mysqld", "--default-time-zone=+07:00"]  # ✅ บังคับให้ MySQL ใช้โซนเวลา
     volumes:
       - db_data:/var/lib/mysql
 
