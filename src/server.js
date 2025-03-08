@@ -21,7 +21,7 @@ app.use(express.urlencoded({ extended: true }));
 const server = createServer(app);
 
 // สร้าง Port WebSocket Server ที่พอร์ต 5050
-const WS_PORT_UNITY = 8181;
+const WS_PORT_UNITY = 8282;
 const wssUnity = new WebSocketServer({ port: WS_PORT_UNITY });
 
 // const WS_PORTWEB = 8282;
@@ -76,7 +76,7 @@ function notifyUnity(token, userId) {
 
 
 // 5) WebSocket Server สำหรับเว็บ (พอร์ต 8282)
-const WS_PORT_WEB = 8282;
+const WS_PORT_WEB = 8181;
 const wssWeb = new WebSocketServer({ port: WS_PORT_WEB });
 
 wssWeb.on("connection", (ws) => {
@@ -1017,7 +1017,7 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
                             ON c.class_id = cp.class_id
                         LEFT JOIN enrollment e 
                             ON e.class_id = cp.class_id
-                        LEFT JOIN PracticeSave ps
+                        LEFT JOIN practicesave ps
                             ON ps.practice_id = cp.practice_id 
                             AND ps.uid = e.uid
                         WHERE cp.class_id = ?
@@ -1052,7 +1052,7 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
                               FROM classroompractice cp
                               JOIN classroom c 
                                   ON cp.class_id = c.class_id
-                              JOIN PracticeSave ps 
+                              JOIN practicesave ps 
                                   ON cp.practice_id = ps.practice_id
                               JOIN user u
                                   ON ps.uid = u.uid
@@ -1060,7 +1060,7 @@ app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
                                   ON cp.practice_id = p.practice_id
                               JOIN (
                                   SELECT uid, MAX(score) AS max_score
-                                  FROM PracticeSave
+                                  FROM practicesave
                                   GROUP BY uid
                               ) AS max_scores
                                   ON ps.uid = max_scores.uid AND ps.score = max_scores.max_score
