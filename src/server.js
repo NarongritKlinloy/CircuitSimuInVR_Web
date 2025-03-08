@@ -170,7 +170,7 @@ app.post("/register", async (req, res) => {
     ]);
     if (existingUser.length > 0) {
       await db.query(
-        "UPDATE user SET last_active = NOW(), role_id = ? WHERE uid = ?",
+        "UPDATE user SET last_active = CONVERT_TZ(NOW(), 'UTC', '+07:00'), role_id = ? WHERE uid = ?",
         [role_id, email]
       );
       console.log(`User ${email} updated successfully`);
@@ -178,7 +178,7 @@ app.post("/register", async (req, res) => {
       return res.json({ message: "User updated successfully", userId: email });
     } else {
       await db.query(
-        "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, NOW())",
+        "INSERT INTO user (uid, name, role_id, last_active) VALUES (?, ?, ?, CONVERT_TZ(NOW(), 'UTC', '+07:00'))",
         [email, name, role_id]
       );
       console.log(`User ${email} registered successfully`);
@@ -253,7 +253,7 @@ app.post("/api/saveScore", async (req, res) => {
     // INSERT ลงตาราง practicesave
     const sql = `
       INSERT INTO practicesave (uid, practice_id, submit_date, score)
-      VALUES (?, ?, NOW(), ?)
+      VALUES (?, ?, CONVERT_TZ(NOW(), 'UTC', '+07:00'), ?)
     `;
     const [result] = await db.query(sql, [userId, practiceId, score]);
 
@@ -292,7 +292,7 @@ app.post("/api/simulator/save", async (req, res) => {
     // INSERT ลงตาราง
     const sql = `
       INSERT INTO savecircuit (uid, circuit_json, circuit_date, circuit_name )
-      VALUES (?, ?, NOW(), ? )
+      VALUES (?, ?, CONVERT_TZ(NOW(), 'UTC', '+07:00'), ? )
     `;
     const [result] = await db.query(sql, [
       userId,
@@ -439,7 +439,7 @@ app.put("/api/simulator/update", async (req, res) => {
     // ใช้ SQL UPDATE แทน INSERT
     const sql = `
       UPDATE savecircuit 
-      SET circuit_json = ?, circuit_date = NOW() 
+      SET circuit_json = ?, circuit_date = CONVERT_TZ(NOW(), 'UTC', '+07:00') 
       WHERE circuit_id = ? AND uid = ?
     `;
     const [result] = await db.query(sql, [saveJson, saveId, userId]);
@@ -690,7 +690,7 @@ app.post("/api/log/visitunity", async (req, res) => {
       return res.status(400).json({ error: "Missing log data" });
     }
 
-    const sql = `INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, NOW(), ?, ?)`;
+    const sql = `INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, CONVERT_TZ(NOW(), 'UTC', '+07:00'), ?, ?)`;
     await db.query(sql, [uid, log_type, practice_id]); // ✅ ใช้ await db.query() ได้เลย
 
     return res.status(200).json({ message: "Added log successfully" });
@@ -704,7 +704,7 @@ app.post("/api/log/visitunity", async (req, res) => {
 // เพิ่ม log
 app.post("/api/log/visit", async (req, res) => {
   const { uid, log_type, practice_id } = req.body;
-  const sql = "INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, NOW(), ?, ?)";
+  const sql = "INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, CONVERT_TZ(NOW(), 'UTC', '+07:00'), ?, ?)";
   try {
     // const now = new Date();
     // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
@@ -851,7 +851,7 @@ app.post("/api/practice", async (req, res) => {
   // const createDate = now.toISOString().slice(0, 19).replace("T", " ");
 
   const sql_insert_practice = `INSERT INTO practice (practice_name, practice_detail, practice_score, create_date)
-    VALUES (?, ?, ?, NOW())`;
+    VALUES (?, ?, ?, CONVERT_TZ(NOW(), 'UTC', '+07:00'))`;
 
   try {
     const [insertResult] = await db.query(sql_insert_practice, [
@@ -1261,7 +1261,7 @@ app.post("/api/classroom/student", async (req, res) => {
     // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
     // const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
 
-    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, NOW())";
+    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, CONVERT_TZ(NOW(), 'UTC', '+07:00'))";
     await db.query(sql_enroll, [processedUid, class_id]);
     res.status(200).send({ message: "Added student to classroom successfully" });
   } catch (err) {
@@ -1280,9 +1280,9 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
   }
   try {
     const sql_check_user = "SELECT * FROM user WHERE uid = ?";
-    const sql_insert_user = "INSERT INTO user (uid, name, role_id, last_active) VALUES(?, ?, 3, NOW())";
+    const sql_insert_user = "INSERT INTO user (uid, name, role_id, last_active) VALUES(?, ?, 3, CONVERT_TZ(NOW(), 'UTC', '+07:00'))";
     const sql_enroll_select = "SELECT * FROM enrollment WHERE uid = ?";
-    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, NOW())";
+    const sql_enroll = "INSERT INTO enrollment (uid, class_id, enroll_date) VALUES (?, ?, CONVERT_TZ(NOW(), 'UTC', '+07:00'))";
 
     // const now = new Date();
     // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
@@ -1427,7 +1427,7 @@ app.put("/api/classroom/sec/:uid", async (req, res) => {
     // const now = new Date();
     // now.setHours(now.getHours() + 7); // เพิ่ม 7 ชั่วโมงให้ตรงกับเวลาประเทศไทย
     // const enrollDate = now.toISOString().slice(0, 19).replace("T", " ");
-    const sql_enroll = ("UPDATE enrollment SET class_id = ?, enroll_date = NOW() WHERE uid = ?");
+    const sql_enroll = ("UPDATE enrollment SET class_id = ?, enroll_date = CONVERT_TZ(NOW(), 'UTC', '+07:00') WHERE uid = ?");
     const [updateResult] = await db.query(sql_enroll, [class_id, uid])
     if (!updateResult) {
       return res.status(400).json({ error: "Sec failed to update!" });
@@ -1699,7 +1699,7 @@ app.put("/api/update-notification", async (req, res) => {
   // const sql = "UPDATE notifications SET is_read = 1, recipient_uid = ? WHERE report_id = ?";
   const sql = `
     UPDATE report
-    SET report_isread = 1, report_dateread = NOW() 
+    SET report_isread = 1, report_dateread = CONVERT_TZ(NOW(), 'UTC', '+07:00') 
     WHERE report_id = ?
   `;
 
