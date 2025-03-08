@@ -720,31 +720,46 @@ app.post("/api/log/visit", async (req, res) => {
 // ดึงข้อมูลการเข้าใช้งานย้อนหลัง 7 วัน
 app.get("/api/log/visits/7days", async (req, res) => {
   try {
+    // 🔹 ดึงข้อมูลจาก MySQL โดยใช้วันที่ย้อนหลัง 7 วัน
     const [rows] = await db.query(`
       SELECT DATE(log_time) AS date, COUNT(*) AS count
       FROM log
-      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) AND DATE(log_time) <= CURDATE() AND log_type = 0
+      WHERE DATE(log_time) >= DATE_SUB(CURDATE(), INTERVAL 6 DAY) 
+        AND DATE(log_time) <= CURDATE() 
+        AND log_type = 0
       GROUP BY DATE(log_time)
       ORDER BY date ASC;
     `);
 
-    // สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
+    // 🔹 สร้าง array ของวันที่ย้อนหลัง 7 วัน (เรียงจากอดีตไปอนาคต)
     const dates = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date();
       date.setDate(date.getDate() - (6 - i));
-      dates.push(date.toISOString().split('T')[0]);
+
+      // ปรับให้ใช้โซนเวลา Asia/Bangkok
+      const formattedDate = new Date(date.toLocaleString("en-US", { timeZone: "Asia/Bangkok" }))
+        .toISOString()
+        .split('T')[0];
+
+      dates.push(formattedDate);
     }
-    console.log(dates);
-    // สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
+
+    console.log("Generated Dates:", dates);
+
+    // 🔹 สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
     const formattedData = {};
     dates.forEach((date) => {
       let foundRow = null;
       for (const row of rows) {
         const rowDate = new Date(row.date);
-        // แปลง UTC เป็น +07:00 (โดยประมาณ)
-        rowDate.setHours(rowDate.getHours() + 7);
-        if (rowDate.toISOString().split('T')[0] === date) {
+
+        // ปรับค่า `row.date` ให้เป็นโซนเวลา Asia/Bangkok
+        const formattedRowDate = new Date(
+          rowDate.toLocaleString("en-US", { timeZone: "Asia/Bangkok" })
+        ).toISOString().split('T')[0];
+
+        if (formattedRowDate === date) {
           foundRow = row;
           break;
         }
@@ -754,10 +769,11 @@ app.get("/api/log/visits/7days", async (req, res) => {
 
     return res.status(200).json(formattedData);
   } catch (error) {
-    console.error('Error fetching log data:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching log data:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
 
 // ดึงข้อมูลการเข้าใช้แบบทดสอบย้อนหลัง 7 วัน
 app.get("/api/log/practice/7days", async (req, res) => {
