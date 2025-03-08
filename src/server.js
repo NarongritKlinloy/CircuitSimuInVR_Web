@@ -735,7 +735,7 @@ app.get("/api/log/visits/7days", async (req, res) => {
       date.setDate(date.getDate() - (6 - i));
       dates.push(date.toISOString().split('T')[0]);
     }
-
+    console.log(dates);
     // สร้าง object โดยมีวันที่เป็น key และจำนวนเป็น value (เติม 0 สำหรับวันที่ไม่มีข้อมูล)
     const formattedData = {};
     dates.forEach((date) => {
@@ -743,7 +743,7 @@ app.get("/api/log/visits/7days", async (req, res) => {
       for (const row of rows) {
         const rowDate = new Date(row.date);
         // แปลง UTC เป็น +07:00 (โดยประมาณ)
-        rowDate.setHours(rowDate.getHours() + 0);
+        rowDate.setHours(rowDate.getHours() + 7);
         if (rowDate.toISOString().split('T')[0] === date) {
           foundRow = row;
           break;
