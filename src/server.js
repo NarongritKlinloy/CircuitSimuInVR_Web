@@ -1298,14 +1298,13 @@ app.post("/api/classroom/student/multidata", async (req, res) => {
       }
       else if (checkStudent[0].role_id !== 3) {
         user_failed.push({ uid: uid, name: name });
-      } else {
+      }
         // ตรวจสอบ enrollment
         const [enrollRows] = await db.query(sql_enroll_select, [processedUid]);
         if (enrollRows.length === 0) {
           await db.query(sql_enroll, [processedUid, class_id]);
         } else {
           user_failed.push({ uid: uid, name: name });
-        }
       }
     });
     await Promise.all(promises);
