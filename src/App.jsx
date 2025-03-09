@@ -1,5 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import { Teacher, Dashboard, Auth } from "@/layouts";
+import FeedbackPage from "@/pages/auth/FeedbackUser"; // ✅ ตรวจสอบ path ให้ถูกต้อง
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <Route path="/auth/*" element={<Auth />} />
       <Route path="/api/*" />
       <Route path="*" element={<Navigate to="/auth/sign-in" replace />} />
+      <Route path="/feedback" element={<FeedbackPage />} />    
     </Routes>
   );
 }

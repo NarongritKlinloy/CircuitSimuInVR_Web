@@ -6,9 +6,11 @@ import { addFeedbackuser } from "@/data/add-feedbackuser"; // ✅ แก้ช�
 
 export function FeedbackPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [comment, setComment] = useState("");
+  const [uid, setuid] = useState("");
+  const [report_detail, setreport_detail] = useState("");
   const [feedbackList, setFeedbackList] = useState([]);
+  const [responseMessage, setResponseMessage] = useState(""); // ✅ เพิ่ม state สำหรับแสดงผลลัพธ์
+  const [responseType, setResponseType] = useState(""); // ✅ success หรือ error
 
   useEffect(() => {
     sessionStorage.clear();
@@ -16,31 +18,21 @@ export function FeedbackPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !comment) return;
+    if (!uid || !report_detail) return;
 
-    const newFeedback = { email, comment };
+    const newFeedback = { uid, report_detail };
     
     try {
-      await addFeedbackuser(newFeedback); // ✅ เรียก API ที่แก้ไขแล้ว
+      const result = await addFeedbackuser(newFeedback); // ✅ เรียก API ที่แก้ไขแล้ว
       setFeedbackList([...feedbackList, newFeedback]);
-      setEmail("");
-      setComment("");
+      setuid("");
+      setreport_detail("");
 
-      Swal.fire({
-        icon: "success",
-        title: "Feedback Submitted",
-        text: "Thank you for your feedback!",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#3b82f6"
-      });
+      setResponseMessage("Thank you for your feedback!"); // ✅ แสดงข้อความสำเร็จ
+      setResponseType("success");
     } catch (error) {
-      Swal.fire({
-        icon: "error",
-        title: "Submission Failed",
-        text: "Unable to send feedback. Please try again!",
-        confirmButtonText: "OK",
-        confirmButtonColor: "#e3342f"
-      });
+      setResponseMessage("Unable to send feedback. Please try again!"); // ✅ แสดงข้อความผิดพลาด
+      setResponseType("error");
     }
   };
 
@@ -64,15 +56,15 @@ export function FeedbackPage() {
             <input
               type="text"
               placeholder="Please enter your email address."
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={uid}
+              onChange={(e) => setuid(e.target.value)}
               className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
               required
             />
             <textarea
               placeholder="Write your comments here..."
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
+              value={report_detail}
+              onChange={(e) => setreport_detail(e.target.value)}
               className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
               required
             />
@@ -83,6 +75,11 @@ export function FeedbackPage() {
               Submit
             </button>
           </form>
+          {responseMessage && (
+            <div className={`mt-4 p-3 text-center rounded-lg ${responseType === "success" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}>
+              {responseMessage}
+            </div>
+          )}
         </div>
       </div>
     </section>
