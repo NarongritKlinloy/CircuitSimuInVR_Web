@@ -63,8 +63,7 @@ export function ExamManagement() {
   
   // ฟังก์ชันเพิ่ม
   const handleAddPractice = async() => {
-    // setPractice([...practice, newPractice]);
-    addPracticeAPI(newPractice);
+    await addPracticeAPI(newPractice);
     setNewPractice({ practice_name: "",
       practice_detail: "",
       practice_score: "" });

@@ -61,9 +61,9 @@ export function TAManagement() {
   );
 
   // add
-  const handleAddTA = () => {
+  const handleAddTA = async() => {
     // console.log(newTA);
-    addTAAPI(newTA);
+    await addTAAPI(newTA);
     // setTA([...TAs, newTA]);
     setNewTA({ uid: "", class_id: sessionStorage.getItem("class_id")});
     setIsAddTAOpen(false);

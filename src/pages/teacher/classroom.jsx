@@ -65,7 +65,7 @@ export function ClassroomMgn() {
   // ฟังก์ชันเพิ่ม
   const handleAddClassroom = async() => {
     // setClassroom([...classrooms, newClassroom]);
-    addClassroomAPI(newClassroom);
+    await addClassroomAPI(newClassroom);
     setNewClassroom({ class_name: "", sec: "", year: "" , semester: "", uid: sessionStorage.getItem("email")});
     setIsAddClassroomOpen(false);
     handleRefresh();
