@@ -139,16 +139,7 @@ function AuthorsTable({ authors, onEditClick, onDelete }) {
 
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-xs font-semibold text-blue-gray-600">
-                                            {new Date(user.last_active).toLocaleString("en-GB", {
-                                                year: "numeric",
-                                                month: "2-digit",
-                                                day: "2-digit",
-                                                hour: "2-digit",
-                                                minute: "2-digit",
-                                                second: "2-digit",
-                                                hour12: false,
-                                                timeZone: "UTC",
-                                            }).replace(",", "")}
+                                                {new Date(user.last_active).toISOString().replace("T", " ").slice(0, 19)}
                                             </Typography>
                                         </td>
 
