@@ -235,7 +235,7 @@ export function Notifications() {
 
                     <td className={`${rowClassName} text-center`}>
                       <Typography className="text-s font-normal text-blue-gray-500">
-                        {report.report_create_date}
+                        {new Date(report.report_create_date).toISOString().replace("T", " ").slice(0, 19)}
                       </Typography>
                     </td>
 

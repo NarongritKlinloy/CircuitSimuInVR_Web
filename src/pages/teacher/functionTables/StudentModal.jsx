@@ -198,7 +198,7 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
             </div>
           )}
           {/* ซ่อนช่อง Student ID ถ้ามีไฟล์แล้ว */}
-          {showExample && (
+          {showExample && !fileUploaded && (
             <div>
               <img src="https://img5.pic.in.th/file/secure-sv1/example4847e0fccad783e0.png" alt="Example Excel" className="w-full rounded-lg" />
             </div>
@@ -209,9 +209,11 @@ function StudentModal({ isOpen, toggleModal, studentData, setStudentData, btnSta
         <Button variant="text" color="red" onClick={handleClose}>
           Cancel
         </Button>
-        <Button variant="text" color="orange" onClick={() => setShowExample(!showExample)}>
-          Show Example Excel
-        </Button>
+          {!fileUploaded && (
+            <Button variant="text" color="orange" onClick={() => setShowExample(!showExample)}>
+            Show Example Excel
+            </Button>
+          )}
         <Button variant="gradient" color="green" onClick={handleSave}>
           {btnStatus}
         </Button>

@@ -133,16 +133,7 @@ function TATable({ TAs, checkStatus }) {
                                         </td>
                                         <td className={`${rowClassName} text-center`}>
                                             <Typography className="text-s font-normal text-blue-gray-500">
-                                                {new Date(last_active).toLocaleString("en-GB", { 
-                                                    day: '2-digit', 
-                                                    month: '2-digit', 
-                                                    year: 'numeric', 
-                                                    hour: '2-digit', 
-                                                    minute: '2-digit', 
-                                                    second: '2-digit', 
-                                                    hour12: false,
-                                                    timeZone: "UTC",
-                                                }).replace(',', '')}
+                                                {new Date(last_active).toISOString().replace("T", " ").slice(0, 19)}
                                             </Typography>
                                         </td>
 
