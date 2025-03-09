@@ -235,16 +235,7 @@ export function Notifications() {
 
                     <td className={`${rowClassName} text-center`}>
                       <Typography className="text-s font-normal text-blue-gray-500">
-                        {new Date(report.report_create_date).toLocaleString("en-GB", {
-                          year: "numeric",
-                          month: "2-digit",
-                          day: "2-digit",
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: false,
-                          timeZone: "UTC",
-                        }).replace(",", "")}
+                        {report.report_create_date}
                       </Typography>
                     </td>
 
