@@ -8,7 +8,7 @@ import {
   FolderIcon
 } from "@heroicons/react/24/solid";
 import { Home,  Tables, Notifications, ExamManagement, ClassroomPractice } from "@/pages/dashboard";
-import { SignIn, SignUp } from "@/pages/auth";
+import { SignIn, SignUp ,FeedbackPage} from "@/pages/auth";
 
 const icon = {
   className: "w-5 h-5 text-inherit",
@@ -69,6 +69,12 @@ export const routes = [
         name: "sign up",
         path: "/sign-up",
         element: <SignUp />,
+      },
+      {
+        icon: <DocumentTextIcon {...icon} />,
+        name: "feedbackuser",
+        path: "/feedbackuser",
+        element: <FeedbackPage />,
       },
     ],
   },
