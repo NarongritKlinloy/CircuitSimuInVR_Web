@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 
 export function FeedbackPage() {
   const navigate = useNavigate();
-  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
   const [feedbackList, setFeedbackList] = useState([]);
 
@@ -16,12 +16,12 @@ export function FeedbackPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!name || !comment) return;
+    if (!email || !comment) return;
 
-    const newFeedback = { name, comment };
+    const newFeedback = { email, comment };
     setFeedbackList([...feedbackList, newFeedback]);
     //addFeedbackAPI(name, comment);
-    setName("");
+    setEmail("");
     setComment("");
 
     Swal.fire({
@@ -29,6 +29,7 @@ export function FeedbackPage() {
       title: "Feedback Submitted",
       text: "Thank you for your feedback!",
       confirmButtonText: "OK",
+      confirmButtonColor: "#3b82f6" // ปรับสีปุ่มเป็นน้ำเงิน
     });
   };
 
@@ -52,8 +53,8 @@ export function FeedbackPage() {
             <input
               type="text"
               placeholder="Please enter your email address."
-              value={name}
-              onChange={(e) => setName(e.target.value)}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
               className="w-full px-4 py-2 border rounded-md text-sm sm:text-base"
               required
             />
