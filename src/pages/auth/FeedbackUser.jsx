@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Typography } from "@material-tailwind/react";
 import Swal from "sweetalert2";
 import { useNavigate } from "react-router-dom";
-//import { addFeedbackAPI } from "@/data/feedback";
+import { addFeedbackuser } from "@/data/add-feedbackuser"; // ✅ แก้ชื่อ import ให้ถูกต้อง
 
 export function FeedbackPage() {
   const navigate = useNavigate();
@@ -19,18 +19,29 @@ export function FeedbackPage() {
     if (!email || !comment) return;
 
     const newFeedback = { email, comment };
-    setFeedbackList([...feedbackList, newFeedback]);
-    //addFeedbackAPI(name, comment);
-    setEmail("");
-    setComment("");
+    
+    try {
+      await addFeedbackuser(newFeedback); // ✅ เรียก API ที่แก้ไขแล้ว
+      setFeedbackList([...feedbackList, newFeedback]);
+      setEmail("");
+      setComment("");
 
-    Swal.fire({
-      icon: "success",
-      title: "Feedback Submitted",
-      text: "Thank you for your feedback!",
-      confirmButtonText: "OK",
-      confirmButtonColor: "#3b82f6" // ปรับสีปุ่มเป็นน้ำเงิน
-    });
+      Swal.fire({
+        icon: "success",
+        title: "Feedback Submitted",
+        text: "Thank you for your feedback!",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#3b82f6"
+      });
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Submission Failed",
+        text: "Unable to send feedback. Please try again!",
+        confirmButtonText: "OK",
+        confirmButtonColor: "#e3342f"
+      });
+    }
   };
 
   return (
