@@ -482,6 +482,7 @@ app.get("/api/practice/find/:uid", async (req, res) => {
 app.post("/api/feedbackuser", async (req, res) => {
   try {
     const {uid, report_detail } = req.body;
+    console.log(uid);
     const report_name = `Feedback by ${uid}`;
     const sql = "SELECT * FROM user WHERE uid = ?";
     const sql_report = `INSERT INTO report (uid, report_name, report_detail, report_create_date, report_isread)
