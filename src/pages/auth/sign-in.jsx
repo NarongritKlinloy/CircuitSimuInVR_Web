@@ -58,8 +58,6 @@ export function SignIn() {
           sessionStorage.setItem("role", role);
           sessionStorage.setItem("email", email);
           sessionStorage.setItem("name", name);
-
-
           if (role === "admin") {
             signInAPI(email, name, 2);
             addLogAPI(email, 0, 0);
@@ -97,7 +95,6 @@ export function SignIn() {
         sessionStorage.setItem("email", email);
         sessionStorage.setItem("name", name);
         sessionStorage.setItem("role", "teacher");
-
         signInAPI(email, name, 1);
         addLogAPI(email, 0, 0);
 

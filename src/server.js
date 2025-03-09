@@ -691,11 +691,11 @@ app.post("/api/log/visitunity", async (req, res) => {
     }
 
     const sql = `INSERT INTO log (uid, log_time, log_type, practice_id) VALUES (?, NOW(), ?, ?)`;
-    await db.query(sql, [uid, log_type, practice_id]); // ✅ ใช้ await db.query() ได้เลย
+    await db.query(sql, [uid, log_type, practice_id]); // ใช้ await db.query() ได้เลย
 
     return res.status(200).json({ message: "Added log successfully" });
   } catch (err) {
-    console.error("❌ Error adding log:", err);
+    console.error("Error adding log:", err);
     return res.status(500).json({ error: "Add log failed" });
   }
 });
