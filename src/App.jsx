@@ -10,7 +10,7 @@ function App() {
       <Route path="/auth/*" element={<Auth />} />
       <Route path="/api/*" />
       <Route path="*" element={<Navigate to="/auth/sign-in" replace />} />
-      <Route path="/feedback" element={<FeedbackPage />} />    
+      <Route path="/feedbackuser" element={<FeedbackPage />} />    
     </Routes>
   );
 }

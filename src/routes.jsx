@@ -70,14 +70,17 @@ export const routes = [
         path: "/sign-up",
         element: <SignUp />,
       },
-      
     ],
   },
-  { 
-        icon: <DocumentTextIcon {...icon} />,
-        name: "feedbackuser",
+  {
+    layout: "feedbackuser",
+    pages: [
+      {
         path: "/feedbackuser",
         element: <FeedbackPage />,
+    },
+
+    ],
   },
 ];
 
