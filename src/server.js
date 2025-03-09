@@ -478,6 +478,27 @@ app.get("/api/practice/find/:uid", async (req, res) => {
   }
 });
 
+
+app.post("/api/feedbackuser", async (req, res) => {
+  try {
+    const {uid, report_detail } = req.body;
+    const report_name = `Feedback by ${uid}`;
+    const sql = "SELECT * FROM user WHERE uid = ?";
+    const sql_report = `INSERT INTO report (uid, report_name, report_detail, report_create_date, report_isread)
+    VALUES (?, ?, ?, NOW(), 0)`;
+    const [row_user] = await db.query(sql, [uid]);
+    if(row_user.length === 0){
+      return res.status(404).json({ error: "Not found user!"});
+    }else{
+      await db.query(sql_report, [uid, report_name, report_detail]);
+      return res.status(200).json({ message: "Send feedback successfully!"});
+    }
+  } catch (error) {
+    console.error("Error saving score:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 //++++++++++++++++++สิ้นสุดของ UNITY++++++++++++++++++++++++++++++++++++++++++++//
 
 // ฟังก์ชันดึงข้อมูล user ตาม role
