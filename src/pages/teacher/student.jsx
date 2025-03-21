@@ -69,12 +69,12 @@ export function StudentMgn() {
   );
 
   // add
-  const handleAddStudent = () => {
+  const handleAddStudent = async() => {
     //console.log(newStudent);
     if(newStudent.data.length > 0){
-      addMultiStudentAPI(newStudent);
+      await addMultiStudentAPI(newStudent);
     }else{
-      addStudentAPI(newStudent);
+      await addStudentAPI(newStudent);
     }
     setNewStudent({ uid: "", class_id: sessionStorage.getItem("class_id"), data: []});
     setIsAddStudentOpen(false);

@@ -1,12 +1,7 @@
 import PropTypes from "prop-types";
 import { Link, NavLink } from "react-router-dom";
 import { XMarkIcon } from "@heroicons/react/24/outline";
-import {
-  Avatar,
-  Button,
-  IconButton,
-  Typography,
-} from "@material-tailwind/react";
+import { Button, IconButton, Typography } from "@material-tailwind/react";
 import { useMaterialTailwindController, setOpenSidenav } from "@/context";
 
 export function Sidenav({ brandImg, brandName, routes }) {
@@ -17,6 +12,11 @@ export function Sidenav({ brandImg, brandName, routes }) {
     white: "bg-white shadow-sm",
     transparent: "bg-transparent",
   };
+
+  //กรอง `feedbackuser` ออกจาก Sidebar
+  const filteredRoutes = routes.filter(route => 
+    route.pages && !route.pages.some(page => page.path === "/feedbackuser")
+  );
 
   return (
     <aside
@@ -33,7 +33,6 @@ export function Sidenav({ brandImg, brandName, routes }) {
                 alt="Logo Circuit simulator in VR"
                 width={60}
               />
-
               <Typography
                 variant="h5"
                 color={sidenavType === "gray" ? "white" : "blue-gray"}
@@ -56,7 +55,7 @@ export function Sidenav({ brandImg, brandName, routes }) {
           </div>
 
           <div className="m-4">
-            {routes.map(({ layout, title, pages }, key) => (
+            {filteredRoutes.map(({ layout, title, pages }, key) => (
               <ul key={key} className="mb-4 flex flex-col gap-1">
                 {title && (
                   <li className="mx-3.5 mt-4 mb-2">
@@ -103,17 +102,13 @@ export function Sidenav({ brandImg, brandName, routes }) {
             ))}
           </div>
         </div>
-
-
       </div>
     </aside>
-
-
   );
 }
 
 Sidenav.defaultProps = {
-  brandImg: "https://img5.pic.in.th/file/secure-sv1/DALLE-2025-01-05-14.14.45---A-bright-and-futuristic-circular-logo-design-for-a-virtual-reality-VR-application-focused-on-circuit-building.-The-logo-features-a-sleek-VR-headset.png",
+  brandImg: "https://img5.pic.in.th/file/secure-sv1/11zon_croppedba3732dd0cac4716.png",
   brandName: "Circuit Simulator in VR",
 };
 

@@ -11,7 +11,7 @@ import {
   DialogBody,
   DialogFooter,
 } from "@material-tailwind/react";
-import SearchAdmin from "../teacher/functionTables/SearchAdmin";
+import SearchSection from "./functionTables/SearchSection";
 import { updateNotificationAPI } from "@/data/updateNotification";
 // import { fetchReadNotifications } from "@/data/fetchReadNoti";
 
@@ -116,7 +116,7 @@ export function Notifications() {
     return (
 
       report.report_name.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากชื่อ
-      report.report_uid.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากผู้ใช้
+      // report.report_uid.toLowerCase().includes(lowerSearchTerm) || //  ค้นหาจากผู้ใช้
       reportDate.includes(lowerSearchTerm) //  ค้นหาจากวันที่
     );
   });
@@ -180,7 +180,7 @@ export function Notifications() {
     <div className="mt-12 mb-8 flex flex-col gap-12">
 
       {/* เพิ่มช่องค้นหา */}
-      <SearchAdmin searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+      <SearchSection search={searchTerm} setSearch={setSearchTerm} />
 
       <Card>
         <CardHeader variant="gradient" color="gray" className="mb-8 p-6 flex justify-between items-center">
@@ -190,7 +190,7 @@ export function Notifications() {
           <table className="w-full min-w-[640px] table-auto border-collapse">
             <thead>
               <tr>
-                {["No.", "Name", "Detail", /*"Report by",*/ "Create Date", "Info."].map((header) => (
+                {["No.", "Name", "Detail", "Feedback From", "Create Date", "Info."].map((header) => (
                   <th key={header}
                     className={`border-b border-blue-gray-50 px-5 py-2 ${header === "Name" ? "text-left" : "text-center"}`}>
                     <Typography variant="small" className="text-[11px] font-bold uppercase text-blue-gray-400">
@@ -227,11 +227,11 @@ export function Notifications() {
                       </Typography>
                     </td>
 
-                    {/* <td className={`${rowClassName} text-center`}>
+                     <td className={`${rowClassName} text-center`}>
                       <Typography className="text-s font-normal text-blue-gray-500">
-                        {report.recipient_uid}
+                        {report.uid}
                       </Typography>
-                    </td> */}
+                    </td> 
 
                     <td className={`${rowClassName} text-center`}>
                       <Typography className="text-s font-normal text-blue-gray-500">
