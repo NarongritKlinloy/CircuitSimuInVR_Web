@@ -15,7 +15,7 @@ function SearchAndAddReport({  toggleAddModal, searchTerm, setSearchTerm }) {
         
         <div className="flex gap-2">
           <Button variant="gradient" color="green" onClick={toggleAddModal}>
-          New Report
+          New Feedback
           </Button>
         </div>
       </div>
