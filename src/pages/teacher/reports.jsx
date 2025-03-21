@@ -351,7 +351,7 @@ useEffect(() => {
 
       {/* Modal Add new report */}
       <Dialog open={isAddReportOpen} handler={handleClose}>
-        <DialogHeader>Add New Report</DialogHeader>
+        <DialogHeader>Add New Feedback</DialogHeader>
         <DialogBody>
           <div className="flex flex-col gap-4">
             {/* Input for Report Name */}
