@@ -146,18 +146,41 @@ export function Notifications() {
   //     console.error("Error updating notification:", error);
   //   }
   // };
-  const handleReadReport = async (report) => {
-    // ตรวจสอบว่ารายงานนี้เคยถูกอ่านแล้วหรือไม่
-    if (updatedReports.includes(report.report_id)) {
-      console.log("รายงานนี้ถูกอ่านแล้ว");
-      return;
-    }
+  // const handleReadReport = async (report) => {
+  //   // ตรวจสอบว่ารายงานนี้เคยถูกอ่านแล้วหรือไม่
+  //   if (updatedReports.includes(report.report_id)) {
+  //     console.log("รายงานนี้ถูกอ่านแล้ว");
+  //     return;
+  //   }
   
+  //   setSelectedReport(report);
+  //   setDialogOpen(true);
+  
+  //   try {
+  //     //  เรียก API เพื่ออัปเดตสถานะอ่านแล้ว
+  //     const response = await updateNotificationAPI(report.report_id);
+  
+  //     if (response.error) {
+  //       console.error("Error updating report read status:", response.error);
+  //       return;
+  //     }
+  
+  //     //  อัปเดตรายการที่อ่านแล้วใน state
+  //     setUpdatedReports((prev) => [...prev, report.report_id]);
+  
+  //     //  รีเฟรชข้อมูลรายงานใหม่
+  //     fetchReports();
+  //   } catch (error) {
+  //     console.error("Error updating notification:", error);
+  //   }
+  // };
+
+  const handleReadReport = async (report) => {
     setSelectedReport(report);
-    setDialogOpen(true);
+    setDialogOpen((prev) => !prev); // Toggle the modal open/close state
   
     try {
-      //  เรียก API เพื่ออัปเดตสถานะอ่านแล้ว
+      // เรียก API เพื่ออัปเดตสถานะอ่านแล้ว
       const response = await updateNotificationAPI(report.report_id);
   
       if (response.error) {
@@ -165,10 +188,10 @@ export function Notifications() {
         return;
       }
   
-      //  อัปเดตรายการที่อ่านแล้วใน state
+      // อัปเดตรายการที่อ่านแล้วใน state
       setUpdatedReports((prev) => [...prev, report.report_id]);
   
-      //  รีเฟรชข้อมูลรายงานใหม่
+      // รีเฟรชข้อมูลรายงานใหม่
       fetchReports();
     } catch (error) {
       console.error("Error updating notification:", error);
