@@ -1100,20 +1100,23 @@ app.get("/api/classroom/practice/:class_id", async (req, res) => {
 // ดึงข้อมูล practice save และ score
 app.get("/api/classroom/practice/:class_id/:practice_id", async (req, res) => {
   const { class_id, practice_id } = req.params;
-  const sql_practice_score = `SELECT 
-                                  u.uid, 
-                                  u.name, 
-                                  MAX(ps.score) AS max_score, 
-                                  ps.submit_date, 
-                                  p.practice_score 
+  const sql_practice_score = `SELECT
+                                  u.uid,
+                                  u.name,
+                                  MAX(ps.score) AS max_score,
+                                  MAX(ps.submit_date) AS submit_date,
+                                  p.practice_score
                               FROM classroompractice cp
                               JOIN classroom c ON cp.class_id = c.class_id
                               JOIN practice p ON cp.practice_id = p.practice_id
                               JOIN enrollment en ON cp.class_id = en.class_id
                               JOIN user u ON en.uid = u.uid
-                              JOIN practicesave ps ON en.uid = ps.uid AND cp.practice_id = ps.practice_id
-                              WHERE cp.class_id = ? AND cp.practice_id = ?
-                              GROUP BY u.uid, u.name, ps.submit_date, p.practice_score`;
+                              JOIN practicesave ps
+                                  ON en.uid = ps.uid
+                                  AND cp.practice_id = ps.practice_id
+                              WHERE cp.class_id = ?
+                              AND cp.practice_id = ?
+                              GROUP BY u.uid, u.name, p.practice_score`;
   try {
     const [rows] = await db.query(sql_practice_score, [class_id, practice_id]);
     if (rows.length === 0) {
