@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        // ชื่อ tool ต้องตรงกับที่ตั้งไว้ใน Jenkins Global Tool Configuration
-        sonarRunner 'SonarQubeScanner' 
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -16,7 +11,10 @@ pipeline {
         stage('SonarQube Analysis') {
             steps {
                 withSonarQubeEnv('SonarQube') {
-                    sh 'sonar-scanner'  // หรือถ้าใช้ sonar-runner ให้เรียก sonar-runner
+                    script {
+                        def scannerHome = tool 'SonarScanner'  // ชื่อที่ตั้งใน Jenkins Global Tool Config
+                        sh "${scannerHome}/bin/sonar-scanner"
+                    }
                 }
             }
         }
