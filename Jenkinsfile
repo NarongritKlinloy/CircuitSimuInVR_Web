@@ -1,14 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-    hudson.plugins.sonar.SonarRunnerInstallation 'SonarQubeScanner'
-}
-
-    environment {
-        SONARQUBE = credentials('retail-token') // หรือใช้ token ตรงๆ ก็ได้
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -18,7 +10,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('retail-token') {
+                withSonarQubeEnv('SonarQube') {   // ✅ ต้องตรงกับชื่อ server ที่ตั้งใน Jenkins
                     sh 'sonar-scanner'
                 }
             }
