@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        sonarQubeScanner 'sonar-scanner'
-    }
+    hudson.plugins.sonar.SonarRunnerInstallation 'SonarQubeScanner'
+}
 
     environment {
         SONARQUBE = credentials('retail-token') // หรือใช้ token ตรงๆ ก็ได้
