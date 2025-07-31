@@ -28,11 +28,11 @@ const wssUnity = new WebSocketServer({ port: WS_PORT_UNITY });
 
 // 2) สร้าง Connection Pool
 const db = mysql.createPool({
-  host: "db",
-  user: "node_user",
+  host: "localhost",
+  user: "root",
   password: "Admin123!",
   // password: "123456789",
-  database: "Project_circuit",
+  database: "circuit_project",
   timezone: "Asia/Bangkok",
   waitForConnections: true,
   connectionLimit: 10,
