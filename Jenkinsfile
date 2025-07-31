@@ -1,5 +1,8 @@
 pipeline {
     agent any
+tools {
+    sonarScanner 'SonarQubeScanner'  // ชื่อที่ตั้งไว้ใน Jenkins Global Tool Configuration
+}
 
     stages {
         stage('Checkout') {
