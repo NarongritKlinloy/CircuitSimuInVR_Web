@@ -12,7 +12,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube') {
                     script {
-                        def scannerHome = tool 'SonarScanner'  // ชื่อที่ตั้งใน Jenkins Global Tool Config
+                        def scannerHome = tool 'SonarQubeScanner'  // ชื่อที่ตั้งใน Jenkins Global Tool Config
                         sh "${scannerHome}/bin/sonar-scanner"
                     }
                 }
