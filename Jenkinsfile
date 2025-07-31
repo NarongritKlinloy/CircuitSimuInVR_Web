@@ -10,7 +10,7 @@ pipeline {
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv('retail-token') {   // ✅ ต้องตรงกับชื่อ server ที่ตั้งใน Jenkins
+                withSonarQubeEnv('SonarQube') {   // ✅ ต้องตรงกับชื่อ server ที่ตั้งใน Jenkins
                     sh 'sonar-scanner'
                 }
             }
